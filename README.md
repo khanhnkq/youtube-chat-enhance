@@ -77,33 +77,6 @@ youtube-chat-enhance/
 
 ---
 
-## 📢 X.com (Twitter) Launch Posts & Thread Copy
-
-Ready-to-copy launch post templates in **English** for promoting on X.com:
-
-### Option A: Single Hero Launch Tweet
-```text
-🚀 Upgrade your YouTube Live stream experience with YouTube Custom Chat & Danmaku!
-
-✨ Features:
-• 60FPS Danmaku Bullet Comments (Bilibili/Niconico style) 🚀
-• Transparent Glassmorphic Floating Chat Overlay 💬
-• Auto-hide native side chat in Fullscreen Mode 🖥️
-• Zero-lag HTML5 Canvas 2D engine ⚡
-
-🔗 Try it on GitHub: https://github.com/khanhnkq/youtube-chat-enhance
-
-#YouTube #VTuber #ChromeExtension #Danmaku #eSports #Hololive #WebDev
-```
-
-### Option B: Feature Breakdown Thread
-- **Tweet 1**: `Why stick with YouTube's boring side chat when you can stream with 60FPS Danmaku bullet comments? Introducing YouTube Custom Chat & Danmaku 🧵👇`
-- **Tweet 2**: `⚡ Powered by a custom 60FPS HTML5 Canvas 2D Engine (Zero DOM Thrashing). Handles 100+ comments/sec effortlessly during massive VTuber debuts & eSports tournaments (CS2, LoL, PUBG)!`
-- **Tweet 3**: `💬 Glassmorphic Floating Overlay: Drag, resize, and set custom opacity anywhere over your video. Auto-hides native side chat in Fullscreen mode for maximum video screen space!`
-- **Tweet 4**: `🎨 Full Control: Realtime color pickers, text shadow, speed, and display area controls with 0ms instant apply. Check out the open-source code on GitHub: https://github.com/khanhnkq/youtube-chat-enhance #VTuber #ChromeExtension`
-
----
-
 ## 📝 License & Author
 
 - **Author:** [khanhnkq](https://github.com/khanhnkq)
