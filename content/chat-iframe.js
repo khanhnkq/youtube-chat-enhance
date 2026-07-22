@@ -172,9 +172,9 @@
 
   function startChatObserver() {
     try {
-      const chatList = document.querySelector('#items.yt-live-chat-item-list-renderer, yt-live-chat-item-list-renderer #items, #contents.yt-live-chat-renderer');
+      const chatList = document.querySelector('#items.yt-live-chat-item-list-renderer, yt-live-chat-item-list-renderer #items, #contents.yt-live-chat-renderer, #chat-messages #items, yt-live-chat-renderer #items');
       if (!chatList) {
-        setTimeout(startChatObserver, 600);
+        setTimeout(startChatObserver, 500);
         return;
       }
 
@@ -184,15 +184,12 @@
         for (let i = 0; i < mutations.length; i++) {
           const addedNodes = mutations[i].addedNodes;
           for (let j = 0; j < addedNodes.length; j++) {
-            const node = addedNodes[j];
-            if (node.nodeType === 1) {
-              parseAndSendChatMessage(node);
-            }
+            processAddedNode(addedNodes[j]);
           }
         }
       });
 
-      observer.observe(chatList, { childList: true, subtree: false });
+      observer.observe(chatList, { childList: true, subtree: true });
 
       const initialItems = chatList.querySelectorAll('yt-live-chat-text-message-renderer, yt-live-chat-paid-message-renderer, yt-live-chat-membership-item-renderer');
       for (let i = 0; i < initialItems.length; i++) {
@@ -201,18 +198,32 @@
     } catch (e) {}
   }
 
+  function processAddedNode(node) {
+    if (!node || node.nodeType !== 1) return;
+
+    if (isMessageElement(node)) {
+      parseAndSendChatMessage(node);
+    } else {
+      const messages = node.querySelectorAll('yt-live-chat-text-message-renderer, yt-live-chat-paid-message-renderer, yt-live-chat-membership-item-renderer');
+      for (let i = 0; i < messages.length; i++) {
+        parseAndSendChatMessage(messages[i]);
+      }
+    }
+  }
+
+  function isMessageElement(el) {
+    if (!el || !el.tagName) return false;
+    const tag = el.tagName.toLowerCase();
+    return tag === 'yt-live-chat-text-message-renderer' ||
+           tag === 'yt-live-chat-paid-message-renderer' ||
+           tag === 'yt-live-chat-membership-item-renderer';
+  }
+
   function parseAndSendChatMessage(element) {
     try {
-      if (!element || !element.tagName) return;
+      if (!isMessageElement(element)) return;
 
       const tagName = element.tagName.toLowerCase();
-      if (!['yt-live-chat-text-message-renderer', 'yt-live-chat-paid-message-renderer', 'yt-live-chat-membership-item-renderer'].includes(tagName)) {
-        return;
-      }
-
-      const now = Date.now();
-      if (now - lastMessageTime < 150) return;
-      lastMessageTime = now;
 
       const msgId = element.getAttribute('id') || element.dataset.id || Math.random().toString(36).substr(2, 9);
       if (processedIds.has(msgId)) return;
@@ -257,7 +268,7 @@
         text,
         isSuperChat,
         amount,
-        timestamp: now
+        timestamp: Date.now()
       };
 
       window.parent.postMessage({

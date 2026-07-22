@@ -11,7 +11,7 @@ class DanmakuEngine {
     this.tracks = [];
     this.config = {};
     this.activeCount = 0;
-    this.maxActive = 30;
+    this.maxActive = 80;
   }
 
   init(playerElement, config = {}) {

@@ -105,12 +105,33 @@
     } catch (err) {}
   }
 
-  // Listen for messages from live chat iframe (postMessage)
+  // Listen for messages from live chat iframe (postMessage) with Deduplication Cache
+  const receivedMsgCache = new Map();
+
   window.addEventListener('message', (event) => {
     if (!event.data) return;
 
     if (event.data.type === 'YT_DANMAKU_MESSAGE') {
       const payload = event.data.payload;
+      if (!payload || !payload.text) return;
+
+      // Unique deduplication key: combine ID or author+text with a 1.5s window
+      const now = Date.now();
+      const dedupeKey = (payload.id && payload.id.length > 10 && !payload.id.startsWith('rand_'))
+        ? payload.id
+        : `${payload.author || ''}_${payload.text}_${Math.floor(now / 1500)}`;
+
+      if (receivedMsgCache.has(dedupeKey)) {
+        return; // Skip duplicate comment sent by second iframe in same 1.5s window
+      }
+
+      receivedMsgCache.set(dedupeKey, now);
+
+      if (receivedMsgCache.size > 300) {
+        const firstKey = receivedMsgCache.keys().next().value;
+        receivedMsgCache.delete(firstKey);
+      }
+
       if (window.ytDanmakuEngine && currentConfig.enableDanmaku) {
         window.ytDanmakuEngine.addComment(payload);
       }

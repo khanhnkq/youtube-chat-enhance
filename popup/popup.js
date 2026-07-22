@@ -169,6 +169,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 2000);
   });
 
+  const coffeeBtn = document.getElementById('coffeeBtn');
+  if (coffeeBtn) {
+    coffeeBtn.addEventListener('click', () => {
+      chrome.tabs.create({ url: 'https://khanhnkq.quizken.com/buy-me-a-coffee' });
+    });
+  }
+
   function updateAreaLabel(val) {
     if (val === '0.33') danmakuAreaVal.textContent = '1/3 Màn hình trên';
     else if (val === '0.5') danmakuAreaVal.textContent = 'Nửa màn hình (50%)';
