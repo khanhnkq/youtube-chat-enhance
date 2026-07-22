@@ -1,6 +1,105 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  // i18n Translations
+  const translations = {
+    vi: {
+      brandSub: 'Nâng tầm xem Livestream YouTube',
+      cardOperatingModes: 'Chế Độ Hoạt Động',
+      floatingChatTitle: 'Khung Chat Nổi Trong Suốt',
+      floatingChatDesc: 'Hiển thị khung chat đè video full màn',
+      danmakuTitle: 'Danmaku (Chữ Chạy Ngang)',
+      danmakuDesc: 'Bình luận chạy ngang video như Bilibili',
+      autoHideChatTitle: 'Tự Động Ẩn Chat Khi Phóng To',
+      autoHideChatDesc: 'Ẩn chat gốc khi Fullscreen & khôi phục khi thoát',
+      cardInterfaceCustomization: 'Tinh Chỉnh Giao Diện',
+      hideHeaderTitle: 'Ẩn Viền & Thanh Tiêu Đề',
+      hideHeaderDesc: 'Chỉ hiện thanh kéo khi rê chuột vào',
+      hideRowBgTitle: 'Ẩn Nền Từng Dòng Chat',
+      hideRowBgDesc: 'Chỉ hiện chữ & avatar nổi trên video',
+      hideInputTitle: 'Ẩn Khung Nhập Chat & Footer',
+      hideInputDesc: 'Ẩn ô nhập tin nhắn và thanh thông báo',
+      cardColorFloatingChat: 'Màu Sắc & Khung Chat Nổi',
+      authorTextColor: 'Màu tên người dùng',
+      chatTextColor: 'Màu nội dung tin nhắn',
+      bgOpacityLabel: 'Độ trong suốt nền khung chat',
+      bgOpacityMin: 'Trong suốt (0%)',
+      bgOpacityMax: 'Trong mờ (100%)',
+      bgBlurLabel: 'Hiệu ứng kính mờ (Blur)',
+      chatFontSizeLabel: 'Cỡ chữ trong khung chat',
+      resetPosBtn: 'Đặt lại Vị trí & Kích thước khung',
+      cardDanmakuSettings: 'Tùy Chỉnh Danmaku',
+      danmakuTextColor: 'Màu chữ Danmaku',
+      danmakuStrokeTitle: 'Viền đen chữ Danmaku',
+      danmakuStrokeDesc: 'Vẽ viền đen đậm quanh nét chữ',
+      danmakuShadowTitle: 'Bóng mờ chữ Danmaku',
+      danmakuShadowDesc: 'Tạo hiệu ứng đổ bóng mờ chữ',
+      danmakuSpeedLabel: 'Tốc độ chữ chạy',
+      danmakuSpeedMin: 'Nhanh (4s)',
+      danmakuSpeedMax: 'Chậm (20s)',
+      danmakuFontSizeLabel: 'Kích thước chữ Danmaku',
+      danmakuOpacityLabel: 'Độ mờ chữ Danmaku',
+      danmakuAreaLabel: 'Vùng màn hình hiển thị',
+      danmakuArea033: '1/3 Màn hình trên',
+      danmakuArea05: 'Nửa màn hình (50%)',
+      danmakuArea075: '3/4 Màn hình',
+      danmakuArea10: 'Toàn màn hình (100%)',
+      coffeeTitle: 'Mời Tác Giả Ly Cà Phê ☕',
+      coffeeDesc: 'Ủng hộ để phát triển thêm tính năng mới: khanhnkq',
+      statusReady: 'Đã sẵn sàng hoạt động',
+      statusReset: 'Đã đặt lại vị trí!',
+      authorLabel: 'Tác giả:'
+    },
+    en: {
+      brandSub: 'Elevate Your YouTube Livestreaming Experience',
+      cardOperatingModes: 'Operating Modes',
+      floatingChatTitle: 'Transparent Floating Chat',
+      floatingChatDesc: 'Display floating chat overlay over video',
+      danmakuTitle: 'Danmaku (Scrolling Comments)',
+      danmakuDesc: 'On-screen flying comments like Bilibili',
+      autoHideChatTitle: 'Auto-Hide Native Chat in Fullscreen',
+      autoHideChatDesc: 'Hide native side chat in Fullscreen & restore on exit',
+      cardInterfaceCustomization: 'Interface Customization',
+      hideHeaderTitle: 'Hide Header & Border',
+      hideHeaderDesc: 'Show drag handle bar only on hover',
+      hideRowBgTitle: 'Hide Chat Row Backgrounds',
+      hideRowBgDesc: 'Show floating text & avatar over video',
+      hideInputTitle: 'Hide Input Box & Footer',
+      hideInputDesc: 'Hide message input box and notice bar',
+      cardColorFloatingChat: 'Color & Floating Chat',
+      authorTextColor: 'Username color',
+      chatTextColor: 'Message text color',
+      bgOpacityLabel: 'Chat window background opacity',
+      bgOpacityMin: 'Transparent (0%)',
+      bgOpacityMax: 'Opaque (100%)',
+      bgBlurLabel: 'Background blur (Blur)',
+      chatFontSizeLabel: 'Chat text font size',
+      resetPosBtn: 'Reset Window Position & Size',
+      cardDanmakuSettings: 'Danmaku Settings',
+      danmakuTextColor: 'Danmaku text color',
+      danmakuStrokeTitle: 'Danmaku text stroke outline',
+      danmakuStrokeDesc: 'Draw dark stroke around text',
+      danmakuShadowTitle: 'Danmaku text shadow',
+      danmakuShadowDesc: 'Add drop shadow effect to text',
+      danmakuSpeedLabel: 'Comment scroll speed',
+      danmakuSpeedMin: 'Fast (4s)',
+      danmakuSpeedMax: 'Slow (20s)',
+      danmakuFontSizeLabel: 'Danmaku font size',
+      danmakuOpacityLabel: 'Danmaku opacity',
+      danmakuAreaLabel: 'On-screen display area',
+      danmakuArea033: 'Top 1/3 Screen',
+      danmakuArea05: 'Top Half (50%)',
+      danmakuArea075: 'Top 3/4 Screen',
+      danmakuArea10: 'Fullscreen (100%)',
+      coffeeTitle: 'Buy the Developer a Coffee ☕',
+      coffeeDesc: 'Support ongoing development & new features: khanhnkq',
+      statusReady: 'Ready',
+      statusReset: 'Position reset!',
+      authorLabel: 'Author:'
+    }
+  };
+
   // Default configuration values
   const defaultConfig = {
+    lang: 'en',
     enableFloatingChat: true,
     enableDanmaku: true,
     autoHideNativeChat: true,
@@ -23,6 +122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Get current storage or fallback to defaults
   const config = await chrome.storage.local.get(defaultConfig);
+  let currentLang = config.lang || 'en';
 
   // UI Elements
   const enableFloatingChat = document.getElementById('enableFloatingChat');
@@ -52,6 +152,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   const danmakuAreaVal = document.getElementById('danmakuAreaVal');
   const resetPosBtn = document.getElementById('resetPosBtn');
   const statusText = document.getElementById('statusText');
+
+  // Apply Language to UI
+  function applyLanguage(lang) {
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    const dict = translations[lang] || translations.en;
+
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[key]) {
+        el.textContent = dict[key];
+      }
+    });
+
+    document.querySelectorAll('#langSwitch .lang-opt').forEach((opt) => {
+      if (opt.getAttribute('data-lang') === lang) {
+        opt.classList.add('active');
+      } else {
+        opt.classList.remove('active');
+      }
+    });
+
+    updateAreaLabel(danmakuArea.value);
+  }
+
+  // Initialize Language
+  applyLanguage(currentLang);
+
+  // Language Switcher Click Event
+  const langSwitch = document.getElementById('langSwitch');
+  if (langSwitch) {
+    langSwitch.addEventListener('click', async (e) => {
+      const targetOpt = e.target.closest('.lang-opt');
+      const selectedLang = targetOpt ? targetOpt.getAttribute('data-lang') : (currentLang === 'vi' ? 'en' : 'vi');
+      if (selectedLang && selectedLang !== currentLang) {
+        applyLanguage(selectedLang);
+        await saveAndNotify({ lang: selectedLang });
+      }
+    });
+  }
 
   // Populate UI with stored config
   enableFloatingChat.checked = config.enableFloatingChat;
@@ -179,9 +319,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   resetPosBtn.addEventListener('click', async () => {
     await saveAndNotify({ resetChatPosition: true });
-    statusText.textContent = 'Position reset!';
+    const dict = translations[currentLang] || translations.en;
+    statusText.textContent = dict.statusReset;
     setTimeout(() => {
-      statusText.textContent = 'Ready';
+      statusText.textContent = dict.statusReady;
     }, 2000);
   });
 
@@ -193,10 +334,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function updateAreaLabel(val) {
-    if (val === '0.33') danmakuAreaVal.textContent = 'Top 1/3 Screen';
-    else if (val === '0.5') danmakuAreaVal.textContent = 'Top Half (50%)';
-    else if (val === '0.75') danmakuAreaVal.textContent = 'Top 3/4 Screen';
-    else danmakuAreaVal.textContent = 'Fullscreen';
+    const dict = translations[currentLang] || translations.en;
+    if (val === '0.33') danmakuAreaVal.textContent = dict.danmakuArea033;
+    else if (val === '0.5') danmakuAreaVal.textContent = dict.danmakuArea05;
+    else if (val === '0.75') danmakuAreaVal.textContent = dict.danmakuArea075;
+    else danmakuAreaVal.textContent = dict.danmakuArea10;
   }
 
   // Save to chrome.storage.local and send message to all YouTube tabs & frames
@@ -214,3 +356,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (err) {}
   }
 });
+
