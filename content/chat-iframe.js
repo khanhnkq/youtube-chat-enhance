@@ -121,43 +121,50 @@
     `;
   }
 
-  // Load initial config from storage
-  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(currentConfig).then((stored) => {
-      currentConfig = { ...currentConfig, ...stored };
-      styleEl.textContent = buildDynamicStyles(currentConfig);
-    }).catch(() => {});
-  }
+  const isCustomOverlayFrame =
+    window.location.hash.includes('yt_custom_overlay=1') ||
+    window.location.hash.includes('yt_custom_chat=1') ||
+    window.name === 'yt_custom_chat_frame';
 
-  styleEl.textContent = buildDynamicStyles(currentConfig);
+  if (isCustomOverlayFrame) {
+    // Load initial config from storage
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get(currentConfig).then((stored) => {
+        currentConfig = { ...currentConfig, ...stored };
+        styleEl.textContent = buildDynamicStyles(currentConfig);
+      }).catch(() => {});
+    }
 
-  if (document.head) {
-    document.head.appendChild(styleEl);
-  } else {
-    document.addEventListener('DOMContentLoaded', () => document.head.appendChild(styleEl));
-  }
+    styleEl.textContent = buildDynamicStyles(currentConfig);
 
-  // Real-time Extension Config Listener via chrome.runtime
-  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
-    try {
-      chrome.runtime.onMessage.addListener((message) => {
-        if (message && message.action === 'UPDATE_CONFIG') {
-          currentConfig = { ...currentConfig, ...(message.config || {}) };
+    if (document.head) {
+      document.head.appendChild(styleEl);
+    } else {
+      document.addEventListener('DOMContentLoaded', () => document.head.appendChild(styleEl));
+    }
+
+    // Real-time Extension Config Listener via chrome.runtime
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+      try {
+        chrome.runtime.onMessage.addListener((message) => {
+          if (message && message.action === 'UPDATE_CONFIG') {
+            currentConfig = { ...currentConfig, ...(message.config || {}) };
+            styleEl.textContent = buildDynamicStyles(currentConfig);
+          }
+        });
+      } catch (e) {}
+    }
+
+    // Real-time Extension Config Listener via postMessage
+    window.addEventListener('message', (event) => {
+      try {
+        if (event.data && event.data.type === 'YT_CHAT_STYLE_UPDATE') {
+          currentConfig = { ...currentConfig, ...(event.data.config || {}) };
           styleEl.textContent = buildDynamicStyles(currentConfig);
         }
-      });
-    } catch (e) {}
+      } catch (e) {}
+    });
   }
-
-  // Real-time Extension Config Listener via postMessage
-  window.addEventListener('message', (event) => {
-    try {
-      if (event.data && event.data.type === 'YT_CHAT_STYLE_UPDATE') {
-        currentConfig = { ...currentConfig, ...(event.data.config || {}) };
-        styleEl.textContent = buildDynamicStyles(currentConfig);
-      }
-    } catch (e) {}
-  });
 
   let observer = null;
   let processedIds = new Set();

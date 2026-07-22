@@ -6,6 +6,7 @@
   let currentConfig = {
     enableFloatingChat: true,
     enableDanmaku: true,
+    autoHideNativeChat: true,
     hideHeaderAndBorder: true,
     bgOpacity: 20,
     bgBlur: 10,
@@ -17,6 +18,66 @@
   };
 
   let initialized = false;
+  let watchFlexyObserver = null;
+
+  function checkFullscreen() {
+    const playerEl = document.querySelector('#movie_player, .html5-video-player');
+    const watchFlexy = document.querySelector('ytd-watch-flexy');
+
+    const isFullscreen = !!(
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.mozFullScreenElement ||
+      document.msFullscreenElement ||
+      (playerEl && playerEl.classList.contains('ytp-fullscreen')) ||
+      (watchFlexy && watchFlexy.hasAttribute('fullscreen'))
+    );
+
+    const isTheater = !!(
+      (watchFlexy && watchFlexy.hasAttribute('theater')) ||
+      (playerEl && playerEl.classList.contains('ytp-large-width'))
+    );
+
+    return isFullscreen || isTheater;
+  }
+
+  function setupWatchFlexyObserver() {
+    try {
+      const watchFlexy = document.querySelector('ytd-watch-flexy');
+      if (!watchFlexy || watchFlexyObserver) return;
+
+      watchFlexyObserver = new MutationObserver(() => {
+        handleFullscreenState();
+      });
+
+      watchFlexyObserver.observe(watchFlexy, {
+        attributes: true,
+        attributeFilter: ['fullscreen', 'theater', 'is-two-columns_']
+      });
+    } catch (e) {}
+  }
+
+  function handleFullscreenState() {
+    const isFS = checkFullscreen();
+
+    if (currentConfig.autoHideNativeChat !== false) {
+      if (isFS) {
+        document.body.classList.add('yt-native-chat-hidden');
+      } else {
+        document.body.classList.remove('yt-native-chat-hidden');
+      }
+    } else {
+      document.body.classList.remove('yt-native-chat-hidden');
+    }
+
+    if (window.ytDraggableChatBox) {
+      window.ytDraggableChatBox.onFullscreenChange(isFS, currentConfig);
+    }
+
+    if (window.ytDanmakuEngine) {
+      window.ytDanmakuEngine.onFullscreenChange(isFS, currentConfig);
+    }
+  }
 
   async function initExtension() {
     try {
@@ -38,6 +99,8 @@
         window.ytDraggableChatBox.init(playerEl, currentConfig);
       }
 
+      setupWatchFlexyObserver();
+      handleFullscreenState();
       initialized = true;
     } catch (err) {}
   }
@@ -70,12 +133,19 @@
             window.ytDraggableChatBox.updateConfig(newConfig);
           }
 
+          handleFullscreenState();
+
           sendResponse({ status: 'OK' });
         }
         return true;
       });
     } catch (e) {}
   }
+
+  // Fullscreen state listeners
+  document.addEventListener('fullscreenchange', handleFullscreenState);
+  document.addEventListener('webkitfullscreenchange', handleFullscreenState);
+  window.addEventListener('resize', handleFullscreenState);
 
   // Pure Event-Driven Init (Zero CPU background overhead)
   function safeInit() {

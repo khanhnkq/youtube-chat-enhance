@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const defaultConfig = {
     enableFloatingChat: true,
     enableDanmaku: true,
+    autoHideNativeChat: true,
     hideHeaderAndBorder: true,
     hideItemBg: true,
     hideInputBox: true,
@@ -24,6 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // UI Elements
   const enableFloatingChat = document.getElementById('enableFloatingChat');
   const enableDanmaku = document.getElementById('enableDanmaku');
+  const autoHideNativeChat = document.getElementById('autoHideNativeChat');
   const hideHeaderAndBorder = document.getElementById('hideHeaderAndBorder');
   const hideItemBg = document.getElementById('hideItemBg');
   const hideInputBox = document.getElementById('hideInputBox');
@@ -50,6 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Populate UI with stored config
   enableFloatingChat.checked = config.enableFloatingChat;
   enableDanmaku.checked = config.enableDanmaku;
+  autoHideNativeChat.checked = config.autoHideNativeChat !== false;
   hideHeaderAndBorder.checked = config.hideHeaderAndBorder;
   hideItemBg.checked = config.hideItemBg;
   hideInputBox.checked = config.hideInputBox;
@@ -86,6 +89,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   enableDanmaku.addEventListener('change', async (e) => {
     await saveAndNotify({ enableDanmaku: e.target.checked });
+  });
+
+  autoHideNativeChat.addEventListener('change', async (e) => {
+    await saveAndNotify({ autoHideNativeChat: e.target.checked });
   });
 
   hideHeaderAndBorder.addEventListener('change', async (e) => {

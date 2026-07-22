@@ -49,11 +49,7 @@ class DraggableChatBox {
       this.attachEventListeners();
       this.updateChatIframe();
 
-      if (this.config.enableFloatingChat === false) {
-        this.overlay.classList.add('is-hidden');
-      } else {
-        this.overlay.classList.remove('is-hidden');
-      }
+      this.onFullscreenChange(this.isFS || false, this.config);
 
       return true;
     } catch (e) {
@@ -86,16 +82,18 @@ class DraggableChatBox {
       const videoId = this.getVideoId();
       if (!videoId) return;
 
-      const targetSrc = `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=${window.location.hostname}`;
+      const targetSrc = `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=${window.location.hostname}#yt_custom_overlay=1`;
       let iframe = this.iframeContainer.querySelector('iframe');
 
       if (!iframe) {
         iframe = document.createElement('iframe');
+        iframe.name = 'yt_custom_chat_frame';
         iframe.allow = 'autoplay; encrypted-media';
         iframe.src = targetSrc;
         this.iframeContainer.appendChild(iframe);
         this.currentVideoId = videoId;
       } else if (this.currentVideoId !== videoId || iframe.src !== targetSrc) {
+        iframe.name = 'yt_custom_chat_frame';
         iframe.src = targetSrc;
         this.currentVideoId = videoId;
       }
@@ -330,17 +328,23 @@ class DraggableChatBox {
     this.savePositionAndSize();
   }
 
+  onFullscreenChange(isFullscreen, newConfig) {
+    try {
+      this.isFS = isFullscreen;
+      if (newConfig) this.config = { ...this.config, ...newConfig };
+      if (!this.overlay) return;
+
+      if (this.config.enableFloatingChat === false) {
+        this.overlay.classList.add('is-hidden');
+      } else {
+        this.overlay.classList.remove('is-hidden');
+      }
+    } catch (e) {}
+  }
+
   updateConfig(newConfig) {
     try {
       this.config = { ...this.config, ...newConfig };
-
-      if (newConfig.enableFloatingChat !== undefined) {
-        if (newConfig.enableFloatingChat) {
-          this.overlay.classList.remove('is-hidden');
-        } else {
-          this.overlay.classList.add('is-hidden');
-        }
-      }
 
       if (newConfig.resetChatPosition) {
         this.resetPosition();
@@ -348,6 +352,7 @@ class DraggableChatBox {
 
       this.applyStyles(this.config);
       this.updateChatIframe();
+      this.onFullscreenChange(this.isFS || false, this.config);
     } catch (e) {}
   }
 }

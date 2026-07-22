@@ -35,13 +35,7 @@ class DanmakuEngine {
         this.playerEl.appendChild(this.container);
       }
 
-      if (!this.isEnabled) {
-        this.container.classList.add('is-hidden');
-      } else {
-        this.container.classList.remove('is-hidden');
-      }
-
-      this.recalculateTracks();
+      this.onFullscreenChange(this.isFS || false, this.config);
       return true;
     } catch (e) {
       console.warn('[YT Chat Extension] DanmakuEngine init warning:', e);
@@ -49,27 +43,54 @@ class DanmakuEngine {
     }
   }
 
-  updateConfig(newConfig) {
+  onFullscreenChange(isFullscreen, newConfig) {
     try {
-      if (!newConfig) return;
-      if (newConfig.enableDanmaku !== undefined) {
+      this.isFS = isFullscreen;
+      if (newConfig) this.config = { ...this.config, ...newConfig };
+      if (newConfig && newConfig.enableDanmaku !== undefined) {
         this.isEnabled = newConfig.enableDanmaku;
+      }
+
+      const autoHide = this.config.autoHideNativeChat !== false;
+      if (autoHide) {
+        if (isFullscreen) {
+          if (this.isEnabled && this.container) {
+            this.container.classList.remove('is-hidden');
+          } else if (this.container) {
+            this.container.classList.add('is-hidden');
+          }
+        } else {
+          if (this.container) {
+            this.container.classList.add('is-hidden');
+          }
+        }
+      } else {
         if (this.container) {
           if (this.isEnabled) this.container.classList.remove('is-hidden');
           else this.container.classList.add('is-hidden');
         }
       }
+      this.recalculateTracks();
+    } catch (e) {}
+  }
+
+  updateConfig(newConfig) {
+    try {
+      if (!newConfig) return;
+      this.config = { ...this.config, ...newConfig };
+      if (newConfig.enableDanmaku !== undefined) {
+        this.isEnabled = newConfig.enableDanmaku;
+      }
       if (newConfig.danmakuSpeed !== undefined) this.speed = newConfig.danmakuSpeed;
       if (newConfig.danmakuFontSize !== undefined) {
         this.fontSize = newConfig.danmakuFontSize;
-        this.recalculateTracks();
       }
       if (newConfig.danmakuOpacity !== undefined) this.opacity = newConfig.danmakuOpacity / 100;
       if (newConfig.danmakuTextColor !== undefined) this.textColor = newConfig.danmakuTextColor;
       if (newConfig.danmakuArea !== undefined) {
         this.displayAreaRatio = parseFloat(newConfig.danmakuArea);
-        this.recalculateTracks();
       }
+      this.onFullscreenChange(this.isFS || false, newConfig);
     } catch (e) {}
   }
 

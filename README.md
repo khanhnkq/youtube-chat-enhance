@@ -17,6 +17,7 @@
 - **Kéo thả di chuyển (Draggable):** Nắm giữ thanh tiêu đề để kéo khung chat tới bất kỳ vị trí nào trên màn hình.
 - **Tùy chỉnh kích thước (Resizable):** Kéo góc dưới bên phải để mở rộng hoặc thu hẹp khung chat.
 - **Nút thu nhỏ tinh gọn (`Live Chat`):** Bấm nút `-` để thu nhỏ khung chat thành một **Floating Badge (Nút nổi nhỏ `Live Chat`)** bo tròn góc màn hình. Bấm vào chữ `Live Chat` để mở lại khung chat đầy đủ bất kỳ lúc nào.
+- **Tự động ẩn chat gốc khi phóng to (Auto-hide on Fullscreen):** Khi bật chế độ Toàn màn hình (Fullscreen), khung chat gốc của YouTube sẽ tự động ẩn đi và thay thế bằng khung chat nổi / Danmaku. Khi thoát Toàn màn hình, giao diện YouTube gốc ban đầu sẽ lập tức được trả lại nguyên vẹn.
 - **Bộ chọn màu sắc (Color Pickers):** Tự do thay đổi màu tên người dùng (`Author Color`), màu nội dung tin nhắn (`Message Text Color`) và màu chữ Danmaku.
 - **Thanh trượt Opacity (0% - 100%):** Tùy chỉnh độ trong suốt nền khung chat.
 - **Thanh trượt Cỡ chữ (11px - 24px):** Điều chỉnh cỡ chữ trong khung chat trực tiếp.
