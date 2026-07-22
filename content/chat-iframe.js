@@ -126,15 +126,32 @@
     window.location.hash.includes('yt_custom_chat=1') ||
     window.name === 'yt_custom_chat_frame';
 
-  if (isCustomOverlayFrame) {
-    // Load initial config from storage
-    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      chrome.storage.local.get(currentConfig).then((stored) => {
-        currentConfig = { ...currentConfig, ...stored };
+  // Load initial config from storage for ALL live chat iframes
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    chrome.storage.local.get(currentConfig).then((stored) => {
+      currentConfig = { ...currentConfig, ...stored };
+      if (isCustomOverlayFrame) {
         styleEl.textContent = buildDynamicStyles(currentConfig);
-      }).catch(() => {});
-    }
+      }
+    }).catch(() => {});
 
+    if (chrome.storage.onChanged) {
+      chrome.storage.onChanged.addListener((changes, areaName) => {
+        if (areaName === 'local') {
+          const updated = {};
+          for (const key in changes) {
+            updated[key] = changes[key].newValue;
+          }
+          currentConfig = { ...currentConfig, ...updated };
+          if (isCustomOverlayFrame) {
+            styleEl.textContent = buildDynamicStyles(currentConfig);
+          }
+        }
+      });
+    }
+  }
+
+  if (isCustomOverlayFrame) {
     styleEl.textContent = buildDynamicStyles(currentConfig);
 
     if (document.head) {
@@ -142,29 +159,33 @@
     } else {
       document.addEventListener('DOMContentLoaded', () => document.head.appendChild(styleEl));
     }
+  }
 
-    // Real-time Extension Config Listener via chrome.runtime
-    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
-      try {
-        chrome.runtime.onMessage.addListener((message) => {
-          if (message && message.action === 'UPDATE_CONFIG') {
-            currentConfig = { ...currentConfig, ...(message.config || {}) };
+  // Real-time Extension Config Listener via chrome.runtime for ALL iframes
+  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+    try {
+      chrome.runtime.onMessage.addListener((message) => {
+        if (message && message.action === 'UPDATE_CONFIG') {
+          currentConfig = { ...currentConfig, ...(message.config || {}) };
+          if (isCustomOverlayFrame) {
             styleEl.textContent = buildDynamicStyles(currentConfig);
           }
-        });
-      } catch (e) {}
-    }
+        }
+      });
+    } catch (e) {}
+  }
 
-    // Real-time Extension Config Listener via postMessage
-    window.addEventListener('message', (event) => {
-      try {
-        if (event.data && event.data.type === 'YT_CHAT_STYLE_UPDATE') {
-          currentConfig = { ...currentConfig, ...(event.data.config || {}) };
+  // Real-time Extension Config Listener via postMessage
+  window.addEventListener('message', (event) => {
+    try {
+      if (event.data && event.data.type === 'YT_CHAT_STYLE_UPDATE') {
+        currentConfig = { ...currentConfig, ...(event.data.config || {}) };
+        if (isCustomOverlayFrame) {
           styleEl.textContent = buildDynamicStyles(currentConfig);
         }
-      } catch (e) {}
-    });
-  }
+      }
+    } catch (e) {}
+  });
 
   let observer = null;
   let processedIds = new Set();
@@ -271,9 +292,31 @@
         timestamp: Date.now()
       };
 
+      queueChatMessage(payload);
+    } catch (e) {}
+  }
+
+  let messageBuffer = [];
+  let flushTimer = null;
+
+  function queueChatMessage(payload) {
+    messageBuffer.push(payload);
+    if (!flushTimer) {
+      flushTimer = setTimeout(flushMessageBuffer, 80);
+    }
+  }
+
+  function flushMessageBuffer() {
+    flushTimer = null;
+    if (messageBuffer.length === 0) return;
+
+    const batch = messageBuffer;
+    messageBuffer = [];
+
+    try {
       window.parent.postMessage({
-        type: 'YT_DANMAKU_MESSAGE',
-        payload: payload
+        type: 'YT_DANMAKU_BATCH',
+        batch: batch
       }, '*');
     } catch (e) {}
   }

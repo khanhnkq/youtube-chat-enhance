@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     authorTextColor: '#ff88aa',
     chatTextColor: '#ffffff',
     danmakuTextColor: '#ffffff',
+    danmakuTextStroke: false,
+    danmakuTextShadow: true,
     bgOpacity: 20,
     bgBlur: 10,
     chatFontSize: 14,
@@ -32,6 +34,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const authorTextColor = document.getElementById('authorTextColor');
   const chatTextColor = document.getElementById('chatTextColor');
   const danmakuTextColor = document.getElementById('danmakuTextColor');
+  const danmakuTextStroke = document.getElementById('danmakuTextStroke');
+  const danmakuTextShadow = document.getElementById('danmakuTextShadow');
   const bgOpacity = document.getElementById('bgOpacity');
   const bgOpacityVal = document.getElementById('bgOpacityVal');
   const bgBlur = document.getElementById('bgBlur');
@@ -118,6 +122,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   danmakuTextColor.addEventListener('input', async (e) => {
     await saveAndNotify({ danmakuTextColor: e.target.value });
   });
+
+  if (danmakuTextStroke) {
+    danmakuTextStroke.addEventListener('change', async (e) => {
+      await saveAndNotify({ danmakuTextStroke: e.target.checked });
+    });
+  }
+
+  if (danmakuTextShadow) {
+    danmakuTextShadow.addEventListener('change', async (e) => {
+      await saveAndNotify({ danmakuTextShadow: e.target.checked });
+    });
+  }
 
   bgOpacity.addEventListener('input', async (e) => {
     const val = parseInt(e.target.value, 10);
