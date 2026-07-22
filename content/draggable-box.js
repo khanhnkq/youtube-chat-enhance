@@ -11,6 +11,8 @@ class DraggableChatBox {
     this.dragOffset = { x: 0, y: 0 };
     this.resizeStart = { width: 0, height: 0, x: 0, y: 0 };
     this.currentVideoId = null;
+    this.animFrameReq = null;
+    this.hasListeners = false;
   }
 
   init(playerElement, config = {}) {
@@ -161,87 +163,123 @@ class DraggableChatBox {
         });
       }
 
-      // Also allow clicking minimized title bar to reopen
+      // Allow clicking minimized title bar to reopen
       this.header.addEventListener('click', (e) => {
         if (this.overlay.classList.contains('is-minimized')) {
           this.toggleMinimize();
         }
       });
 
-      this.header.addEventListener('mousedown', (e) => {
-        if (e.target.closest('.yt-drag-btn')) return;
-        this.isDragging = true;
-        const rect = this.overlay.getBoundingClientRect();
-        this.dragOffset.x = e.clientX - rect.left;
-        this.dragOffset.y = e.clientY - rect.top;
+      // Smooth Dragging Start
+      this.header.addEventListener('mousedown', this.onDragStart);
 
-        document.addEventListener('mousemove', this.onDrag);
-        document.addEventListener('mouseup', this.onStopDrag);
-        e.preventDefault();
-      });
-
+      // Smooth Resizing Start
       if (this.resizeHandle) {
-        this.resizeHandle.addEventListener('mousedown', (e) => {
-          this.isResizing = true;
-          const rect = this.overlay.getBoundingClientRect();
-          this.resizeStart = {
-            width: rect.width,
-            height: rect.height,
-            x: e.clientX,
-            y: e.clientY
-          };
-
-          document.addEventListener('mousemove', this.onResize);
-          document.addEventListener('mouseup', this.onStopResize);
-          e.preventDefault();
-        });
+        this.resizeHandle.addEventListener('mousedown', this.onResizeStart);
       }
     } catch (e) {}
   }
 
+  onDragStart = (e) => {
+    if (e.target.closest('.yt-drag-btn')) return;
+    this.isDragging = true;
+    const rect = this.overlay.getBoundingClientRect();
+    this.dragOffset.x = e.clientX - rect.left;
+    this.dragOffset.y = e.clientY - rect.top;
+
+    // Disable iframe pointer events during drag to prevent mouse capture stutter
+    const iframe = this.overlay.querySelector('iframe');
+    if (iframe) iframe.style.pointerEvents = 'none';
+    document.body.style.userSelect = 'none';
+
+    document.addEventListener('mousemove', this.onDrag);
+    document.addEventListener('mouseup', this.onStopDrag);
+    e.preventDefault();
+  };
+
   onDrag = (e) => {
     if (!this.isDragging || !this.overlay || !this.playerEl) return;
 
-    const playerRect = this.playerEl.getBoundingClientRect();
-    let left = e.clientX - playerRect.left - this.dragOffset.x;
-    let top = e.clientY - playerRect.top - this.dragOffset.y;
+    if (this.animFrameReq) cancelAnimationFrame(this.animFrameReq);
 
-    const maxLeft = Math.max(0, playerRect.width - this.overlay.offsetWidth);
-    const maxTop = Math.max(0, playerRect.height - this.overlay.offsetHeight);
+    this.animFrameReq = requestAnimationFrame(() => {
+      const playerRect = this.playerEl.getBoundingClientRect();
+      let left = e.clientX - playerRect.left - this.dragOffset.x;
+      let top = e.clientY - playerRect.top - this.dragOffset.y;
 
-    left = Math.max(0, Math.min(left, maxLeft));
-    top = Math.max(0, Math.min(top, maxTop));
+      const maxLeft = Math.max(0, playerRect.width - this.overlay.offsetWidth);
+      const maxTop = Math.max(0, playerRect.height - this.overlay.offsetHeight);
 
-    this.overlay.style.left = `${left}px`;
-    this.overlay.style.top = `${top}px`;
-    this.overlay.style.right = 'auto';
-    this.overlay.style.bottom = 'auto';
+      left = Math.max(0, Math.min(left, maxLeft));
+      top = Math.max(0, Math.min(top, maxTop));
+
+      this.overlay.style.left = `${left}px`;
+      this.overlay.style.top = `${top}px`;
+      this.overlay.style.right = 'auto';
+      this.overlay.style.bottom = 'auto';
+    });
   };
 
   onStopDrag = () => {
     if (!this.isDragging) return;
     this.isDragging = false;
+
+    // Restore iframe pointer events
+    const iframe = this.overlay.querySelector('iframe');
+    if (iframe) iframe.style.pointerEvents = 'auto';
+    document.body.style.userSelect = '';
+
     document.removeEventListener('mousemove', this.onDrag);
     document.removeEventListener('mouseup', this.onStopDrag);
     this.savePositionAndSize();
   };
 
+  onResizeStart = (e) => {
+    this.isResizing = true;
+    const rect = this.overlay.getBoundingClientRect();
+    this.resizeStart = {
+      width: rect.width,
+      height: rect.height,
+      x: e.clientX,
+      y: e.clientY
+    };
+
+    // Disable iframe pointer events during resize
+    const iframe = this.overlay.querySelector('iframe');
+    if (iframe) iframe.style.pointerEvents = 'none';
+    document.body.style.userSelect = 'none';
+
+    document.addEventListener('mousemove', this.onResize);
+    document.addEventListener('mouseup', this.onStopResize);
+    e.preventDefault();
+  };
+
   onResize = (e) => {
     if (!this.isResizing || !this.overlay) return;
 
-    const deltaX = e.clientX - this.resizeStart.x;
-    const deltaY = e.clientY - this.resizeStart.y;
+    if (this.animFrameReq) cancelAnimationFrame(this.animFrameReq);
 
-    const newWidth = Math.max(200, this.resizeStart.width + deltaX);
-    const newHeight = Math.max(150, this.resizeStart.height + deltaY);
+    this.animFrameReq = requestAnimationFrame(() => {
+      const deltaX = e.clientX - this.resizeStart.x;
+      const deltaY = e.clientY - this.resizeStart.y;
 
-    this.overlay.style.width = `${newWidth}px`;
-    this.overlay.style.height = `${newHeight}px`;
+      const newWidth = Math.max(160, this.resizeStart.width + deltaX);
+      const newHeight = Math.max(100, this.resizeStart.height + deltaY);
+
+      this.overlay.style.width = `${newWidth}px`;
+      this.overlay.style.height = `${newHeight}px`;
+    });
   };
 
   onStopResize = () => {
     if (!this.isResizing) return;
     this.isResizing = false;
+
+    // Restore iframe pointer events
+    const iframe = this.overlay.querySelector('iframe');
+    if (iframe) iframe.style.pointerEvents = 'auto';
+    document.body.style.userSelect = '';
+
     document.removeEventListener('mousemove', this.onResize);
     document.removeEventListener('mouseup', this.onStopResize);
     this.savePositionAndSize();
