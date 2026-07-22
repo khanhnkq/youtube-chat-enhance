@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     hideHeaderAndBorder: true,
     hideItemBg: true,
     hideInputBox: true,
+    authorTextColor: '#ff88aa',
+    chatTextColor: '#ffffff',
+    danmakuTextColor: '#ffffff',
     bgOpacity: 20,
     bgBlur: 10,
     chatFontSize: 14,
@@ -24,6 +27,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const hideHeaderAndBorder = document.getElementById('hideHeaderAndBorder');
   const hideItemBg = document.getElementById('hideItemBg');
   const hideInputBox = document.getElementById('hideInputBox');
+  const authorTextColor = document.getElementById('authorTextColor');
+  const chatTextColor = document.getElementById('chatTextColor');
+  const danmakuTextColor = document.getElementById('danmakuTextColor');
   const bgOpacity = document.getElementById('bgOpacity');
   const bgOpacityVal = document.getElementById('bgOpacityVal');
   const bgBlur = document.getElementById('bgBlur');
@@ -47,7 +53,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   hideHeaderAndBorder.checked = config.hideHeaderAndBorder;
   hideItemBg.checked = config.hideItemBg;
   hideInputBox.checked = config.hideInputBox;
-  
+
+  authorTextColor.value = config.authorTextColor || '#ff88aa';
+  chatTextColor.value = config.chatTextColor || '#ffffff';
+  danmakuTextColor.value = config.danmakuTextColor || '#ffffff';
+
   bgOpacity.value = config.bgOpacity;
   bgOpacityVal.textContent = `${config.bgOpacity}%`;
 
@@ -88,6 +98,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   hideInputBox.addEventListener('change', async (e) => {
     await saveAndNotify({ hideInputBox: e.target.checked });
+  });
+
+  authorTextColor.addEventListener('input', async (e) => {
+    await saveAndNotify({ authorTextColor: e.target.value });
+  });
+
+  chatTextColor.addEventListener('input', async (e) => {
+    await saveAndNotify({ chatTextColor: e.target.value });
+  });
+
+  danmakuTextColor.addEventListener('input', async (e) => {
+    await saveAndNotify({ danmakuTextColor: e.target.value });
   });
 
   bgOpacity.addEventListener('input', async (e) => {

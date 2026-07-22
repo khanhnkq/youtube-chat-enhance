@@ -4,16 +4,20 @@
   let currentConfig = {
     hideItemBg: true,
     hideInputBox: true,
-    chatFontSize: 14
+    chatFontSize: 14,
+    authorTextColor: '#ff88aa',
+    chatTextColor: '#ffffff'
   };
 
-  // Inject dynamic CSS into Live Chat iframe (High-performance alpha backgrounds, NO heavy backdrop-blur)
+  // Inject dynamic CSS into Live Chat iframe
   const styleEl = document.createElement('style');
   styleEl.id = 'yt-custom-chat-iframe-style';
 
   function buildDynamicStyles(config = {}) {
     const hideItemBg = config.hideItemBg !== false;
     const fontSize = config.chatFontSize || 14;
+    const authorColor = config.authorTextColor || '#ff88aa';
+    const messageColor = config.chatTextColor || '#ffffff';
 
     return `
       *, *::before, *::after {
@@ -102,14 +106,14 @@
       }
 
       #author-name {
-        color: #ff88aa !important;
+        color: ${authorColor} !important;
         font-weight: 700 !important;
         font-size: ${fontSize}px !important;
         text-shadow: 0 1px 3px rgba(0,0,0,0.95) !important;
       }
 
       #message {
-        color: #ffffff !important;
+        color: ${messageColor} !important;
         font-weight: 600 !important;
         font-size: ${fontSize}px !important;
         text-shadow: 0 1px 3px rgba(0,0,0,0.95) !important;
@@ -168,7 +172,6 @@
       }
 
       observer = new MutationObserver((mutations) => {
-        // Skip Danmaku processing if Danmaku is disabled to save 100% messaging CPU
         if (currentConfig.enableDanmaku === false) return;
 
         for (let i = 0; i < mutations.length; i++) {

@@ -17,7 +17,7 @@
         </svg>
         <span>YouTube Chat Customizer</span>
       </div>
-      <span class="version">v1.1.0</span>
+      <span class="version">v1.2.0</span>
     </header>
 
     <!-- Content Sections -->
@@ -88,7 +88,21 @@
 
       <!-- Transparent Chat Settings -->
       <section class="card" id="chatSettingsGroup">
-        <h3 class="card-title">Tùy Chỉnh Khung Chat Nổi</h3>
+        <h3 class="card-title">Tùy Chỉnh Khung Chat Nổi & Màu Chữ</h3>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">Màu tên người dùng</span>
+          </div>
+          <input type="color" id="authorTextColor" value="#ff88aa" class="color-picker">
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">Màu nội dung tin nhắn</span>
+          </div>
+          <input type="color" id="chatTextColor" value="#ffffff" class="color-picker">
+        </div>
 
         <div class="slider-group">
           <div class="slider-header">
@@ -130,6 +144,13 @@
       <!-- Danmaku Settings -->
       <section class="card" id="danmakuSettingsGroup">
         <h3 class="card-title">Tùy Chỉnh Danmaku (Bullet Comment)</h3>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">Màu chữ Danmaku</span>
+          </div>
+          <input type="color" id="danmakuTextColor" value="#ffffff" class="color-picker">
+        </div>
 
         <div class="slider-group">
           <div class="slider-header">

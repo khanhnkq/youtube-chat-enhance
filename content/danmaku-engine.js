@@ -7,6 +7,7 @@ class DanmakuEngine {
     this.fontSize = 22;
     this.opacity = 0.9;
     this.displayAreaRatio = 0.5;
+    this.textColor = '#ffffff';
     this.tracks = [];
     this.config = {};
     this.activeCount = 0;
@@ -23,6 +24,7 @@ class DanmakuEngine {
       this.fontSize = this.config.danmakuFontSize || 22;
       this.opacity = (this.config.danmakuOpacity !== undefined ? this.config.danmakuOpacity : 90) / 100;
       this.displayAreaRatio = parseFloat(this.config.danmakuArea || '0.5');
+      this.textColor = this.config.danmakuTextColor || '#ffffff';
       this.isEnabled = this.config.enableDanmaku !== undefined ? this.config.enableDanmaku : true;
 
       // Create or locate Danmaku Container inside YouTube Player
@@ -63,6 +65,7 @@ class DanmakuEngine {
         this.recalculateTracks();
       }
       if (newConfig.danmakuOpacity !== undefined) this.opacity = newConfig.danmakuOpacity / 100;
+      if (newConfig.danmakuTextColor !== undefined) this.textColor = newConfig.danmakuTextColor;
       if (newConfig.danmakuArea !== undefined) {
         this.displayAreaRatio = parseFloat(newConfig.danmakuArea);
         this.recalculateTracks();
@@ -139,6 +142,9 @@ class DanmakuEngine {
 
       const textSpan = document.createElement('span');
       textSpan.textContent = msgData.text;
+      if (this.textColor) {
+        textSpan.style.color = this.textColor;
+      }
       itemEl.appendChild(textSpan);
 
       this.container.appendChild(itemEl);
