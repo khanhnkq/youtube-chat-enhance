@@ -1,0 +1,241 @@
+/* ---------------------------------------------------- */
+/* CUSTOM FLOATING TRANSPARENT CHAT OVERLAY (ULTRA FAST) */
+/* ---------------------------------------------------- */
+
+.yt-custom-chat-overlay,
+.yt-custom-chat-overlay *,
+.yt-custom-chat-body,
+.yt-custom-chat-body iframe {
+  border: none !important;
+  border-width: 0px !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.yt-custom-chat-overlay {
+  position: absolute !important;
+  z-index: 2147483647 !important;
+  width: 320px;
+  height: 420px;
+  min-width: 80px;
+  min-height: 28px;
+  top: 20px;
+  right: 20px;
+  background-color: rgba(0, 0, 0, 0.35);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: auto !important;
+  scrollbar-width: none !important;
+  contain: layout style paint !important;
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1), height 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.2s ease, opacity 0.2s ease;
+}
+
+.yt-custom-chat-overlay ::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+}
+
+.yt-custom-chat-overlay.is-hidden {
+  display: none !important;
+}
+
+/* MINIMIZED STATE: PURE TEXT "Live Chat" */
+.yt-custom-chat-overlay.is-minimized {
+  width: 80px !important;
+  height: 28px !important;
+  border-radius: 14px !important;
+  background: rgba(0, 0, 0, 0.75) !important;
+  cursor: pointer !important;
+  opacity: 0.85 !important;
+}
+
+.yt-custom-chat-overlay.is-minimized:hover {
+  opacity: 1 !important;
+  transform: scale(1.05);
+}
+
+.yt-custom-chat-overlay.is-minimized .yt-custom-drag-header {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  height: 28px !important;
+  background: transparent !important;
+  padding: 0 8px !important;
+  justify-content: center !important;
+}
+
+/* Body containing direct Live Chat Iframe */
+.yt-custom-chat-body {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background: transparent !important;
+  scrollbar-width: none !important;
+}
+
+.yt-custom-chat-body iframe {
+  width: 100%;
+  height: 100%;
+  background: transparent !important;
+  border-radius: 12px;
+  scrollbar-width: none !important;
+}
+
+/* Custom Header Drag Bar */
+.yt-custom-drag-header {
+  height: 28px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.yt-custom-drag-header:active {
+  cursor: grabbing;
+}
+
+/* Frameless Auto-Hide Mode: Header & Resize Handle only show when mouse hovers over chat box */
+.yt-frameless-mode .yt-custom-drag-header,
+.yt-frameless-mode .yt-custom-resize-handle {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.yt-frameless-mode.yt-custom-chat-overlay:hover .yt-custom-drag-header,
+.yt-frameless-mode.yt-custom-chat-overlay:hover .yt-custom-resize-handle {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.yt-custom-drag-title {
+  font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Remove dot icon before title */
+.yt-custom-drag-title::before {
+  display: none !important;
+}
+
+.yt-custom-drag-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.yt-drag-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  transition: background 0.15s ease;
+}
+
+.yt-drag-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Custom Resize Handle */
+.yt-custom-resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 16px;
+  height: 16px;
+  cursor: se-resize;
+  z-index: 2147483647;
+  background: linear-gradient(135deg, transparent 50%, rgba(255, 255, 255, 0.5) 50%);
+  border-bottom-right-radius: 12px;
+  transition: opacity 0.2s ease;
+}
+
+/* ---------------------------------------------------- */
+/* DANMAKU / BULLET COMMENT LAYER */
+/* ---------------------------------------------------- */
+.yt-danmaku-container {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  z-index: 2147483646 !important;
+  contain: layout style paint !important;
+}
+
+.yt-danmaku-container.is-hidden {
+  display: none !important;
+}
+
+.yt-danmaku-item {
+  position: absolute;
+  white-space: nowrap;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  will-change: transform;
+  pointer-events: none !important;
+  user-select: none;
+  contain: layout style paint !important;
+}
+
+.yt-danmaku-avatar {
+  width: 1.2em;
+  height: 1.2em;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.yt-danmaku-badge {
+  font-size: 0.75em;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(255, 0, 85, 0.85);
+  color: #fff;
+  font-weight: bold;
+}
+
+@keyframes ytDanmakuFly {
+  0% {
+    transform: translate3d(100vw, 0, 0);
+  }
+  100% {
+    transform: translate3d(-100%, 0, 0);
+  }
+}

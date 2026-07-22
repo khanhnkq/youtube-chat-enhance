@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Chat & Danmaku Customizer</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          <path d="M8 10h.01M12 10h.01M16 10h.01" stroke-width="3" stroke-linecap="round"></path>
+        </svg>
+        <span>YouTube Chat Customizer</span>
+      </div>
+      <span class="version">v1.1.0</span>
+    </header>
+
+    <!-- Content Sections -->
+    <main class="main-content">
+      <!-- Main Feature Toggles -->
+      <section class="card">
+        <h3 class="card-title">Chế Độ Hoạt Động</h3>
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">Khung Chat Nổi Trong Suốt</span>
+            <span class="setting-desc">Hiển thị khung chat đè video full màn</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="enableFloatingChat">
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">Danmaku (Chữ Chạy Ngang)</span>
+            <span class="setting-desc">Bình luận chạy ngang video như Bilibili</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="enableDanmaku">
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Advanced Customization Toggles -->
+      <section class="card">
+        <h3 class="card-title">Tùy Chọn Tinh Chỉnh Giao Diện</h3>
+        
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">Ẩn Viền & Thanh Tiêu Đề</span>
+            <span class="setting-desc">Chỉ hiện thanh kéo khi rê chuột vào</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="hideHeaderAndBorder">
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">Ẩn Nền Từng Dòng Chat</span>
+            <span class="setting-desc">Chỉ hiện chữ & avatar nổi trên video</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="hideItemBg">
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">Ẩn Khung Nhập Chat & Footer</span>
+            <span class="setting-desc">Ẩn ô nhập tin nhắn và thanh thông báo</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="hideInputBox">
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Transparent Chat Settings -->
+      <section class="card" id="chatSettingsGroup">
+        <h3 class="card-title">Tùy Chỉnh Khung Chat Nổi</h3>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>Độ trong suốt nền khung chat</span>
+            <span class="slider-value" id="bgOpacityVal">20%</span>
+          </div>
+          <input type="range" id="bgOpacity" min="0" max="100" value="20" step="5">
+          <div class="range-labels">
+            <span>Trong suốt (0%)</span>
+            <span>Trong mờ (100%)</span>
+          </div>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>Hiệu ứng kính mờ (Blur)</span>
+            <span class="slider-value" id="bgBlurVal">10px</span>
+          </div>
+          <input type="range" id="bgBlur" min="0" max="25" value="10" step="1">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>Cỡ chữ trong khung chat</span>
+            <span class="slider-value" id="chatFontSizeVal">14px</span>
+          </div>
+          <input type="range" id="chatFontSize" min="11" max="24" value="14" step="1">
+        </div>
+
+        <button class="btn btn-secondary" id="resetPosBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
+          Đặt lại Vị trí & Kích thước khung
+        </button>
+      </section>
+
+      <!-- Danmaku Settings -->
+      <section class="card" id="danmakuSettingsGroup">
+        <h3 class="card-title">Tùy Chỉnh Danmaku (Bullet Comment)</h3>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>Tốc độ chữ chạy</span>
+            <span class="slider-value" id="danmakuSpeedVal">10s</span>
+          </div>
+          <input type="range" id="danmakuSpeed" min="4" max="20" value="10" step="1">
+          <div class="range-labels">
+            <span>Nhanh (4s)</span>
+            <span>Chậm (20s)</span>
+          </div>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>Kích thước chữ Danmaku</span>
+            <span class="slider-value" id="danmakuFontSizeVal">22px</span>
+          </div>
+          <input type="range" id="danmakuFontSize" min="14" max="38" value="22" step="1">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>Độ mờ chữ Danmaku</span>
+            <span class="slider-value" id="danmakuOpacityVal">90%</span>
+          </div>
+          <input type="range" id="danmakuOpacity" min="20" max="100" value="90" step="5">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>Vùng màn hình hiển thị</span>
+            <span class="slider-value" id="danmakuAreaVal">Nửa trên (50%)</span>
+          </div>
+          <select id="danmakuArea" class="select-input">
+            <option value="0.33">1/3 Màn hình trên</option>
+            <option value="0.5" selected>Nửa màn hình (50%)</option>
+            <option value="0.75">3/4 Màn hình</option>
+            <option value="1.0">Toàn màn hình (100%)</option>
+          </select>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>Trạng thái: <strong id="statusText" class="status-active">Đã sẵn sàng</strong></span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
