@@ -60,16 +60,21 @@ body {
 }
 
 .brand-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--accent-gradient);
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  box-shadow: var(--shadow-glow);
   flex-shrink: 0;
+  background: transparent;
+}
+
+.brand-icon img {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
 }
 
 .brand-info {
@@ -229,7 +234,10 @@ body {
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: rgba(255, 255, 255, 0.15);
   transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 22px;
@@ -249,12 +257,12 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background: var(--accent-gradient);
   border-color: transparent;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(20px);
 }
 
@@ -441,8 +449,17 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 @keyframes pulseDot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.85); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
 }
 
 .status-text {
