@@ -179,9 +179,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   resetPosBtn.addEventListener('click', async () => {
     await saveAndNotify({ resetChatPosition: true });
-    statusText.textContent = 'Đã đặt lại vị trí!';
+    statusText.textContent = 'Position reset!';
     setTimeout(() => {
-      statusText.textContent = 'Đã sẵn sàng';
+      statusText.textContent = 'Ready';
     }, 2000);
   });
 
@@ -193,10 +193,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function updateAreaLabel(val) {
-    if (val === '0.33') danmakuAreaVal.textContent = '1/3 Màn hình trên';
-    else if (val === '0.5') danmakuAreaVal.textContent = 'Nửa màn hình (50%)';
-    else if (val === '0.75') danmakuAreaVal.textContent = '3/4 Màn hình';
-    else danmakuAreaVal.textContent = 'Toàn màn hình';
+    if (val === '0.33') danmakuAreaVal.textContent = 'Top 1/3 Screen';
+    else if (val === '0.5') danmakuAreaVal.textContent = 'Top Half (50%)';
+    else if (val === '0.75') danmakuAreaVal.textContent = 'Top 3/4 Screen';
+    else danmakuAreaVal.textContent = 'Fullscreen';
   }
 
   // Save to chrome.storage.local and send message to all YouTube tabs & frames

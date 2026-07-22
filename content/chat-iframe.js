@@ -277,7 +277,7 @@
         if (amountEl) amount = amountEl.textContent.trim();
       } else if (tagName === 'yt-live-chat-membership-item-renderer') {
         const headerEl = element.querySelector('#header-subtext');
-        if (headerEl) text = headerEl.textContent.trim() || 'Thành viên mới!';
+        if (headerEl) text = headerEl.textContent.trim() || 'New Member!';
       }
 
       if (!text && !isSuperChat) return;

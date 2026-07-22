@@ -31,11 +31,11 @@ class DraggableChatBox {
           <div class="yt-custom-drag-header">
             <div class="yt-custom-drag-title">Live Chat</div>
             <div class="yt-custom-drag-actions">
-              <button class="yt-drag-btn" id="ytChatMinBtn" title="Thu nhỏ / Mở lại">—</button>
+              <button class="yt-drag-btn" id="ytChatMinBtn" title="Minimize / Restore">—</button>
             </div>
           </div>
           <div class="yt-custom-chat-body"></div>
-          <div class="yt-custom-resize-handle" title="Kéo để thay đổi kích thước"></div>
+          <div class="yt-custom-resize-handle" title="Drag to resize"></div>
         `;
         this.playerEl.appendChild(this.overlay);
       }

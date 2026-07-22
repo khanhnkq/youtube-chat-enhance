@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
@@ -18,7 +18,7 @@
         </div>
         <div class="brand-info">
           <h1 class="brand-title">YT Chat Customizer</h1>
-          <span class="brand-sub">Nâng tầm xem Livestream YouTube</span>
+          <span class="brand-sub">Elevate Your YouTube Livestreaming Experience</span>
         </div>
       </div>
       <div class="header-badges">
@@ -28,7 +28,7 @@
     </header>
 
     <main class="card-list">
-      <!-- Card 1: Chế Độ Hoạt Động -->
+      <!-- Card 1: Operating Modes -->
       <section class="card">
         <div class="card-header">
           <svg class="card-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -37,13 +37,13 @@
               points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
             </polygon>
           </svg>
-          <h2 class="card-title">Chế Độ Hoạt Động</h2>
+          <h2 class="card-title">Operating Modes</h2>
         </div>
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title">Khung Chat Nổi Trong Suốt</span>
-            <span class="setting-desc">Hiển thị khung chat đè video full màn</span>
+            <span class="setting-title">Transparent Floating Chat</span>
+            <span class="setting-desc">Display floating chat overlay over video</span>
           </div>
           <label class="switch">
             <input type="checkbox" id="enableFloatingChat">
@@ -53,8 +53,8 @@
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title">Danmaku (Chữ Chạy Ngang)</span>
-            <span class="setting-desc">Bình luận chạy ngang video như Bilibili</span>
+            <span class="setting-title">Danmaku (Scrolling Comments)</span>
+            <span class="setting-desc">On-screen flying comments like Bilibili</span>
           </div>
           <label class="switch">
             <input type="checkbox" id="enableDanmaku">
@@ -64,8 +64,8 @@
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title">Tự Động Ẩn Chat Khi Phóng To</span>
-            <span class="setting-desc">Ẩn chat gốc khi Fullscreen & khôi phục khi thoát</span>
+            <span class="setting-title">Auto-Hide Native Chat in Fullscreen</span>
+            <span class="setting-desc">Hide native side chat in Fullscreen & restore on exit</span>
           </div>
           <label class="switch">
             <input type="checkbox" id="autoHideNativeChat">
@@ -74,20 +74,20 @@
         </div>
       </section>
 
-      <!-- Card 2: Tùy Chọn Tinh Chỉnh Giao Diện -->
+      <!-- Card 2: Interface Customization -->
       <section class="card">
         <div class="card-header">
           <svg class="card-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2.2">
             <path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"></path>
           </svg>
-          <h2 class="card-title">Tinh Chỉnh Giao Diện</h2>
+          <h2 class="card-title">Interface Customization</h2>
         </div>
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title">Ẩn Viền & Thanh Tiêu Đề</span>
-            <span class="setting-desc">Chỉ hiện thanh kéo khi rê chuột vào</span>
+            <span class="setting-title">Hide Header & Border</span>
+            <span class="setting-desc">Show drag handle bar only on hover</span>
           </div>
           <label class="switch">
             <input type="checkbox" id="hideHeaderAndBorder">
@@ -97,8 +97,8 @@
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title">Ẩn Nền Từng Dòng Chat</span>
-            <span class="setting-desc">Chỉ hiện chữ & avatar nổi trên video</span>
+            <span class="setting-title">Hide Chat Row Backgrounds</span>
+            <span class="setting-desc">Show floating text & avatar over video</span>
           </div>
           <label class="switch">
             <input type="checkbox" id="hideItemBg">
@@ -108,8 +108,8 @@
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title">Ẩn Khung Nhập Chat & Footer</span>
-            <span class="setting-desc">Ẩn ô nhập tin nhắn và thanh thông báo</span>
+            <span class="setting-title">Hide Input Box & Footer</span>
+            <span class="setting-desc">Hide message input box and notice bar</span>
           </div>
           <label class="switch">
             <input type="checkbox" id="hideInputBox">
@@ -118,7 +118,7 @@
         </div>
       </section>
 
-      <!-- Card 3: Tùy Chỉnh Khung Chat Nổi & Màu Chữ -->
+      <!-- Card 3: Color & Floating Chat -->
       <section class="card" id="chatSettingsGroup">
         <div class="card-header">
           <svg class="card-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -128,38 +128,38 @@
               d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
             </path>
           </svg>
-          <h2 class="card-title">Màu Sắc & Khung Chat Nổi</h2>
+          <h2 class="card-title">Color & Floating Chat</h2>
         </div>
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title">Màu tên người dùng</span>
+            <span class="setting-title">Username color</span>
           </div>
           <input type="color" id="authorTextColor" value="#ff88aa" class="color-picker">
         </div>
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title">Màu nội dung tin nhắn</span>
+            <span class="setting-title">Message text color</span>
           </div>
           <input type="color" id="chatTextColor" value="#ffffff" class="color-picker">
         </div>
 
         <div class="slider-group">
           <div class="slider-header">
-            <span>Độ trong suốt nền khung chat</span>
+            <span>Chat window background opacity</span>
             <span class="slider-value" id="bgOpacityVal">20%</span>
           </div>
           <input type="range" id="bgOpacity" min="0" max="100" value="20" step="5">
           <div class="range-labels">
-            <span>Trong suốt (0%)</span>
-            <span>Trong mờ (100%)</span>
+            <span>Transparent (0%)</span>
+            <span>Opaque (100%)</span>
           </div>
         </div>
 
         <div class="slider-group">
           <div class="slider-header">
-            <span>Hiệu ứng kính mờ (Blur)</span>
+            <span>Background blur (Blur)</span>
             <span class="slider-value" id="bgBlurVal">10px</span>
           </div>
           <input type="range" id="bgBlur" min="0" max="25" value="10" step="1">
@@ -167,7 +167,7 @@
 
         <div class="slider-group">
           <div class="slider-header">
-            <span>Cỡ chữ trong khung chat</span>
+            <span>Chat text font size</span>
             <span class="slider-value" id="chatFontSizeVal">14px</span>
           </div>
           <input type="range" id="chatFontSize" min="11" max="24" value="14" step="1">
@@ -178,7 +178,7 @@
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
             <path d="M3 3v5h5"></path>
           </svg>
-          Đặt lại Vị trí & Kích thước khung
+          Reset Window Position & Size
         </button>
       </section>
 
@@ -190,20 +190,20 @@
             <line x1="22" y1="2" x2="11" y2="13"></line>
             <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
           </svg>
-          <h2 class="card-title">Tùy Chỉnh Danmaku</h2>
+          <h2 class="card-title">Danmaku Settings</h2>
         </div>
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title">Màu chữ Danmaku</span>
+            <span class="setting-title">Danmaku text color</span>
           </div>
           <input type="color" id="danmakuTextColor" value="#ffffff" class="color-picker">
         </div>
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title">Viền đen chữ Danmaku</span>
-            <span class="setting-desc">Vẽ viền đen đậm quanh nét chữ</span>
+            <span class="setting-title">Danmaku text stroke outline</span>
+            <span class="setting-desc">Draw dark stroke around text</span>
           </div>
           <label class="switch">
             <input type="checkbox" id="danmakuTextStroke">
@@ -213,8 +213,8 @@
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title">Bóng mờ chữ Danmaku</span>
-            <span class="setting-desc">Tạo hiệu ứng đổ bóng mờ chữ</span>
+            <span class="setting-title">Danmaku text shadow</span>
+            <span class="setting-desc">Add drop shadow effect to text</span>
           </div>
           <label class="switch">
             <input type="checkbox" id="danmakuTextShadow">
@@ -224,19 +224,19 @@
 
         <div class="slider-group">
           <div class="slider-header">
-            <span>Tốc độ chữ chạy</span>
+            <span>Comment scroll speed</span>
             <span class="slider-value" id="danmakuSpeedVal">10s</span>
           </div>
           <input type="range" id="danmakuSpeed" min="4" max="20" value="10" step="1">
           <div class="range-labels">
-            <span>Nhanh (4s)</span>
-            <span>Chậm (20s)</span>
+            <span>Fast (4s)</span>
+            <span>Slow (20s)</span>
           </div>
         </div>
 
         <div class="slider-group">
           <div class="slider-header">
-            <span>Kích thước chữ Danmaku</span>
+            <span>Danmaku font size</span>
             <span class="slider-value" id="danmakuFontSizeVal">22px</span>
           </div>
           <input type="range" id="danmakuFontSize" min="14" max="38" value="22" step="1">
@@ -244,7 +244,7 @@
 
         <div class="slider-group">
           <div class="slider-header">
-            <span>Độ mờ chữ Danmaku</span>
+            <span>Danmaku opacity</span>
             <span class="slider-value" id="danmakuOpacityVal">90%</span>
           </div>
           <input type="range" id="danmakuOpacity" min="20" max="100" value="90" step="5">
@@ -252,14 +252,14 @@
 
         <div class="slider-group">
           <div class="slider-header">
-            <span>Vùng màn hình hiển thị</span>
-            <span class="slider-value" id="danmakuAreaVal">Nửa trên (50%)</span>
+            <span>On-screen display area</span>
+            <span class="slider-value" id="danmakuAreaVal">Top Half (50%)</span>
           </div>
           <select id="danmakuArea" class="select-input">
-            <option value="0.33">1/3 Màn hình trên</option>
-            <option value="0.5" selected>Nửa màn hình (50%)</option>
-            <option value="0.75">3/4 Màn hình</option>
-            <option value="1.0">Toàn màn hình (100%)</option>
+            <option value="0.33">Top 1/3 Screen</option>
+            <option value="0.5" selected>Top Half (50%)</option>
+            <option value="0.75">Top 3/4 Screen</option>
+            <option value="1.0">Fullscreen (100%)</option>
           </select>
         </div>
       </section>
@@ -277,8 +277,8 @@
           </svg>
         </div>
         <div class="coffee-body">
-          <span class="coffee-title">Mời Tác Giả Ly Cà Phê ☕</span>
-          <span class="coffee-desc">Ủng hộ để phát triển thêm tính năng mới: khanhnkq</span>
+          <span class="coffee-title">Buy the Developer a Coffee ☕</span>
+          <span class="coffee-desc">Support ongoing development & new features: khanhnkq</span>
         </div>
       </button>
     </main>
@@ -287,10 +287,10 @@
     <footer class="footer-card">
       <div id="status" class="status-banner">
         <span class="status-dot"></span>
-        <span id="statusText" class="status-text">Đã sẵn sàng hoạt động</span>
+        <span id="statusText" class="status-text">Ready</span>
       </div>
       <div class="author-credit">
-        <span>Tác giả: <strong class="author-name">Khanhnkq</strong></span>
+        <span>Author: <strong class="author-name">Khanhnkq</strong></span>
       </div>
     </footer>
   </div>
