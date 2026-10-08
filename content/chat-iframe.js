@@ -198,14 +198,18 @@
 
   function startChatObserver() {
     try {
-      const chatList = document.querySelector('#items.yt-live-chat-item-list-renderer, yt-live-chat-item-list-renderer #items, #contents.yt-live-chat-renderer, #chat-messages #items, yt-live-chat-renderer #items');
+      const chatList = document.querySelector(
+        '#items.yt-live-chat-item-list-renderer, yt-live-chat-item-list-renderer #items, #contents.yt-live-chat-renderer, #chat-messages #items, yt-live-chat-renderer #items'
+      );
       if (!chatList) {
         setTimeout(startChatObserver, 500);
         return;
       }
 
-      // HIGH PERFORMANCE: childList ONLY (subtree: false)
-      // Disabling subtree avoids thousands of irrelevant emote/badge/span mutation records.
+      if (observer) {
+        try { observer.disconnect(); } catch (err) {}
+      }
+
       observer = new MutationObserver((mutations) => {
         if (!chatList.isConnected) {
           try { observer.disconnect(); } catch (err) {}
@@ -219,11 +223,13 @@
           const addedNodes = mutations[i].addedNodes;
           for (let j = 0; j < addedNodes.length; j++) {
             const node = addedNodes[j];
-            if (node.nodeType === 1) {
+            if (node && node.nodeType === 1) {
               if (isMessageElement(node)) {
                 parseAndSendChatMessage(node);
-              } else if (node.firstElementChild) {
-                const sub = node.querySelectorAll('yt-live-chat-text-message-renderer, yt-live-chat-paid-message-renderer, yt-live-chat-membership-item-renderer');
+              } else {
+                const sub = node.querySelectorAll(
+                  'yt-live-chat-text-message-renderer, yt-live-chat-paid-message-renderer, yt-live-chat-membership-item-renderer'
+                );
                 for (let k = 0; k < sub.length; k++) {
                   parseAndSendChatMessage(sub[k]);
                 }
@@ -233,31 +239,25 @@
         }
       });
 
-      observer.observe(chatList, { childList: true, subtree: false });
+      // Observe childList + subtree to catch when Polymer binds content inside message nodes
+      observer.observe(chatList, { childList: true, subtree: true });
 
-      // Mark existing historical messages as processed to avoid flooding screen with 50-100 comments on stream open
-      const initialItems = chatList.children;
-      const totalInitial = initialItems.length;
-      for (let i = 0; i < totalInitial; i++) {
-        const item = initialItems[i];
-        if (isMessageElement(item)) {
-          if (i >= totalInitial - 2) {
-            parseAndSendChatMessage(item);
-          } else {
-            item.__ytProcessed = true;
-          }
-        }
+      // Parse initial visible messages (latest 5 to immediately verify on load)
+      const initialItems = chatList.querySelectorAll(
+        'yt-live-chat-text-message-renderer, yt-live-chat-paid-message-renderer, yt-live-chat-membership-item-renderer'
+      );
+      const startIdx = Math.max(0, initialItems.length - 5);
+      for (let i = startIdx; i < initialItems.length; i++) {
+        parseAndSendChatMessage(initialItems[i]);
       }
     } catch (e) {}
   }
 
   function parseAndSendChatMessage(element) {
     try {
-      // Instant O(1) DOM check to avoid reprocessing
-      if (element.__ytProcessed) return;
-      element.__ytProcessed = true;
+      if (!element || element.__ytProcessed) return;
 
-      const tagName = element.tagName.toLowerCase();
+      const tagName = element.tagName ? element.tagName.toLowerCase() : '';
       const msgId = element.getAttribute('id') || element.dataset.id || '';
 
       let author = '';
@@ -286,10 +286,23 @@
         if (headerEl) text = headerEl.textContent.trim() || 'New Member!';
       }
 
-      if (!text && !isSuperChat) return;
+      // If Polymer hasn't rendered the text yet, retry in 80ms and do NOT mark processed
+      if (!text && !isSuperChat) {
+        if (!element.__ytPending) {
+          element.__ytPending = true;
+          setTimeout(() => {
+            element.__ytPending = false;
+            parseAndSendChatMessage(element);
+          }, 80);
+        }
+        return;
+      }
+
+      // Mark processed now that we have real message content
+      element.__ytProcessed = true;
 
       const payload = {
-        id: msgId,
+        id: msgId || ('msg_' + Math.random().toString(36).substr(2, 9)),
         author,
         avatar,
         text,

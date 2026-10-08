@@ -20,7 +20,6 @@ class DanmakuEngine {
     this.isFS = false;
     this.dpr = Math.min(window.devicePixelRatio || 1, 2);
     this.lastPauseTime = 0;
-    this.isPaused = false;
 
     // Stable bound functions for proper cleanup
     this.boundResize = this.resizeCanvas.bind(this);
@@ -66,6 +65,7 @@ class DanmakuEngine {
       window.removeEventListener('resize', this.boundResize);
       window.addEventListener('resize', this.boundResize);
 
+      // Always show canvas if Danmaku is enabled
       this.onFullscreenChange(this.isFS || false, this.config);
 
       return true;
@@ -86,13 +86,17 @@ class DanmakuEngine {
         this.videoEl = video;
         this.videoEl.addEventListener('play', this.boundVideoPlay);
         this.videoEl.addEventListener('pause', this.boundVideoPause);
-        this.isPaused = this.videoEl.paused;
       }
     } catch (e) {}
   }
 
+  isVideoPaused() {
+    if (this.videoEl) return this.videoEl.paused;
+    const v = this.playerEl ? this.playerEl.querySelector('video') : document.querySelector('video');
+    return v ? v.paused : false;
+  }
+
   onVideoPlay() {
-    this.isPaused = false;
     if (this.lastPauseTime > 0) {
       const now = Date.now();
       const pauseDuration = now - this.lastPauseTime;
@@ -111,7 +115,6 @@ class DanmakuEngine {
   }
 
   onVideoPause() {
-    this.isPaused = true;
     this.lastPauseTime = Date.now();
     this.stopLoop();
   }
@@ -121,7 +124,7 @@ class DanmakuEngine {
       this.stopLoop();
     } else {
       if (!this.videoEl) this.attachVideoListeners();
-      if (this.comments.length > 0 && this.isEnabled && !this.isPaused) {
+      if (this.comments.length > 0 && this.isEnabled && !this.isVideoPaused()) {
         this.startLoop();
       }
     }
@@ -167,21 +170,15 @@ class DanmakuEngine {
         this.isEnabled = newConfig.enableDanmaku;
       }
 
-      const autoHide = this.config.autoHideNativeChat !== false;
-      let shouldShow = false;
-
-      if (autoHide) {
-        shouldShow = isFullscreen && this.isEnabled;
-      } else {
-        shouldShow = this.isEnabled;
-      }
+      // Danmaku should ALWAYS be visible when enabled, both in Windowed & Fullscreen mode
+      const shouldShow = !!this.isEnabled;
 
       if (this.canvas) {
         this.canvas.style.display = shouldShow ? 'block' : 'none';
         if (!shouldShow) {
           this.stopLoop();
           this.clear();
-        } else if (this.comments.length > 0 && !this.isPaused) {
+        } else if (this.comments.length > 0 && !this.isVideoPaused()) {
           this.startLoop();
         }
       }
@@ -207,7 +204,7 @@ class DanmakuEngine {
       if (this.canvas) {
         if (this.isEnabled) {
           this.canvas.style.display = 'block';
-          if (this.comments.length > 0 && !this.isPaused) {
+          if (this.comments.length > 0 && !this.isVideoPaused()) {
             this.startLoop();
           }
         } else {
@@ -228,7 +225,6 @@ class DanmakuEngine {
     }
 
     const img = new Image();
-    // Do not set crossOrigin = 'anonymous' to avoid CORS blocking on various CDN endpoints
     const entry = { canvas: null, ready: false };
     this.avatarCache.set(url, entry);
 
@@ -268,6 +264,7 @@ class DanmakuEngine {
   addComment(msgData) {
     try {
       if (!this.isEnabled || !this.ctx || !msgData || !msgData.text) return;
+
       if (this.comments.length >= 120) {
         this.comments.shift(); // Evict oldest comment to always display fresh incoming live chat
       }
@@ -340,7 +337,7 @@ class DanmakuEngine {
       }
 
       // Wake up render loop if not running
-      if (!this.animFrameId && !this.isPaused && !document.hidden) {
+      if (!this.animFrameId && !document.hidden) {
         this.startLoop();
       }
     } catch (e) {}
@@ -357,10 +354,10 @@ class DanmakuEngine {
     if (this.animFrameId) return;
     const loop = () => {
       this.render();
-      if (this.comments.length > 0 && this.isEnabled && !this.isPaused && !document.hidden) {
+      if (this.comments.length > 0 && this.isEnabled && !document.hidden && !this.isVideoPaused()) {
         this.animFrameId = requestAnimationFrame(loop);
       } else {
-        // Sleep when no comments or disabled
+        // Sleep when no comments, tab hidden, or video paused
         this.stopLoop();
       }
     };
