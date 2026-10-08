@@ -6,8 +6,14 @@
     hideInputBox: true,
     chatFontSize: 14,
     authorTextColor: '#ff88aa',
-    chatTextColor: '#ffffff'
+    chatTextColor: '#ffffff',
+    enableDanmaku: true
   };
+
+  const isCustomOverlayFrame =
+    window.location.hash.includes('yt_custom_overlay=1') ||
+    window.location.hash.includes('yt_custom_chat=1') ||
+    window.name === 'yt_custom_chat_frame';
 
   // Inject dynamic CSS into Live Chat iframe
   const styleEl = document.createElement('style');
@@ -20,11 +26,7 @@
     const messageColor = config.chatTextColor || '#ffffff';
 
     return `
-      *, *::before, *::after {
-        border: none !important;
-        border-width: 0px !important;
-        outline: none !important;
-        box-shadow: none !important;
+      html, body, #item-list, #items, #contents, #chat-messages {
         scrollbar-width: none !important;
         -ms-overflow-style: none !important;
       }
@@ -121,12 +123,7 @@
     `;
   }
 
-  const isCustomOverlayFrame =
-    window.location.hash.includes('yt_custom_overlay=1') ||
-    window.location.hash.includes('yt_custom_chat=1') ||
-    window.name === 'yt_custom_chat_frame';
-
-  // Load initial config from storage for ALL live chat iframes
+  // Load initial config from storage
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
     chrome.storage.local.get(currentConfig).then((stored) => {
       currentConfig = { ...currentConfig, ...stored };
@@ -161,7 +158,7 @@
     }
   }
 
-  // Real-time Extension Config Listener via chrome.runtime for ALL iframes
+  // Real-time Extension Config Listener via chrome.runtime
   if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
     try {
       chrome.runtime.onMessage.addListener((message) => {
@@ -188,49 +185,8 @@
   });
 
   let observer = null;
-  let processedIds = new Set();
-  let lastMessageTime = 0;
-
-  function startChatObserver() {
-    try {
-      const chatList = document.querySelector('#items.yt-live-chat-item-list-renderer, yt-live-chat-item-list-renderer #items, #contents.yt-live-chat-renderer, #chat-messages #items, yt-live-chat-renderer #items');
-      if (!chatList) {
-        setTimeout(startChatObserver, 500);
-        return;
-      }
-
-      observer = new MutationObserver((mutations) => {
-        if (currentConfig.enableDanmaku === false) return;
-
-        for (let i = 0; i < mutations.length; i++) {
-          const addedNodes = mutations[i].addedNodes;
-          for (let j = 0; j < addedNodes.length; j++) {
-            processAddedNode(addedNodes[j]);
-          }
-        }
-      });
-
-      observer.observe(chatList, { childList: true, subtree: true });
-
-      const initialItems = chatList.querySelectorAll('yt-live-chat-text-message-renderer, yt-live-chat-paid-message-renderer, yt-live-chat-membership-item-renderer');
-      for (let i = 0; i < initialItems.length; i++) {
-        parseAndSendChatMessage(initialItems[i]);
-      }
-    } catch (e) {}
-  }
-
-  function processAddedNode(node) {
-    if (!node || node.nodeType !== 1) return;
-
-    if (isMessageElement(node)) {
-      parseAndSendChatMessage(node);
-    } else {
-      const messages = node.querySelectorAll('yt-live-chat-text-message-renderer, yt-live-chat-paid-message-renderer, yt-live-chat-membership-item-renderer');
-      for (let i = 0; i < messages.length; i++) {
-        parseAndSendChatMessage(messages[i]);
-      }
-    }
-  }
+  let messageBuffer = [];
+  let flushTimer = null;
 
   function isMessageElement(el) {
     if (!el || !el.tagName) return false;
@@ -240,19 +196,64 @@
            tag === 'yt-live-chat-membership-item-renderer';
   }
 
+  function startChatObserver() {
+    try {
+      const chatList = document.querySelector('#items.yt-live-chat-item-list-renderer, yt-live-chat-item-list-renderer #items, #contents.yt-live-chat-renderer, #chat-messages #items, yt-live-chat-renderer #items');
+      if (!chatList) {
+        setTimeout(startChatObserver, 500);
+        return;
+      }
+
+      // HIGH PERFORMANCE: childList ONLY (subtree: false)
+      // Disabling subtree avoids thousands of irrelevant emote/badge/span mutation records.
+      observer = new MutationObserver((mutations) => {
+        if (currentConfig.enableDanmaku === false) return;
+
+        for (let i = 0; i < mutations.length; i++) {
+          const addedNodes = mutations[i].addedNodes;
+          for (let j = 0; j < addedNodes.length; j++) {
+            const node = addedNodes[j];
+            if (node.nodeType === 1) {
+              if (isMessageElement(node)) {
+                parseAndSendChatMessage(node);
+              } else if (node.firstElementChild) {
+                const sub = node.querySelectorAll('yt-live-chat-text-message-renderer, yt-live-chat-paid-message-renderer, yt-live-chat-membership-item-renderer');
+                for (let k = 0; k < sub.length; k++) {
+                  parseAndSendChatMessage(sub[k]);
+                }
+              }
+            }
+          }
+        }
+      });
+
+      observer.observe(chatList, { childList: true, subtree: false });
+
+      // Mark existing historical messages as processed to avoid flooding screen with 50-100 comments on stream open
+      const initialItems = chatList.children;
+      const totalInitial = initialItems.length;
+      for (let i = 0; i < totalInitial; i++) {
+        const item = initialItems[i];
+        if (isMessageElement(item)) {
+          item.__ytProcessed = true;
+          // Optionally send at most the latest 2 messages as gentle welcome
+          if (i >= totalInitial - 2) {
+            delete item.__ytProcessed;
+            parseAndSendChatMessage(item);
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
   function parseAndSendChatMessage(element) {
     try {
-      if (!isMessageElement(element)) return;
+      // Instant O(1) DOM check to avoid reprocessing
+      if (element.__ytProcessed) return;
+      element.__ytProcessed = true;
 
       const tagName = element.tagName.toLowerCase();
-
-      const msgId = element.getAttribute('id') || element.dataset.id || Math.random().toString(36).substr(2, 9);
-      if (processedIds.has(msgId)) return;
-      processedIds.add(msgId);
-      if (processedIds.size > 200) {
-        const firstKey = processedIds.keys().next().value;
-        processedIds.delete(firstKey);
-      }
+      const msgId = element.getAttribute('id') || element.dataset.id || '';
 
       let author = '';
       let avatar = '';
@@ -264,7 +265,7 @@
       if (authorEl) author = authorEl.textContent.trim();
 
       const imgEl = element.querySelector('#img, yt-img-shadow img');
-      if (imgEl) avatar = imgEl.src;
+      if (imgEl) avatar = imgEl.currentSrc || imgEl.src || '';
 
       const messageEl = element.querySelector('#message');
       if (messageEl) {
@@ -296,13 +297,10 @@
     } catch (e) {}
   }
 
-  let messageBuffer = [];
-  let flushTimer = null;
-
   function queueChatMessage(payload) {
     messageBuffer.push(payload);
     if (!flushTimer) {
-      flushTimer = setTimeout(flushMessageBuffer, 80);
+      flushTimer = setTimeout(flushMessageBuffer, 60);
     }
   }
 
@@ -316,6 +314,7 @@
     try {
       window.parent.postMessage({
         type: 'YT_DANMAKU_BATCH',
+        frameSource: isCustomOverlayFrame ? 'custom' : 'native',
         batch: batch
       }, '*');
     } catch (e) {}

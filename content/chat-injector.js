@@ -1,8 +1,6 @@
 (function () {
   'use strict';
 
-  console.log('[YT Chat Extension] Injector script loaded.');
-
   let currentConfig = {
     enableFloatingChat: true,
     enableDanmaku: true,
@@ -19,6 +17,7 @@
 
   let initialized = false;
   let watchFlexyObserver = null;
+  const receivedMsgCache = new Map();
 
   function checkFullscreen() {
     const playerEl = document.querySelector('#movie_player, .html5-video-player');
@@ -44,7 +43,12 @@
   function setupWatchFlexyObserver() {
     try {
       const watchFlexy = document.querySelector('ytd-watch-flexy');
-      if (!watchFlexy || watchFlexyObserver) return;
+      if (!watchFlexy) return;
+
+      if (watchFlexyObserver) {
+        watchFlexyObserver.disconnect();
+        watchFlexyObserver = null;
+      }
 
       watchFlexyObserver = new MutationObserver(() => {
         handleFullscreenState();
@@ -105,13 +109,10 @@
     } catch (err) {}
   }
 
-  // Listen for messages from live chat iframe (postMessage) with Deduplication Cache
-  const receivedMsgCache = new Map();
-
   function processPayload(payload, now) {
     if (!payload || !payload.text) return null;
 
-    const dedupeKey = (payload.id && payload.id.length > 10 && !payload.id.startsWith('rand_'))
+    const dedupeKey = (payload.id && payload.id.length > 8 && !payload.id.startsWith('rand_'))
       ? payload.id
       : `${payload.author || ''}_${payload.text}_${Math.floor(now / 1500)}`;
 
@@ -206,23 +207,28 @@
   document.addEventListener('webkitfullscreenchange', handleFullscreenState);
   window.addEventListener('resize', handleFullscreenState);
 
-  // Pure Event-Driven Init (Zero CPU background overhead)
+  function resetOnNavigation() {
+    initialized = false;
+    receivedMsgCache.clear();
+    if (watchFlexyObserver) {
+      watchFlexyObserver.disconnect();
+      watchFlexyObserver = null;
+    }
+    if (window.ytDanmakuEngine) {
+      window.ytDanmakuEngine.clear();
+    }
+    setTimeout(initExtension, 400);
+  }
+
+  // YouTube SPA Navigation Events (Clean state reset)
+  window.addEventListener('yt-navigate-finish', resetOnNavigation);
+  window.addEventListener('popstate', resetOnNavigation);
+
   function safeInit() {
     if (!initialized) {
       initExtension();
     }
   }
-
-  // YouTube SPA Navigation Events (No polling or body MutationObservers)
-  window.addEventListener('yt-navigate-finish', () => {
-    initialized = false;
-    setTimeout(initExtension, 500);
-  });
-
-  window.addEventListener('popstate', () => {
-    initialized = false;
-    setTimeout(initExtension, 500);
-  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', safeInit);

@@ -10,6 +10,9 @@ class DraggableChatBox {
     this.isResizing = false;
     this.dragOffset = { x: 0, y: 0 };
     this.resizeStart = { width: 0, height: 0, x: 0, y: 0 };
+    this.cachedPlayerRect = null;
+    this.cachedOverlayWidth = 0;
+    this.cachedOverlayHeight = 0;
     this.currentVideoId = null;
     this.animFrameReq = null;
     this.hasListeners = false;
@@ -185,6 +188,15 @@ class DraggableChatBox {
     this.dragOffset.x = e.clientX - rect.left;
     this.dragOffset.y = e.clientY - rect.top;
 
+    // Cache bounds to prevent layout thrashing inside rAF
+    if (this.playerEl) {
+      this.cachedPlayerRect = this.playerEl.getBoundingClientRect();
+    }
+    this.cachedOverlayWidth = this.overlay.offsetWidth;
+    this.cachedOverlayHeight = this.overlay.offsetHeight;
+
+    this.overlay.classList.add('is-dragging');
+
     // Disable iframe pointer events during drag to prevent mouse capture stutter
     const iframe = this.overlay.querySelector('iframe');
     if (iframe) iframe.style.pointerEvents = 'none';
@@ -196,35 +208,45 @@ class DraggableChatBox {
   };
 
   onDrag = (e) => {
-    if (!this.isDragging || !this.overlay || !this.playerEl) return;
+    if (!this.isDragging || !this.overlay || !this.cachedPlayerRect) return;
 
-    if (this.animFrameReq) cancelAnimationFrame(this.animFrameReq);
+    this.latestMouseX = e.clientX;
+    this.latestMouseY = e.clientY;
 
-    this.animFrameReq = requestAnimationFrame(() => {
-      const playerRect = this.playerEl.getBoundingClientRect();
-      let left = e.clientX - playerRect.left - this.dragOffset.x;
-      let top = e.clientY - playerRect.top - this.dragOffset.y;
+    if (!this.dragRafPending) {
+      this.dragRafPending = true;
+      requestAnimationFrame(() => {
+        this.dragRafPending = false;
+        if (!this.isDragging || !this.overlay || !this.cachedPlayerRect) return;
 
-      const maxLeft = Math.max(0, playerRect.width - this.overlay.offsetWidth);
-      const maxTop = Math.max(0, playerRect.height - this.overlay.offsetHeight);
+        const maxLeft = Math.max(0, this.cachedPlayerRect.width - this.cachedOverlayWidth);
+        const maxTop = Math.max(0, this.cachedPlayerRect.height - this.cachedOverlayHeight);
 
-      left = Math.max(0, Math.min(left, maxLeft));
-      top = Math.max(0, Math.min(top, maxTop));
+        let left = this.latestMouseX - this.cachedPlayerRect.left - this.dragOffset.x;
+        let top = this.latestMouseY - this.cachedPlayerRect.top - this.dragOffset.y;
 
-      this.overlay.style.left = `${left}px`;
-      this.overlay.style.top = `${top}px`;
-      this.overlay.style.right = 'auto';
-      this.overlay.style.bottom = 'auto';
-    });
+        left = Math.max(0, Math.min(left, maxLeft));
+        top = Math.max(0, Math.min(top, maxTop));
+
+        this.overlay.style.left = `${left}px`;
+        this.overlay.style.top = `${top}px`;
+        this.overlay.style.right = 'auto';
+        this.overlay.style.bottom = 'auto';
+      });
+    }
   };
 
   onStopDrag = () => {
     if (!this.isDragging) return;
     this.isDragging = false;
+    this.dragRafPending = false;
+    this.cachedPlayerRect = null;
 
-    // Restore iframe pointer events
-    const iframe = this.overlay.querySelector('iframe');
-    if (iframe) iframe.style.pointerEvents = 'auto';
+    if (this.overlay) {
+      this.overlay.classList.remove('is-dragging');
+      const iframe = this.overlay.querySelector('iframe');
+      if (iframe) iframe.style.pointerEvents = 'auto';
+    }
     document.body.style.userSelect = '';
 
     document.removeEventListener('mousemove', this.onDrag);
@@ -242,6 +264,8 @@ class DraggableChatBox {
       y: e.clientY
     };
 
+    this.overlay.classList.add('is-resizing');
+
     // Disable iframe pointer events during resize
     const iframe = this.overlay.querySelector('iframe');
     if (iframe) iframe.style.pointerEvents = 'none';
@@ -255,27 +279,37 @@ class DraggableChatBox {
   onResize = (e) => {
     if (!this.isResizing || !this.overlay) return;
 
-    if (this.animFrameReq) cancelAnimationFrame(this.animFrameReq);
+    this.latestResizeX = e.clientX;
+    this.latestResizeY = e.clientY;
 
-    this.animFrameReq = requestAnimationFrame(() => {
-      const deltaX = e.clientX - this.resizeStart.x;
-      const deltaY = e.clientY - this.resizeStart.y;
+    if (!this.resizeRafPending) {
+      this.resizeRafPending = true;
+      requestAnimationFrame(() => {
+        this.resizeRafPending = false;
+        if (!this.isResizing || !this.overlay) return;
 
-      const newWidth = Math.max(160, this.resizeStart.width + deltaX);
-      const newHeight = Math.max(100, this.resizeStart.height + deltaY);
+        const deltaX = this.latestResizeX - this.resizeStart.x;
+        const deltaY = this.latestResizeY - this.resizeStart.y;
 
-      this.overlay.style.width = `${newWidth}px`;
-      this.overlay.style.height = `${newHeight}px`;
-    });
+        const newWidth = Math.max(160, this.resizeStart.width + deltaX);
+        const newHeight = Math.max(100, this.resizeStart.height + deltaY);
+
+        this.overlay.style.width = `${newWidth}px`;
+        this.overlay.style.height = `${newHeight}px`;
+      });
+    }
   };
 
   onStopResize = () => {
     if (!this.isResizing) return;
     this.isResizing = false;
+    this.resizeRafPending = false;
 
-    // Restore iframe pointer events
-    const iframe = this.overlay.querySelector('iframe');
-    if (iframe) iframe.style.pointerEvents = 'auto';
+    if (this.overlay) {
+      this.overlay.classList.remove('is-resizing');
+      const iframe = this.overlay.querySelector('iframe');
+      if (iframe) iframe.style.pointerEvents = 'auto';
+    }
     document.body.style.userSelect = '';
 
     document.removeEventListener('mousemove', this.onResize);
@@ -354,6 +388,21 @@ class DraggableChatBox {
       this.updateChatIframe();
       this.onFullscreenChange(this.isFS || false, this.config);
     } catch (e) {}
+  }
+
+  destroy() {
+    if (this.animFrameReq) {
+      cancelAnimationFrame(this.animFrameReq);
+      this.animFrameReq = null;
+    }
+    if (this.overlay && this.overlay.parentNode) {
+      this.overlay.parentNode.removeChild(this.overlay);
+      this.overlay = null;
+      this.header = null;
+      this.iframeContainer = null;
+      this.resizeHandle = null;
+      this.hasListeners = false;
+    }
   }
 }
 
