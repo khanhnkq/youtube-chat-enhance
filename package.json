@@ -1,0 +1,20 @@
+{
+  "name": "youtube-custom-chat-danmaku",
+  "version": "1.2.0",
+  "description": "YouTube Custom Chat & Danmaku Browser Extension for Chrome and Firefox",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "lint:firefox": "npx web-ext lint --source-dir dist/firefox",
+    "test:firefox": "npx web-ext run --source-dir dist/firefox"
+  },
+  "keywords": [
+    "youtube",
+    "chat",
+    "danmaku",
+    "extension",
+    "firefox",
+    "chrome"
+  ],
+  "author": "khanhnkq",
+  "license": "MIT"
+}

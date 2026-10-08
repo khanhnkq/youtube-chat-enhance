@@ -41,18 +41,32 @@
 
 ---
 
-## 📦 Installation Guide
+## 📦 Installation & Packaging Guide
 
-1. **Clone or Download the Repository:**
-   ```bash
-   git clone https://github.com/khanhnkq/youtube-chat-enhance.git
-   ```
-2. **Load into Google Chrome (or Brave / Edge / Arc):**
-   - Open your browser and navigate to `chrome://extensions/`
-   - Enable **Developer mode** using the toggle in the top-right corner.
-   - Click **Load unpacked**.
-   - Select the `youtube-chat-enhance` project folder.
-3. **Enjoy!** Open any YouTube Live Stream or Video, and click the Extension icon in the toolbar to customize your experience.
+### 1. Load for Development (Unpacked)
+- **Google Chrome / Brave / Edge / Arc:**
+  1. Open `chrome://extensions/`
+  2. Enable **Developer mode** (top-right toggle).
+  3. Click **Load unpacked** and select the project folder (or `dist/chrome`).
+- **Mozilla Firefox:**
+  1. Open `about:debugging#/runtime/this-firefox`
+  2. Click **Load Temporary Add-on...**
+  3. Select `manifest.json` from the project folder (or `dist/firefox/manifest.json`).
+
+### 2. Multi-Browser Production Packaging
+Build clean, lightweight ZIP packages (~33KB) for both Chrome Web Store and Mozilla Add-ons (AMO):
+```bash
+npm run build
+```
+Output files will be generated in `dist/`:
+- `dist/YouTube-Custom-Chat-Chrome-v1.2.0.zip` (for Chrome Web Store)
+- `dist/YouTube-Custom-Chat-Firefox-v1.2.0.zip` (for Mozilla Add-ons / AMO)
+- `dist/YouTube-Custom-Chat-Firefox-v1.2.0.xpi` (Firefox Add-on XPI)
+
+Lint Firefox build:
+```bash
+npm run lint:firefox
+```
 
 ---
 
