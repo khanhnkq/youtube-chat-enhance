@@ -82,6 +82,13 @@ class DraggableChatBox {
     try {
       if (!this.iframeContainer) return;
 
+      if (this.config.enableFloatingChat === false) {
+        const existingIframe = this.iframeContainer.querySelector('iframe');
+        if (existingIframe) existingIframe.remove();
+        this.currentVideoId = null;
+        return;
+      }
+
       const videoId = this.getVideoId();
       if (!videoId) return;
 

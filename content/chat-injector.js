@@ -93,7 +93,15 @@
 
     try {
       const playerEl = document.querySelector('#movie_player, .html5-video-player');
-      if (!playerEl) return;
+      if (!playerEl) {
+        if (!window.__ytChatRetryCount) window.__ytChatRetryCount = 0;
+        if (window.__ytChatRetryCount < 10) {
+          window.__ytChatRetryCount++;
+          setTimeout(initExtension, 500);
+        }
+        return;
+      }
+      window.__ytChatRetryCount = 0;
 
       if (window.ytDanmakuEngine) {
         window.ytDanmakuEngine.init(playerEl, currentConfig);

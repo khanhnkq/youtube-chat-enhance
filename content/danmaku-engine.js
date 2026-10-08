@@ -268,7 +268,9 @@ class DanmakuEngine {
   addComment(msgData) {
     try {
       if (!this.isEnabled || !this.ctx || !msgData || !msgData.text) return;
-      if (this.comments.length >= 100) return; // Cap maximum onscreen capacity
+      if (this.comments.length >= 120) {
+        this.comments.shift(); // Evict oldest comment to always display fresh incoming live chat
+      }
 
       const now = Date.now();
       if (!this.tracks || this.tracks.length === 0) this.recalculateTracks();

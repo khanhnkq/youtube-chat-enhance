@@ -207,6 +207,12 @@
       // HIGH PERFORMANCE: childList ONLY (subtree: false)
       // Disabling subtree avoids thousands of irrelevant emote/badge/span mutation records.
       observer = new MutationObserver((mutations) => {
+        if (!chatList.isConnected) {
+          try { observer.disconnect(); } catch (err) {}
+          startChatObserver();
+          return;
+        }
+
         if (currentConfig.enableDanmaku === false) return;
 
         for (let i = 0; i < mutations.length; i++) {
@@ -235,11 +241,10 @@
       for (let i = 0; i < totalInitial; i++) {
         const item = initialItems[i];
         if (isMessageElement(item)) {
-          item.__ytProcessed = true;
-          // Optionally send at most the latest 2 messages as gentle welcome
           if (i >= totalInitial - 2) {
-            delete item.__ytProcessed;
             parseAndSendChatMessage(item);
+          } else {
+            item.__ytProcessed = true;
           }
         }
       }
