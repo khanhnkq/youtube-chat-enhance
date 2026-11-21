@@ -5,6 +5,7 @@
   "scripts": {
     "build": "node scripts/build.js",
     "lint:firefox": "npx web-ext lint --source-dir dist/firefox",
+    "test": "node --test tests/*.test.mjs",
     "test:firefox": "npx web-ext run --source-dir dist/firefox",
     "perf": "node scripts/perf/profile.mjs"
   },

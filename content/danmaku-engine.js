@@ -15,6 +15,10 @@ class DanmakuEngine {
     this.hasShadow = true;
     this.config = {};
     this.tracks = [];
+    this.pending = [];
+    this.pendingDrainTimer = null;
+    this.pausedAt = null;
+    this.pausedTotal = 0;
     this.activeItems = [];
     this.nodePool = [];
     this.layerWidth = 0;
@@ -23,6 +27,18 @@ class DanmakuEngine {
 
     this.boundVideoPlay = this.onVideoPlay.bind(this);
     this.boundVideoPause = this.onVideoPause.bind(this);
+  }
+
+  static trackFreeAt(last, newV, layerWidth, gap) {
+    if (!last) return -Infinity;
+
+    const t1 = last.start + (last.w + gap) / last.v;
+    if (newV > last.v) {
+      const exit = last.start + (layerWidth + last.w) / last.v;
+      const t2 = exit - layerWidth / newV;
+      return Math.max(t1, t2);
+    }
+    return t1;
   }
 
   init(playerElement, config = {}) {
@@ -38,6 +54,8 @@ class DanmakuEngine {
       this.clear();
 
       this.playerEl = player;
+      this.pausedAt = null;
+      this.pausedTotal = 0;
       this.config = config || {};
       this.applyConfig(this.config, true);
 
@@ -61,6 +79,7 @@ class DanmakuEngine {
       this.updateLayerStyle();
       this.recalculateTracks();
       this.attachVideoListeners();
+      this.pausedAt = this.isVideoPaused() ? performance.now() : null;
 
       if (typeof ResizeObserver !== 'undefined') {
         this.resizeObserver = new ResizeObserver(entries => {
@@ -126,6 +145,10 @@ class DanmakuEngine {
     } catch (e) {}
   }
 
+  clock() {
+    return (this.pausedAt ?? performance.now()) - this.pausedTotal;
+  }
+
   isVideoPaused() {
     if (this.videoEl) return this.videoEl.paused;
     const video = this.playerEl ? this.playerEl.querySelector('video') : document.querySelector('video');
@@ -133,12 +156,18 @@ class DanmakuEngine {
   }
 
   onVideoPlay() {
+    if (this.pausedAt !== null) {
+      this.pausedTotal += performance.now() - this.pausedAt;
+      this.pausedAt = null;
+    }
     for (const item of this.activeItems) {
       if (item.animation) item.animation.play();
     }
+    this.drainPending();
   }
 
   onVideoPause() {
+    if (this.pausedAt === null) this.pausedAt = performance.now();
     for (const item of this.activeItems) {
       if (item.animation) item.animation.pause();
     }
@@ -179,8 +208,15 @@ class DanmakuEngine {
 
   recalculateTracks() {
     const lineHeight = this.fontSize * 1.35;
-    const trackCount = Math.max(1, Math.floor(this.layerHeight / lineHeight));
-    this.tracks = Number.isFinite(trackCount) ? new Array(trackCount).fill(0) : new Array(5).fill(0);
+    const calculatedTrackCount = Math.floor(this.layerHeight / lineHeight);
+    const trackCount = Number.isFinite(calculatedTrackCount)
+      ? Math.max(1, calculatedTrackCount)
+      : 5;
+    if (this.tracks.length !== trackCount) {
+      const tracks = this.tracks.slice(0, trackCount);
+      while (tracks.length < trackCount) tracks.push(null);
+      this.tracks = tracks;
+    }
   }
 
   onFullscreenChange(isFullscreen, newConfig) {
@@ -237,95 +273,126 @@ class DanmakuEngine {
     this.removeActiveItem(item);
   }
 
+  schedulePendingDrain() {
+    if (
+      this.pendingDrainTimer !== null ||
+      this.pending.length === 0 ||
+      this.isVideoPaused()
+    ) {
+      return;
+    }
+
+    this.pendingDrainTimer = setTimeout(() => {
+      this.pendingDrainTimer = null;
+      this.drainPending();
+    }, 200);
+  }
+
+  drainPending() {
+    if (this.isVideoPaused()) return;
+
+    while (this.pending.length > 0) {
+      let placed;
+      try {
+        placed = this.placeComment(this.pending[0]);
+      } catch (e) {
+        placed = true;
+      }
+      if (!placed) break;
+      this.pending.shift();
+    }
+
+    this.schedulePendingDrain();
+  }
+
+  placeComment(msgData) {
+    if (!this.tracks || this.tracks.length === 0) this.recalculateTracks();
+
+    const now = this.clock();
+    const text = String(msgData.text);
+    this.measureContext.font = `bold ${this.fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    const textWidth = this.measureContext.measureText(text).width;
+    const hasAvatar = !!msgData.avatar;
+    const isSuperChat = !!msgData.isSuperChat;
+    const badgeText = isSuperChat ? (msgData.amount || 'SuperChat') : '';
+    const badgeTextWidth = isSuperChat ? this.measureContext.measureText(badgeText).width : 0;
+    const avatarSpacing = hasAvatar ? this.fontSize * 1.1 + 6 : 0;
+    const badgeSpacing = isSuperChat ? badgeTextWidth + 10 + 6 : 0;
+    const totalWidth = textWidth + avatarSpacing + badgeSpacing;
+    const newV = (this.layerWidth + totalWidth) / (this.speed * 1000);
+
+    let trackIndex = -1;
+    for (let i = 0; i < this.tracks.length; i++) {
+      if (DanmakuEngine.trackFreeAt(this.tracks[i], newV, this.layerWidth, 24) <= now) {
+        trackIndex = i;
+        break;
+      }
+    }
+    if (trackIndex === -1) return false;
+
+    const previousTrack = this.tracks[trackIndex];
+    this.tracks[trackIndex] = { start: now, v: newV, w: totalWidth };
+
+    const lineHeight = this.fontSize * 1.35;
+    const y = trackIndex * lineHeight + 12;
+    const node = this.getItemNode();
+    node.textContent = text;
+
+    if (hasAvatar) {
+      const avatar = document.createElement('img');
+      avatar.className = 'yt-danmaku-avatar';
+      avatar.decoding = 'async';
+      avatar.src = msgData.avatar;
+      avatar.alt = '';
+      node.insertBefore(avatar, node.firstChild);
+    }
+
+    if (isSuperChat) {
+      const badge = document.createElement('span');
+      badge.className = 'yt-danmaku-badge';
+      badge.textContent = badgeText;
+      node.insertBefore(badge, hasAvatar ? node.childNodes[1] : node.firstChild);
+    }
+
+    this.layer.appendChild(node);
+    let animation;
+    try {
+      animation = node.animate([
+        { transform: `translate3d(${this.layerWidth}px,${y}px,0)` },
+        { transform: `translate3d(${-totalWidth}px,${y}px,0)` }
+      ], {
+        duration: this.speed * 1000,
+        easing: 'linear',
+        fill: 'none'
+      });
+    } catch (e) {
+      this.tracks[trackIndex] = previousTrack;
+      node.remove();
+      this.recycleNode(node);
+      return true;
+    }
+
+    if (this.activeItems.length >= 80) {
+      this.removeActiveItem(this.activeItems[0]);
+    }
+
+    const item = { el: node, animation };
+    this.activeItems.push(item);
+    animation.onfinish = () => this.finishItem(item);
+
+    if (!this.videoEl) this.attachVideoListeners();
+    if (this.isVideoPaused()) animation.pause();
+    return true;
+  }
+
   addComment(msgData) {
     try {
       if (!this.isEnabled || !this.layer || !this.measureContext || !msgData || !msgData.text) return;
-
-      if (this.activeItems.length >= 80) {
-        this.removeActiveItem(this.activeItems[0]);
+      if (this.isVideoPaused() || this.pending.length > 0 || !this.placeComment(msgData)) {
+        if (this.pending.length >= 30) this.pending.shift();
+        this.pending.push(msgData);
+        this.schedulePendingDrain();
       }
-
-      const now = Date.now();
-      if (!this.tracks || this.tracks.length === 0) this.recalculateTracks();
-
-      let trackIndex = -1;
-      for (let i = 0; i < this.tracks.length; i++) {
-        if (this.tracks[i] <= now) {
-          trackIndex = i;
-          break;
-        }
-      }
-
-      if (trackIndex === -1) {
-        let minTime = Infinity;
-        for (let i = 0; i < this.tracks.length; i++) {
-          if (this.tracks[i] < minTime) {
-            minTime = this.tracks[i];
-            trackIndex = i;
-          }
-        }
-      }
-      if (trackIndex === -1) trackIndex = 0;
-
-      const text = String(msgData.text);
-      this.measureContext.font = `bold ${this.fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-      const textWidth = this.measureContext.measureText(text).width;
-      const hasAvatar = !!msgData.avatar;
-      const isSuperChat = !!msgData.isSuperChat;
-      const badgeText = isSuperChat ? (msgData.amount || 'SuperChat') : '';
-      const badgeTextWidth = isSuperChat ? this.measureContext.measureText(badgeText).width : 0;
-      const avatarSpacing = hasAvatar ? this.fontSize * 1.1 + 6 : 0;
-      const badgeSpacing = isSuperChat ? badgeTextWidth + 10 + 6 : 0;
-      const totalWidth = textWidth + avatarSpacing + badgeSpacing;
-      const speedPxPerMs = (this.layerWidth + totalWidth) / (this.speed * 1000);
-      const timeToClearRightEdge = (totalWidth + 30) / speedPxPerMs;
-
-      this.tracks[trackIndex] = now + Math.min(timeToClearRightEdge, this.speed * 800);
-
-      const lineHeight = this.fontSize * 1.35;
-      const y = trackIndex * lineHeight + 12;
-      const node = this.getItemNode();
-      node.textContent = text;
-
-      if (hasAvatar) {
-        const avatar = document.createElement('img');
-        avatar.className = 'yt-danmaku-avatar';
-        avatar.decoding = 'async';
-        avatar.src = msgData.avatar;
-        avatar.alt = '';
-        node.insertBefore(avatar, node.firstChild);
-      }
-
-      if (isSuperChat) {
-        const badge = document.createElement('span');
-        badge.className = 'yt-danmaku-badge';
-        badge.textContent = badgeText;
-        node.insertBefore(badge, hasAvatar ? node.childNodes[1] : node.firstChild);
-      }
-
-      this.layer.appendChild(node);
-      let animation;
-      try {
-        animation = node.animate([
-          { transform: `translate3d(${this.layerWidth}px,${y}px,0)` },
-          { transform: `translate3d(${-totalWidth}px,${y}px,0)` }
-        ], {
-          duration: this.speed * 1000,
-          easing: 'linear',
-          fill: 'none'
-        });
-      } catch (e) {
-        node.remove();
-        this.recycleNode(node);
-        return;
-      }
-
-      const item = { el: node, animation };
-      this.activeItems.push(item);
-      animation.onfinish = () => this.finishItem(item);
-
-      if (!this.videoEl) this.attachVideoListeners();
-      if (this.isVideoPaused()) animation.pause();
     } catch (e) {}
   }
 
@@ -337,6 +404,12 @@ class DanmakuEngine {
   }
 
   clear() {
+    this.pending = [];
+    if (this.pendingDrainTimer !== null) {
+      clearTimeout(this.pendingDrainTimer);
+      this.pendingDrainTimer = null;
+    }
+    this.tracks = this.tracks.map(() => null);
     for (const item of this.activeItems.slice()) {
       this.removeActiveItem(item, false);
     }
