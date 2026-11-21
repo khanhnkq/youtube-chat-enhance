@@ -30,6 +30,7 @@
       ],
       "css": ["content/overlay.css"],
       "js": [
+        "content/config.js",
         "content/danmaku-engine.js",
         "content/draggable-box.js",
         "content/chat-injector.js"
@@ -41,7 +42,7 @@
         "https://www.youtube.com/live_chat*",
         "https://www.youtube.com/live_chat_replay*"
       ],
-      "js": ["content/chat-iframe.js"],
+      "js": ["content/config.js", "content/chat-iframe.js"],
       "all_frames": true,
       "run_at": "document_idle"
     }

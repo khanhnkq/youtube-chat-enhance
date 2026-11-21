@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       coffeeDesc: 'Ủng hộ để phát triển thêm tính năng mới: khanhnkq',
       statusReady: 'Đã sẵn sàng hoạt động',
       statusReset: 'Đã đặt lại vị trí!',
+      statusSaveError: 'Không lưu được cài đặt. Hãy thử lại.',
       authorLabel: 'Tác giả:'
     },
     en: {
@@ -93,36 +94,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       coffeeDesc: 'Support ongoing development & new features: khanhnkq',
       statusReady: 'Ready',
       statusReset: 'Position reset!',
+      statusSaveError: 'Could not save settings. Please try again.',
       authorLabel: 'Author:'
     }
   };
 
-  // Default configuration values
-  const defaultConfig = {
-    lang: 'en',
-    enableFloatingChat: true,
-    enableDanmaku: true,
-    autoHideNativeChat: true,
-    hideHeaderAndBorder: true,
-    hideItemBg: true,
-    hideInputBox: true,
-    authorTextColor: '#ff88aa',
-    chatTextColor: '#ffffff',
-    danmakuTextColor: '#ffffff',
-    danmakuTextStroke: false,
-    danmakuTextShadow: true,
-    bgOpacity: 20,
-    bgBlur: 10,
-    chatFontSize: 14,
-    danmakuSpeed: 10,
-    danmakuFontSize: 22,
-    danmakuOpacity: 90,
-    danmakuArea: '0.5'
-  };
-
-  // Get current storage or fallback to defaults
-  const config = await chrome.storage.local.get(defaultConfig);
+  let config;
+  try {
+    config = await YTChatConfig.load();
+  } catch (error) {
+    document.getElementById('statusText').textContent = translations.en.statusSaveError;
+    document.querySelectorAll('input, select, button').forEach(el => { el.disabled = true; });
+    return;
+  }
   let currentLang = config.lang || 'en';
+  const writer = createConfigWriter(chrome.storage.local, { onError: showSaveError });
 
   // UI Elements
   const enableFloatingChat = document.getElementById('enableFloatingChat');
@@ -200,6 +186,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   hideHeaderAndBorder.checked = config.hideHeaderAndBorder;
   hideItemBg.checked = config.hideItemBg;
   hideInputBox.checked = config.hideInputBox;
+  danmakuTextStroke.checked = config.danmakuTextStroke;
+  danmakuTextShadow.checked = config.danmakuTextShadow;
 
   authorTextColor.value = config.authorTextColor || '#ff88aa';
   chatTextColor.value = config.chatTextColor || '#ffffff';
@@ -252,15 +240,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   authorTextColor.addEventListener('input', async (e) => {
-    await saveAndNotify({ authorTextColor: e.target.value });
+    await saveAndNotify({ authorTextColor: e.target.value }, false);
   });
 
   chatTextColor.addEventListener('input', async (e) => {
-    await saveAndNotify({ chatTextColor: e.target.value });
+    await saveAndNotify({ chatTextColor: e.target.value }, false);
   });
 
   danmakuTextColor.addEventListener('input', async (e) => {
-    await saveAndNotify({ danmakuTextColor: e.target.value });
+    await saveAndNotify({ danmakuTextColor: e.target.value }, false);
   });
 
   if (danmakuTextStroke) {
@@ -278,37 +266,37 @@ document.addEventListener('DOMContentLoaded', async () => {
   bgOpacity.addEventListener('input', async (e) => {
     const val = parseInt(e.target.value, 10);
     bgOpacityVal.textContent = `${val}%`;
-    await saveAndNotify({ bgOpacity: val });
+    await saveAndNotify({ bgOpacity: val }, false);
   });
 
   bgBlur.addEventListener('input', async (e) => {
     const val = parseInt(e.target.value, 10);
     bgBlurVal.textContent = `${val}px`;
-    await saveAndNotify({ bgBlur: val });
+    await saveAndNotify({ bgBlur: val }, false);
   });
 
   chatFontSize.addEventListener('input', async (e) => {
     const val = parseInt(e.target.value, 10);
     chatFontSizeVal.textContent = `${val}px`;
-    await saveAndNotify({ chatFontSize: val });
+    await saveAndNotify({ chatFontSize: val }, false);
   });
 
   danmakuSpeed.addEventListener('input', async (e) => {
     const val = parseInt(e.target.value, 10);
     danmakuSpeedVal.textContent = `${val}s`;
-    await saveAndNotify({ danmakuSpeed: val });
+    await saveAndNotify({ danmakuSpeed: val }, false);
   });
 
   danmakuFontSize.addEventListener('input', async (e) => {
     const val = parseInt(e.target.value, 10);
     danmakuFontSizeVal.textContent = `${val}px`;
-    await saveAndNotify({ danmakuFontSize: val });
+    await saveAndNotify({ danmakuFontSize: val }, false);
   });
 
   danmakuOpacity.addEventListener('input', async (e) => {
     const val = parseInt(e.target.value, 10);
     danmakuOpacityVal.textContent = `${val}%`;
-    await saveAndNotify({ danmakuOpacity: val });
+    await saveAndNotify({ danmakuOpacity: val }, false);
   });
 
   danmakuArea.addEventListener('change', async (e) => {
@@ -318,12 +306,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   resetPosBtn.addEventListener('click', async () => {
-    await saveAndNotify({ resetChatPosition: true });
-    const dict = translations[currentLang] || translations.en;
-    statusText.textContent = dict.statusReset;
-    setTimeout(() => {
-      statusText.textContent = dict.statusReady;
-    }, 2000);
+    try {
+      await writer.flush();
+      // Clearing persisted placement also resets tabs opened in the future.
+      await chrome.storage.local.remove(['chatBoxPos', 'resetChatPosition']);
+      const tabs = await chrome.tabs.query({ url: 'https://www.youtube.com/*' });
+      await Promise.all(tabs.map(tab => chrome.tabs.sendMessage(tab.id, {
+        action: 'RESET_CHAT_POSITION'
+      }, { frameId: 0 }).catch(() => {})));
+      const dict = translations[currentLang] || translations.en;
+      statusText.textContent = dict.statusReset;
+      setTimeout(() => { statusText.textContent = dict.statusReady; }, 2000);
+    } catch (error) {
+      showSaveError();
+    }
+  });
+
+  // Commit the final value before a pointer/keyboard interaction ends.
+  document.querySelectorAll('input[type="range"], input[type="color"]').forEach(input => {
+    input.addEventListener('change', () => writer.flush().catch(showSaveError));
   });
 
   const coffeeBtn = document.getElementById('coffeeBtn');
@@ -341,19 +342,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     else danmakuAreaVal.textContent = dict.danmakuArea10;
   }
 
-  // Save to chrome.storage.local and send message to all YouTube tabs & frames
-  async function saveAndNotify(partialConfig) {
-    await chrome.storage.local.set(partialConfig);
+  function showSaveError() {
+    statusText.textContent = (translations[currentLang] || translations.en).statusSaveError;
+  }
 
+  // Storage listeners deliver settings once to every open YouTube frame.
+  async function saveAndNotify(partialConfig, immediate = true) {
     try {
-      const tabs = await chrome.tabs.query({ url: 'https://www.youtube.com/*' });
-      for (const tab of tabs) {
-        chrome.tabs.sendMessage(tab.id, {
-          action: 'UPDATE_CONFIG',
-          config: partialConfig
-        }).catch(() => {});
-      }
-    } catch (err) {}
+      await writer.update(partialConfig, immediate);
+    } catch (error) {
+      showSaveError();
+    }
   }
 });
-
