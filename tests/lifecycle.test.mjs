@@ -126,3 +126,51 @@ for (const [label, startsCollapsed, endsCollapsed, nextVideo, viewerReopensAndHi
     assert.equal(chatFrame.clicks, startsCollapsed ? 0 : (viewerReopensAndHides ? 1 : 2));
   });
 }
+
+function placementHarness({ saved, player }) {
+  const { storage } = storageHarness({ chatBoxPos: saved });
+  const overlay = {
+    style: { left: '', top: '', width: '', height: '' },
+    classList: { add() {}, remove() {}, contains: () => false },
+    get offsetWidth() { return parseFloat(this.style.width) || 320; },
+    get offsetHeight() { return parseFloat(this.style.height) || 420; }
+  };
+  const ctx = vm.createContext({ chrome: { runtime: { id: 'test' }, storage }, window: {}, document: {}, URLSearchParams });
+  vm.runInContext(source('content/draggable-box.js'), ctx);
+  const box = ctx.window.ytDraggableChatBox;
+  Object.assign(box, {
+    overlay, config: {},
+    playerEl: { getBoundingClientRect: () => ({ left: 0, top: 0, width: player.width, height: player.height }) }
+  });
+  return { box, overlay, player };
+}
+
+test('a placement saved in fullscreen is pulled back inside a smaller player on restore', async () => {
+  const { box, overlay } = placementHarness({
+    saved: { left: '960px', top: '540px', width: '320px', height: '420px' },
+    player: { width: 877, height: 440 }
+  });
+  await box.restorePositionAndSize();
+  assert.equal(overlay.style.left, '557px');
+  assert.equal(overlay.style.top, '20px');
+  assert.equal(overlay.style.width, '320px');
+});
+
+test('a placement that fits the player is restored unchanged', async () => {
+  const { box, overlay } = placementHarness({
+    saved: { left: '100px', top: '50px', width: '320px', height: '420px' },
+    player: { width: 1257, height: 668 }
+  });
+  await box.restorePositionAndSize();
+  assert.equal(overlay.style.left, '100px');
+  assert.equal(overlay.style.top, '50px');
+});
+
+test('leaving fullscreen pulls the chat back inside the smaller player', () => {
+  const { box, overlay, player } = placementHarness({ saved: null, player: { width: 1280, height: 960 } });
+  Object.assign(overlay.style, { left: '960px', top: '540px', width: '320px', height: '420px' });
+  Object.assign(player, { width: 877, height: 440 });
+  box.onFullscreenChange(false, {});
+  assert.equal(overlay.style.left, '557px');
+  assert.equal(overlay.style.top, '20px');
+});

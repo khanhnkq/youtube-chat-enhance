@@ -354,12 +354,27 @@ class DraggableChatBox {
         if (chatBoxPos.height) this.overlay.style.height = chatBoxPos.height;
         this.overlay.style.right = 'auto';
         this.overlay.style.bottom = 'auto';
+        this.keepInsidePlayer();
       } else {
         this.resetPosition();
       }
     } catch (err) {
       this.resetPosition();
     }
+  }
+
+  // A placement saved in a larger player (e.g. fullscreen) can fall outside a smaller one, hiding the header.
+  keepInsidePlayer() {
+    if (!this.overlay || !this.playerEl || !this.overlay.offsetWidth) return;
+    const left = parseFloat(this.overlay.style.left);
+    const top = parseFloat(this.overlay.style.top);
+    if (Number.isNaN(left) && Number.isNaN(top)) return;
+    const player = this.playerEl.getBoundingClientRect();
+    if (!player.width || !player.height) return;
+    const maxLeft = Math.max(0, player.width - this.overlay.offsetWidth);
+    const maxTop = Math.max(0, player.height - this.overlay.offsetHeight);
+    if (!Number.isNaN(left)) this.overlay.style.left = `${Math.max(0, Math.min(left, maxLeft))}px`;
+    if (!Number.isNaN(top)) this.overlay.style.top = `${Math.max(0, Math.min(top, maxTop))}px`;
   }
 
   resetPosition() {
@@ -383,6 +398,7 @@ class DraggableChatBox {
         this.overlay.classList.add('is-hidden');
       } else {
         this.overlay.classList.remove('is-hidden');
+        this.keepInsidePlayer();
       }
     } catch (e) {}
   }
