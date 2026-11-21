@@ -127,7 +127,7 @@ for (const [label, startsCollapsed, endsCollapsed, nextVideo, viewerReopensAndHi
   });
 }
 
-function placementHarness({ saved, player }) {
+function placementHarness({ saved, player, frames = null }) {
   const { storage, state } = storageHarness({ chatBoxPos: saved });
   const overlay = {
     style: { left: '', top: '', width: '', height: '' },
@@ -144,7 +144,7 @@ function placementHarness({ saved, player }) {
     offsetHeight: 420
   };
   const document = { body: { style: {} }, addEventListener() {}, removeEventListener() {} };
-  const ctx = vm.createContext({ chrome: { runtime: { id: 'test' }, storage }, window: {}, document, URLSearchParams, requestAnimationFrame: fn => fn() });
+  const ctx = vm.createContext({ chrome: { runtime: { id: 'test' }, storage }, window: {}, document, URLSearchParams, requestAnimationFrame: fn => (frames ? frames.push(fn) : fn()) });
   vm.runInContext(source('content/draggable-box.js'), ctx);
   const box = ctx.window.ytDraggableChatBox;
   Object.assign(box, {
@@ -283,4 +283,32 @@ test('a drag pushed against the player edge saves the displayed placement', asyn
   assert.equal(overlay.style.top, '20px');
   assert.equal(state.chatBoxPos.left, '557px');
   assert.equal(state.chatBoxPos.top, '20px');
+});
+
+test('a small drag of a clamped chat is saved', async () => {
+  const { box, state } = placementHarness({
+    saved: { left: '960px', top: '540px', width: '320px', height: '420px' },
+    player: { width: 877, height: 440 }
+  });
+  await box.restorePositionAndSize();
+  box.onDragStart({ target: { closest: () => null }, clientX: 600, clientY: 30, preventDefault() {} });
+  box.onDrag({ clientX: 597, clientY: 30 });
+  box.onStopDrag();
+  assert.equal(state.chatBoxPos.left, '554px');
+});
+
+test('releasing before the drag frame runs still applies and saves the drop position', async () => {
+  const frames = [];
+  const { box, overlay, state } = placementHarness({
+    saved: { left: '960px', top: '540px', width: '320px', height: '420px' },
+    player: { width: 877, height: 440 },
+    frames
+  });
+  await box.restorePositionAndSize();
+  box.onDragStart({ target: { closest: () => null }, clientX: 600, clientY: 30, preventDefault() {} });
+  box.onDrag({ clientX: 550, clientY: 30 });
+  box.onStopDrag();
+  frames.forEach(fn => fn());
+  assert.equal(overlay.style.left, '507px');
+  assert.equal(state.chatBoxPos.left, '507px');
 });

@@ -199,6 +199,7 @@ class DraggableChatBox {
     if (e.target.closest('.yt-drag-btn')) return;
     this.isDragging = true;
     this.dragStartPointer = { x: e.clientX, y: e.clientY };
+    this.dragStartPos = { left: this.overlay.style.left, top: this.overlay.style.top };
     this.latestMouseX = e.clientX;
     this.latestMouseY = e.clientY;
     const rect = this.overlay.getBoundingClientRect();
@@ -232,29 +233,33 @@ class DraggableChatBox {
 
     if (!this.dragRafPending) {
       this.dragRafPending = true;
-      requestAnimationFrame(() => {
-        this.dragRafPending = false;
-        if (!this.isDragging || !this.overlay || !this.cachedPlayerRect) return;
-
-        const maxLeft = Math.max(0, this.cachedPlayerRect.width - this.cachedOverlayWidth);
-        const maxTop = Math.max(0, this.cachedPlayerRect.height - this.cachedOverlayHeight);
-
-        let left = this.latestMouseX - this.cachedPlayerRect.left - this.dragOffset.x;
-        let top = this.latestMouseY - this.cachedPlayerRect.top - this.dragOffset.y;
-
-        left = Math.max(0, Math.min(left, maxLeft));
-        top = Math.max(0, Math.min(top, maxTop));
-
-        this.overlay.style.left = `${left}px`;
-        this.overlay.style.top = `${top}px`;
-        this.overlay.style.right = 'auto';
-        this.overlay.style.bottom = 'auto';
-      });
+      requestAnimationFrame(this.applyDragFrame);
     }
+  };
+
+  applyDragFrame = () => {
+    this.dragRafPending = false;
+    if (!this.isDragging || !this.overlay || !this.cachedPlayerRect) return;
+
+    const maxLeft = Math.max(0, this.cachedPlayerRect.width - this.cachedOverlayWidth);
+    const maxTop = Math.max(0, this.cachedPlayerRect.height - this.cachedOverlayHeight);
+
+    let left = this.latestMouseX - this.cachedPlayerRect.left - this.dragOffset.x;
+    let top = this.latestMouseY - this.cachedPlayerRect.top - this.dragOffset.y;
+
+    left = Math.max(0, Math.min(left, maxLeft));
+    top = Math.max(0, Math.min(top, maxTop));
+
+    this.overlay.style.left = `${left}px`;
+    this.overlay.style.top = `${top}px`;
+    this.overlay.style.right = 'auto';
+    this.overlay.style.bottom = 'auto';
   };
 
   onStopDrag = () => {
     if (!this.isDragging) return;
+    // Apply a move still waiting for its animation frame before the placement is read.
+    if (this.dragRafPending) this.applyDragFrame();
     this.isDragging = false;
     this.dragRafPending = false;
     this.cachedPlayerRect = null;
@@ -269,13 +274,17 @@ class DraggableChatBox {
     document.removeEventListener('mousemove', this.onDrag);
     document.removeEventListener('mouseup', this.onStopDrag);
     // A plain click (e.g. reopening the minimized chat) must not replace the chosen placement.
-    // Compare pointer travel, not position: a drag against the player edge leaves the clamped position unchanged.
+    // A drag counts if the chat moved, or the pointer travelled while the chat stayed clamped at an edge.
     const start = this.dragStartPointer;
-    if (this.overlay && start &&
-        (Math.abs(this.latestMouseX - start.x) > 3 || Math.abs(this.latestMouseY - start.y) > 3)) {
-      this.preferredPos = { left: this.overlay.style.left, top: this.overlay.style.top };
+    const startPos = this.dragStartPos;
+    if (this.overlay && start && startPos) {
+      const { left, top } = this.overlay.style;
+      const moved = left !== startPos.left || top !== startPos.top;
+      const travelled = Math.abs(this.latestMouseX - start.x) > 3 || Math.abs(this.latestMouseY - start.y) > 3;
+      if (moved || travelled) this.preferredPos = { left, top };
     }
     this.dragStartPointer = null;
+    this.dragStartPos = null;
     this.savePositionAndSize();
   };
 
