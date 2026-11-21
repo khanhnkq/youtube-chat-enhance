@@ -1,3 +1,7 @@
+> **Archived (historical).** This plan is complete and is kept only for history; it is not maintained.
+> Current packaging and release steps are in the [README](../../README.md#-installation--packaging-guide) and [FIREFOXAMO.md](../../FIREFOXAMO.md).
+> Since it was written: `web-ext lint` reports 0 errors and 2 accepted warnings (listed in `scripts/firefox-lint-known-warnings.json`), package sizes and file counts have changed, and Danmaku is drawn with DOM elements and the Web Animations API, not Canvas.
+
 # Kế Hoạch Đóng Gói Cho Mozilla Firefox (Firefox Packaging Plan)
 **Dự án**: YouTube Custom Chat & Danmaku (WebExtensions Manifest V3)  
 **Mục tiêu**: Đóng gói và phát hành extension cho Mozilla Firefox (Firefox Add-ons - AMO) song song cùng Google Chrome.

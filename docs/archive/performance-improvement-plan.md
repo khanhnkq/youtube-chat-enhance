@@ -1,3 +1,7 @@
+> **Archived (historical).** This plan is complete and is kept only for history; it is not maintained.
+> Tasks 1.1, 2.1 and 2.2 describe the Canvas 2D Danmaku engine (render loop, `clearRect`, offscreen avatar cache, `measureText` per frame). That engine was replaced by the DOM/WAAPI renderer in `content/danmaku-engine.js`, so those tasks and their verification steps no longer match the code.
+> The current architecture is described in the [README](../../README.md).
+
 # Kế Hoạch Cải Tiến Hiệu Năng (Performance Improvement Plan)
 **Dự án**: YouTube Custom Chat & Danmaku (Chrome Extension MV3)
 
