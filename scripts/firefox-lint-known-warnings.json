@@ -1,0 +1,14 @@
+[
+  {
+    "code": "KEY_FIREFOX_UNSUPPORTED_BY_MIN_VERSION",
+    "file": "manifest.json",
+    "contains": "data_collection_permissions",
+    "reason": "strict_min_version is 109.0; Firefox reads data_collection_permissions from 140 and older versions ignore the key."
+  },
+  {
+    "code": "KEY_FIREFOX_ANDROID_UNSUPPORTED_BY_MIN_VERSION",
+    "file": "manifest.json",
+    "contains": "data_collection_permissions",
+    "reason": "strict_min_version is 109.0; Firefox for Android reads data_collection_permissions from 142 and older versions ignore the key."
+  }
+]

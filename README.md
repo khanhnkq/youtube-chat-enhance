@@ -64,10 +64,15 @@ Output files will be generated in `dist/`:
 - `dist/YouTube-Custom-Chat-Firefox-v1.2.0.zip` (for Mozilla Add-ons / AMO)
 - `dist/YouTube-Custom-Chat-Firefox-v1.2.0.xpi` (Firefox Add-on XPI)
 
-Lint Firefox build:
+### Checks
+Every pull request runs the checks in `.github/workflows/checks.yml`. Run the same set locally after `npm ci`:
 ```bash
-npm run lint:firefox
+npm run check
 ```
+- `npm test`: unit tests.
+- `npm run lint`: ESLint; fails on unused variables and empty blocks. The empty `catch` blocks that already existed are counted per file in `eslint-suppressions.json`, so only new ones fail. After removing one, run `npx eslint . --prune-suppressions`.
+- `npm run build`: builds both packages.
+- `npm run lint:firefox`: `web-ext lint` on `dist/firefox`; fails on errors and on warnings that are not listed in `scripts/firefox-lint-known-warnings.json`.
 
 ### Performance profiling
 Start Chrome with `--remote-debugging-port=9222`.

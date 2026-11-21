@@ -1,0 +1,22 @@
+{
+  "content/chat-iframe.js": {
+    "no-empty": {
+      "count": 5
+    }
+  },
+  "content/chat-injector.js": {
+    "no-empty": {
+      "count": 4
+    }
+  },
+  "content/danmaku-engine.js": {
+    "no-empty": {
+      "count": 4
+    }
+  },
+  "content/draggable-box.js": {
+    "no-empty": {
+      "count": 7
+    }
+  }
+}

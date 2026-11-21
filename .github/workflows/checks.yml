@@ -1,0 +1,62 @@
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Lint source (unused variables, new empty catch blocks)
+        if: ${{ !cancelled() }}
+        run: npm run lint
+
+      - name: Build Chrome and Firefox packages
+        id: build
+        if: ${{ !cancelled() }}
+        run: npm run build
+
+      - name: Verify both packages
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          for package in dist/YouTube-Custom-Chat-Chrome-v*.zip dist/YouTube-Custom-Chat-Firefox-v*.zip; do
+            unzip -tq "$package"
+            unzip -Z1 "$package" | grep -qx 'manifest.json'
+          done
+
+      - name: Lint the built Firefox package
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: npm run lint:firefox
+
+      - name: Upload packages
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: extension-packages
+          path: |
+            dist/*.zip
+            dist/*.xpi
+          if-no-files-found: error
+          retention-days: 14
