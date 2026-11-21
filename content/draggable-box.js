@@ -172,7 +172,7 @@ class DraggableChatBox {
       }
 
       // Allow clicking minimized title bar to reopen
-      this.header.addEventListener('click', (e) => {
+      this.header.addEventListener('click', () => {
         if (this.overlay.classList.contains('is-minimized')) {
           this.toggleMinimize();
         }
