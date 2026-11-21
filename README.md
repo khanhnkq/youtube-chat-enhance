@@ -33,10 +33,11 @@
 - **Draggable & Resizable**: Drag the title bar to position the chat box anywhere over your video. Resize from the bottom-right handle.
 - **Minimized Floating Badge (`Live Chat`)**: Collapse the chat into a small, elegant badge at the corner of your video with one click.
 - **Auto-Hide Native Chat in Fullscreen**: Automatically hides YouTube's native side chat in Fullscreen mode to expand the video player to 100% full screen width, restoring the original layout when exiting.
-- **Live Color & Styling Pickers**: Adjust username colors, chat message colors, background blur, and background opacity in real-time with **0ms instant live apply**.
+- **Live Color & Styling Pickers**: Adjust username colors, chat message colors, and background opacity. Continuous input is coalesced at 120ms intervals; ending an interaction commits the final value immediately.
+- **Saved Preferences**: New profiles start with Floating Chat on and Danmaku off. Profiles with existing settings keep their saved values and legacy Danmaku default, including when only some settings were saved. An empty storage profile is treated as new.
 
 ### ⚡ 4. Zero-Lag Performance Architecture
-- **0ms Realtime State Sync**: Uses `chrome.storage.onChanged` to broadcast instant style changes across all frames without requiring F5 page reloads.
+- **Single-Channel State Sync**: Uses `chrome.storage.onChanged` to apply changed settings across frames without duplicate runtime broadcasts or page reloads. Resetting placement is a separate, repeatable command rather than a persistent setting.
 - **Batch IPC Messaging**: Batches high-volume incoming chat messages into 80ms buffers to reduce cross-frame IPC postMessage overhead by over 90%.
 
 ---
@@ -83,8 +84,10 @@ youtube-chat-enhance/
 ├── popup/
 ├── popup/popup.html      # Ultra-Clean Dark Glassmorphic Control Panel
 ├── popup/popup.css       # Neon Accents & Glassmorphism Styling
-└── popup/popup.js        # Realtime Storage & Message Dispatcher
+├── popup/popup.js        # Settings UI & Transient Commands
+└── popup/config-writer.js # Coalesced, Serialized Storage Writes
 ├── content/
+├── content/config.js         # Shared Defaults, Profile Migration & Storage Subscription
 ├── content/chat-injector.js  # Main Content Script for YouTube Watch/Live Pages
 ├── content/chat-iframe.js    # Live Chat Iframe Parser & IPC Batcher
 ├── content/draggable-box.js  # Drag, Resize & Compositor Layer Manager

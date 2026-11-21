@@ -1,19 +1,7 @@
 (function () {
   'use strict';
 
-  let currentConfig = {
-    enableFloatingChat: true,
-    enableDanmaku: true,
-    autoHideNativeChat: true,
-    hideHeaderAndBorder: true,
-    bgOpacity: 20,
-    bgBlur: 10,
-    chatFontSize: 14,
-    danmakuSpeed: 10,
-    danmakuFontSize: 22,
-    danmakuOpacity: 90,
-    danmakuArea: '0.5'
-  };
+  let currentConfig = { ...YTChatConfig.defaults };
 
   let initialized = false;
   let watchFlexyObserver = null;
@@ -167,8 +155,7 @@
   async function initExtension() {
     try {
       if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
-        const stored = await chrome.storage.local.get(currentConfig);
-        currentConfig = { ...currentConfig, ...stored };
+        currentConfig = await YTChatConfig.load();
       }
     } catch (e) {}
 
@@ -260,54 +247,31 @@
     }
   });
 
-  // Listen for extension config updates via chrome.storage.onChanged
-  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
-    chrome.storage.onChanged.addListener((changes, areaName) => {
-      if (areaName === 'local') {
-        const wasFloatingChatEnabled = currentConfig.enableFloatingChat !== false;
-        const updatedConfig = {};
-        for (const key in changes) {
-          updatedConfig[key] = changes[key].newValue;
-        }
-        currentConfig = { ...currentConfig, ...updatedConfig };
+  // Storage is the only configuration update channel.
+  YTChatConfig.subscribe((updatedConfig) => {
+    const wasFloatingChatEnabled = currentConfig.enableFloatingChat !== false;
+    currentConfig = { ...currentConfig, ...updatedConfig };
 
-        if (window.ytDanmakuEngine) {
-          window.ytDanmakuEngine.updateConfig(updatedConfig);
-        }
+    if (window.ytDanmakuEngine && Object.keys(updatedConfig).some(key => key.startsWith('danmaku') || key === 'enableDanmaku')) {
+      window.ytDanmakuEngine.updateConfig(updatedConfig);
+    }
 
-        if (window.ytDraggableChatBox) {
-          window.ytDraggableChatBox.updateConfig(updatedConfig);
-        }
+    if (window.ytDraggableChatBox && ['enableFloatingChat', 'hideHeaderAndBorder', 'bgOpacity'].some(key => key in updatedConfig)) {
+      window.ytDraggableChatBox.updateConfig(updatedConfig);
+    }
 
-        handleFloatingChatConfigChange(wasFloatingChatEnabled);
-        handleFullscreenState();
-      }
-    });
-  }
+    if ('enableFloatingChat' in updatedConfig) handleFloatingChatConfigChange(wasFloatingChatEnabled);
+    if ('autoHideNativeChat' in updatedConfig) handleFullscreenState();
+  });
 
-  // Listen for extension config updates from popup.js
+  // Commands are transient and repeatable, never stored as config flags.
   if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
     try {
       chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        if (message && message.action === 'UPDATE_CONFIG') {
-          const wasFloatingChatEnabled = currentConfig.enableFloatingChat !== false;
-          const newConfig = message.config || {};
-          currentConfig = { ...currentConfig, ...newConfig };
-
-          if (window.ytDanmakuEngine) {
-            window.ytDanmakuEngine.updateConfig(newConfig);
-          }
-
-          if (window.ytDraggableChatBox) {
-            window.ytDraggableChatBox.updateConfig(newConfig);
-          }
-
-          handleFloatingChatConfigChange(wasFloatingChatEnabled);
-          handleFullscreenState();
-
+        if (message && message.action === 'RESET_CHAT_POSITION') {
+          if (window.ytDraggableChatBox) window.ytDraggableChatBox.resetPosition();
           sendResponse({ status: 'OK' });
         }
-        return true;
       });
     } catch (e) {}
   }

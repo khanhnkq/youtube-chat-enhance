@@ -1,14 +1,7 @@
 (function () {
   'use strict';
 
-  let currentConfig = {
-    hideItemBg: true,
-    hideInputBox: true,
-    chatFontSize: 14,
-    authorTextColor: '#ff88aa',
-    chatTextColor: '#ffffff',
-    enableDanmaku: true
-  };
+  let currentConfig = { ...YTChatConfig.defaults };
 
   const isCustomOverlayFrame =
     window.location.hash.includes('yt_custom_overlay=1') ||
@@ -123,30 +116,17 @@
     `;
   }
 
-  // Load initial config from storage
-  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(currentConfig).then((stored) => {
-      currentConfig = { ...currentConfig, ...stored };
-      if (isCustomOverlayFrame) {
-        styleEl.textContent = buildDynamicStyles(currentConfig);
-      }
-    }).catch(() => {});
+  const configReady = YTChatConfig.load().then((stored) => {
+    currentConfig = stored;
+    if (isCustomOverlayFrame) styleEl.textContent = buildDynamicStyles(currentConfig);
+  }).catch(() => {});
 
-    if (chrome.storage.onChanged) {
-      chrome.storage.onChanged.addListener((changes, areaName) => {
-        if (areaName === 'local') {
-          const updated = {};
-          for (const key in changes) {
-            updated[key] = changes[key].newValue;
-          }
-          currentConfig = { ...currentConfig, ...updated };
-          if (isCustomOverlayFrame) {
-            styleEl.textContent = buildDynamicStyles(currentConfig);
-          }
-        }
-      });
+  YTChatConfig.subscribe((updated) => {
+    currentConfig = { ...currentConfig, ...updated };
+    if (isCustomOverlayFrame && ['hideItemBg', 'chatFontSize', 'authorTextColor', 'chatTextColor'].some(key => key in updated)) {
+      styleEl.textContent = buildDynamicStyles(currentConfig);
     }
-  }
+  });
 
   if (isCustomOverlayFrame) {
     styleEl.textContent = buildDynamicStyles(currentConfig);
@@ -157,33 +137,6 @@
       document.addEventListener('DOMContentLoaded', () => document.head.appendChild(styleEl));
     }
   }
-
-  // Real-time Extension Config Listener via chrome.runtime
-  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
-    try {
-      chrome.runtime.onMessage.addListener((message) => {
-        if (message && message.action === 'UPDATE_CONFIG') {
-          currentConfig = { ...currentConfig, ...(message.config || {}) };
-          if (isCustomOverlayFrame) {
-            styleEl.textContent = buildDynamicStyles(currentConfig);
-          }
-        }
-      });
-    } catch (e) {}
-  }
-
-  // Real-time Extension Config Listener via postMessage
-  window.addEventListener('message', (event) => {
-    try {
-      if (event.source !== window.parent || event.origin !== 'https://www.youtube.com') return;
-      if (event.data && event.data.type === 'YT_CHAT_STYLE_UPDATE') {
-        currentConfig = { ...currentConfig, ...(event.data.config || {}) };
-        if (isCustomOverlayFrame) {
-          styleEl.textContent = buildDynamicStyles(currentConfig);
-        }
-      }
-    } catch (e) {}
-  });
 
   let observer = null;
   let messageBuffer = [];
@@ -339,9 +292,11 @@
     } catch (e) {}
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startChatObserver);
-  } else {
-    startChatObserver();
-  }
+  configReady.then(() => {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startChatObserver);
+    } else {
+      startChatObserver();
+    }
+  });
 })();

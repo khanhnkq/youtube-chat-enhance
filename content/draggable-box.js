@@ -387,10 +387,6 @@ class DraggableChatBox {
     try {
       this.config = { ...this.config, ...newConfig };
 
-      if (newConfig.resetChatPosition) {
-        this.resetPosition();
-      }
-
       this.applyStyles(this.config);
       this.updateChatIframe();
       this.onFullscreenChange(this.isFS || false, this.config);
