@@ -138,6 +138,10 @@
     }
   }
 
+  // YouTube fills #message shortly after inserting the node; re-read a few times, then give up.
+  const RENDER_RETRY_DELAY = 80;
+  const MAX_RENDER_RETRIES = 10;
+
   let observer = null;
   let messageBuffer = [];
   let flushTimer = null;
@@ -207,6 +211,27 @@
     } catch (e) {}
   }
 
+  // Unicode emoji carry the character in alt; channel emoji carry a bare name and a data-emoji-id.
+  function readEmojiText(img) {
+    const alt = img.getAttribute('alt') || '';
+    return alt && img.getAttribute('data-emoji-id') ? `:${alt}:` : alt;
+  }
+
+  // textContent skips emoji, which YouTube renders as <img alt="...">.
+  function readMessageText(node) {
+    let text = '';
+    const children = node.childNodes;
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      if (child.nodeType === 3) {
+        text += child.textContent;
+      } else if (child.nodeType === 1) {
+        text += child.tagName.toLowerCase() === 'img' ? readEmojiText(child) : readMessageText(child);
+      }
+    }
+    return text;
+  }
+
   function parseAndSendChatMessage(element) {
     try {
       if (!element || element.__ytProcessed) return;
@@ -228,7 +253,7 @@
 
       const messageEl = element.querySelector('#message');
       if (messageEl) {
-        text = messageEl.textContent.trim();
+        text = readMessageText(messageEl).trim();
       }
 
       if (tagName === 'yt-live-chat-paid-message-renderer') {
@@ -240,15 +265,16 @@
         if (headerEl) text = headerEl.textContent.trim() || 'New Member!';
       }
 
-      // If Polymer hasn't rendered the text yet, retry in 80ms and do NOT mark processed
+      // If Polymer hasn't rendered the text yet, retry shortly and do NOT mark processed
       if (!text && !isSuperChat) {
-        if (!element.__ytPending) {
-          element.__ytPending = true;
-          setTimeout(() => {
-            element.__ytPending = false;
-            parseAndSendChatMessage(element);
-          }, 80);
-        }
+        const retries = element.__ytRetries || 0;
+        if (element.__ytPending || !element.isConnected || retries >= MAX_RENDER_RETRIES) return;
+        element.__ytPending = true;
+        element.__ytRetries = retries + 1;
+        setTimeout(() => {
+          element.__ytPending = false;
+          if (element.isConnected) parseAndSendChatMessage(element);
+        }, RENDER_RETRY_DELAY);
         return;
       }
 
