@@ -54,7 +54,7 @@ function copyDir(src, dest, filterFn) {
 // 4. File filtering rules
 // Exclude dev scripts, heavy uncompressed images, documentation, and OS files
 function iconFilter(filePath, dirent) {
-  const allowedIcons = ['icon-16.png', 'icon-48.png', 'icon-128.png'];
+  const allowedIcons = ['icon-16.png', 'icon-48.png', 'icon-128.png', 'icon.svg'];
   return allowedIcons.includes(dirent.name);
 }
 
@@ -78,7 +78,7 @@ function populateTarget(targetDir, manifestObj) {
   // Copy popup UI
   copyDir(path.join(ROOT_DIR, 'popup'), path.join(targetDir, 'popup'), generalFilter);
 
-  // Copy icons (only official required sizes)
+  // Copy icons (required sizes + popup logo)
   copyDir(path.join(ROOT_DIR, 'icons'), path.join(targetDir, 'icons'), iconFilter);
 
   // Copy LICENSE if available
