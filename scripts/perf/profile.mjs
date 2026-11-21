@@ -15,12 +15,12 @@ await send('Profiler.enable');
 await send('Profiler.setSamplingInterval', { interval: 200 });
 const m0 = (await send('Performance.getMetrics')).metrics;
 // frame timing + long tasks in page main world
-await send('Runtime.evaluate', { expression: `window.__pf={f:[],lt:0,ltms:0};(function l(t){window.__pf.f.push(t);if(window.__pf.f.length<100000)requestAnimationFrame(l)})(performance.now());try{new PerformanceObserver(l=>{for(const e of l.getEntries()){__pf.lt++;__pf.ltms+=e.duration}}).observe({type:'longtask'})}catch(e){}` });
+await send('Runtime.evaluate', { expression: `(()=>{const tok=window.__pfTok=(window.__pfTok||0)+1;if(window.__pfObs)window.__pfObs.disconnect();const pf=window.__pf={f:[],lt:0,ltms:0};(function l(t){if(window.__pfTok!==tok)return;pf.f.push(t);if(pf.f.length<100000)requestAnimationFrame(l)})(performance.now());try{window.__pfObs=new PerformanceObserver(l=>{for(const e of l.getEntries()){pf.lt++;pf.ltms+=e.duration}});window.__pfObs.observe({type:'longtask'})}catch(e){}})()` });
 await send('Profiler.start');
 await new Promise(r => setTimeout(r, secs * 1000));
 const prof = (await send('Profiler.stop')).profile;
 const m1 = (await send('Performance.getMetrics')).metrics;
-const pf = (await send('Runtime.evaluate', { expression: `(()=>{const f=__pf.f;const d=[];for(let i=1;i<f.length;i++)d.push(f[i]-f[i-1]);d.sort((a,b)=>a-b);return JSON.stringify({frames:d.length,fps:d.length/((f[f.length-1]-f[0])/1000),p50:d[d.length>>1],p95:d[Math.floor(d.length*0.95)],over33:d.filter(x=>x>33).length,longTasks:__pf.lt,longTaskMs:Math.round(__pf.ltms),iframes:document.querySelectorAll('iframe').length,canvas:(()=>{const c=document.querySelector('.yt-danmaku-canvas');return c?c.width+'x'+c.height:null})()})})()`, returnByValue: true })).result.value;
+const pf = (await send('Runtime.evaluate', { expression: `(()=>{window.__pfTok++;const f=__pf.f;const d=[];for(let i=1;i<f.length;i++)d.push(f[i]-f[i-1]);d.sort((a,b)=>a-b);return JSON.stringify({frames:d.length,fps:d.length/((f[f.length-1]-f[0])/1000),p50:d[d.length>>1],p95:d[Math.floor(d.length*0.95)],over33:d.filter(x=>x>33).length,longTasks:__pf.lt,longTaskMs:Math.round(__pf.ltms),iframes:document.querySelectorAll('iframe').length,canvas:(()=>{const c=document.querySelector('.yt-danmaku-canvas');return c?c.width+'x'+c.height:null})()})})()`, returnByValue: true })).result.value;
 const get = (m, n) => (m.find(x => x.name === n) || {}).value;
 const delta = n => +(get(m1, n) - get(m0, n)).toFixed(3);
 // self time by url
