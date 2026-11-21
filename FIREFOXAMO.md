@@ -41,7 +41,7 @@ Elevate your YouTube livestream and video watching experience with **YouTube Cus
 
 3. **Danmaku Mode (Scrolling Flying Comments):**
    - Stream live chat comments smoothly across your video right-to-left in real-time (Bilibili / Niconico / Douyu style).
-   - High-performance Canvas 2D engine with zero idle overhead.
+   - High-performance DOM/WAAPI renderer using compositor-only transforms.
    - Displays sender avatars, SuperChat badges, and customizable text colors/shadows.
    - Configurable scroll speed (4s - 20s), font size (14px - 38px), text opacity, and display area (Top 1/3, Top Half, Top 3/4, or Fullscreen).
 
@@ -68,7 +68,7 @@ Nâng tầm trải nghiệm xem livestream và video YouTube với tiện ích *
 
 3. **Chế Độ Danmaku (Bình Luận Bay Ngang Màn Hình):**
    - Bình luận live chat bay mượt mà từ phải sang trái theo phong cách Bilibili / Niconico.
-   - Engine Canvas 2D hiệu năng cao, tự động ngủ tiết kiệm pin khi không có comment hoặc tạm dừng video.
+   - Renderer DOM/WAAPI hiệu năng cao, chuyển động bằng transform trên compositor.
    - Hiển thị avatar người gửi, huy hiệu SuperChat nổi bật.
    - Tùy chỉnh tốc độ bay, kích thước font chữ, màu sắc, viền chữ, bóng đổ và vùng hiển thị (1/3 trên, 1/2 trên, 3/4 trên hoặc toàn màn hình).
 
@@ -82,7 +82,7 @@ Nâng tầm trải nghiệm xem livestream và video YouTube với tiện ích *
 | Permission / Host Permission | Justification for Reviewer |
 | :--- | :--- |
 | `storage` | Storing user UI preferences locally (floating chat coordinates, opacity, font size, Danmaku speed, language). No data leaves the browser. |
-| `https://www.youtube.com/*` | Injecting content scripts into YouTube watch/live pages and the YouTube live chat iframe to render the floating chat overlay and Danmaku canvas. |
+| `https://www.youtube.com/*` | Injecting content scripts into YouTube watch/live pages and the YouTube live chat iframe to render the floating chat overlay and DOM/WAAPI Danmaku. |
 
 ---
 
@@ -105,7 +105,7 @@ Nâng tầm trải nghiệm xem livestream và video YouTube với tiện ích *
 ```text
 Dear Reviewer,
 
-- This extension enhances the YouTube live chat experience by providing a transparent floating overlay and Danmaku canvas comments on YouTube video pages.
+- This extension enhances the YouTube live chat experience by providing a transparent floating overlay and DOM/WAAPI Danmaku comments on YouTube video pages.
 - The extension is written in pure vanilla JavaScript and CSS without minification, transpilation, or obfuscation.
 - All source files inside the extension package are human-readable.
 - No remote scripts or third-party tracking libraries are loaded.

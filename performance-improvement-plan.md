@@ -6,7 +6,7 @@
 ## 🎯 Mục Tiêu Chính
 Tối ưu hóa mức tiêu thụ CPU, GPU và RAM của extension khi xem livestream YouTube (đặc biệt là các stream có lượng chat cực lớn):
 1. **Giảm 50-70% CPU/GPU idle**: Ngừng vòng lặp canvas render khi không có comment hoặc khi video tạm dừng/ẩn tab.
-2. **Loại bỏ hiện tượng giật khung hình (frame drops / layout thrashing)**: Tối ưu Canvas Danmaku và chuyển đổi cơ chế kéo thả/resize sang GPU transform.
+2. **Loại bỏ hiện tượng giật khung hình (frame drops / layout thrashing)**: Tối ưu DOM/WAAPI Danmaku và chuyển đổi cơ chế kéo thả/resize sang GPU transform.
 3. **Giảm 50% RAM & Network của Chat**: Tránh chạy song song 2 iframe YouTube Live Chat gây trùng lặp network và parser.
 4. **Dọn sạch rò rỉ bộ nhớ (Memory Leaks)** khi chuyển video trên YouTube (SPA Navigation).
 
@@ -67,7 +67,7 @@ Tối ưu hóa mức tiêu thụ CPU, GPU và RAM của extension khi xem livest
 
 | Phase | Trọng tâm | Ước tính tác động |
 |-------|-----------|-------------------|
-| **Phase 1** | **Danmaku Idle Loop & Canvas Batching** (Task 1.1 + 2.1 + 2.2) | Giảm 60% GPU/CPU tiêu thụ khi xem video bình thường |
+| **Phase 1** | **Danmaku DOM Renderer & Batching** (Task 1.1 + 2.1 + 2.2) | Giảm 60% GPU/CPU tiêu thụ khi xem video bình thường |
 | **Phase 2** | **Chat Iframe & MutationObserver Streamlining** (Task 3.1 + 3.2) | Giảm 40% CPU spike trên các stream có chat đông |
 | **Phase 3** | **GPU Transform Dragging & SPA Cleanup** (Task 4.1 + 5.1) | Trải nghiệm kéo thả siêu mượt, xóa sổ memory leaks |
 | **Phase 4** | **Benchmark & Verification** | Đo đạc DevTools Performance & Memory trước/sau tối ưu |

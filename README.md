@@ -2,7 +2,7 @@
 
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-brightgreen.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Performance](https://img.shields.io/badge/Performance-60FPS%20Canvas-ff0055.svg)](#-supercharged-performance-60fps)
+[![Performance](https://img.shields.io/badge/Performance-60FPS%20DOM%2FWAAPI-ff0055.svg)](#-supercharged-performance-60fps)
 
 > **YouTube Chat Enhance** is a high-performance **Chrome Extension (Manifest V3)** designed to revolutionize your YouTube live stream and video watching experience. Features include **60FPS Hardware-Accelerated Danmaku Bullet Comments**, **Transparent Floating Chat Overlays**, **Real-time Live Color & Opacity Styling**, and **Auto-Hide Native Chat in Fullscreen Mode**.
 
@@ -20,7 +20,7 @@
 
 ### 1. 🎆 60FPS Hardware-Accelerated Danmaku (Bullet Screen Comments)
 - **On-Screen Flying Comments**: Streams live chat messages horizontally across your video from right to left in real-time (Bilibili / Niconico style).
-- **GPU-Accelerated HTML5 Canvas 2D Engine**: Zero DOM thrashing or layout reflows! Runs at smooth **60FPS** even during high-volume VTuber debuts and eSports tournaments (CS2, LoL, PUBG, Valorant).
+- **DOM/WAAPI Danmaku Renderer**: Comments travel with compositor-only transforms, avoiding per-frame canvas redraws while maintaining smooth motion.
 - **Smart Track Allocation**: Intelligent line-collision algorithms ensure comments never overlap awkwardly.
 - **Customizable Appearance**: Customize text speed (4s - 20s), font size (14px - 38px), opacity, text color, outline stroke, and display area (Top 1/3, Top 50%, Top 75%, or Fullscreen).
 
@@ -68,6 +68,11 @@ Lint Firefox build:
 npm run lint:firefox
 ```
 
+### Performance profiling
+Start Chrome with `--remote-debugging-port=9222`.
+Open a live stream and run `npm run perf -- 15 ext_on`.
+Compare the results with the extension disabled.
+
 ---
 
 ## 📂 Project Structure
@@ -83,7 +88,7 @@ youtube-chat-enhance/
 ├── content/chat-injector.js  # Main Content Script for YouTube Watch/Live Pages
 ├── content/chat-iframe.js    # Live Chat Iframe Parser & IPC Batcher
 ├── content/draggable-box.js  # Drag, Resize & Compositor Layer Manager
-├── content/danmaku-engine.js # 60FPS Hardware-Accelerated HTML5 Canvas 2D Engine
+├── content/danmaku-engine.js # DOM/WAAPI Danmaku Renderer
 └── content/overlay.css       # Clean Layout, Frameless Overlay & Fullscreen Expansion Rules
 ├── icons/                # High-Res Icons (icon.svg, 16px, 48px, 128px PNGs)
 └── README.md             # Project Documentation
