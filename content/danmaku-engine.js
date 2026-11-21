@@ -144,6 +144,15 @@ class DanmakuEngine {
     }
   }
 
+  parseHexColor(color) {
+    const match = /^#([a-f\d]{3}|[a-f\d]{6})$/i.exec(color);
+    if (!match) return null;
+    const hex = match[1].length === 3
+      ? [...match[1]].map(character => character + character).join('')
+      : match[1];
+    return [0, 2, 4].map(index => parseInt(hex.slice(index, index + 2), 16));
+  }
+
   updateLayerStyle() {
     if (!this.layer) return;
     this.layer.style.position = 'absolute';
@@ -152,8 +161,16 @@ class DanmakuEngine {
     this.layer.style.width = '100%';
     this.layer.style.height = `${this.displayAreaRatio * 100}%`;
     this.layer.style.setProperty('--dm-font-size', `${this.fontSize}px`);
-    this.layer.style.setProperty('--dm-color', this.textColor || '#ffffff');
-    this.layer.style.setProperty('--dm-opacity', this.opacity);
+    const color = this.textColor || '#ffffff';
+    const rgb = this.parseHexColor(color);
+    if (rgb) {
+      this.layer.style.setProperty('--dm-color', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${this.opacity})`);
+      this.layer.style.removeProperty('opacity');
+    } else {
+      this.layer.style.setProperty('--dm-color', color);
+      this.layer.style.opacity = this.opacity;
+    }
+    this.layer.style.setProperty('--dm-shadow-color', `rgba(0, 0, 0, ${0.85 * this.opacity})`);
     this.layer.classList.toggle('dm-shadow', this.hasShadow);
     this.layer.classList.toggle('dm-stroke', this.hasStroke);
     this.layer.style.display = this.isEnabled ? '' : 'none';
