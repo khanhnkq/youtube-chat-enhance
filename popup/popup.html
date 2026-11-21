@@ -22,11 +22,11 @@
         </div>
       </div>
       <div class="header-badges">
-        <div class="lang-switch" id="langSwitch" title="Switch Language / Đổi Ngôn Ngữ">
+        <button type="button" class="lang-switch" id="langSwitch" aria-label="Switch language to Vietnamese" title="Switch Language / Đổi Ngôn Ngữ">
           <span class="lang-opt" data-lang="vi">VN</span>
           <span class="lang-divider">/</span>
           <span class="lang-opt active" data-lang="en">EN</span>
-        </div>
+        </button>
         <span class="badge-tag">PRO</span>
         <span class="badge-ver">v1.2.0</span>
       </div>
@@ -47,33 +47,33 @@
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title" data-i18n="floatingChatTitle">Transparent Floating Chat</span>
-            <span class="setting-desc" data-i18n="floatingChatDesc">Display floating chat overlay over video</span>
+            <span class="setting-title" id="enableFloatingChatLabel" data-i18n="floatingChatTitle">Transparent Floating Chat</span>
+            <span class="setting-desc" id="enableFloatingChatDesc" data-i18n="floatingChatDesc">Display floating chat overlay over video</span>
           </div>
           <label class="switch">
-            <input type="checkbox" id="enableFloatingChat">
+            <input type="checkbox" id="enableFloatingChat" aria-labelledby="enableFloatingChatLabel" aria-describedby="enableFloatingChatDesc">
             <span class="slider round"></span>
           </label>
         </div>
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title" data-i18n="danmakuTitle">Danmaku (Scrolling Comments)</span>
-            <span class="setting-desc" data-i18n="danmakuDesc">On-screen flying comments like Bilibili</span>
+            <span class="setting-title" id="enableDanmakuLabel" data-i18n="danmakuTitle">Danmaku (Scrolling Comments)</span>
+            <span class="setting-desc" id="enableDanmakuDesc" data-i18n="danmakuDesc">On-screen flying comments like Bilibili</span>
           </div>
           <label class="switch">
-            <input type="checkbox" id="enableDanmaku">
+            <input type="checkbox" id="enableDanmaku" aria-labelledby="enableDanmakuLabel" aria-describedby="enableDanmakuDesc">
             <span class="slider round"></span>
           </label>
         </div>
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title" data-i18n="autoHideChatTitle">Auto-Hide Native Chat in Fullscreen</span>
-            <span class="setting-desc" data-i18n="autoHideChatDesc">Hide native side chat in Fullscreen & restore on exit</span>
+            <span class="setting-title" id="autoHideNativeChatLabel" data-i18n="autoHideChatTitle">Auto-Hide Native Chat in Fullscreen</span>
+            <span class="setting-desc" id="autoHideNativeChatDesc" data-i18n="autoHideChatDesc">Hide native side chat in Fullscreen & restore on exit</span>
           </div>
           <label class="switch">
-            <input type="checkbox" id="autoHideNativeChat">
+            <input type="checkbox" id="autoHideNativeChat" aria-labelledby="autoHideNativeChatLabel" aria-describedby="autoHideNativeChatDesc">
             <span class="slider round"></span>
           </label>
         </div>
@@ -91,33 +91,33 @@
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title" data-i18n="hideHeaderTitle">Hide Header & Border</span>
-            <span class="setting-desc" data-i18n="hideHeaderDesc">Show drag handle bar only on hover</span>
+            <span class="setting-title" id="hideHeaderAndBorderLabel" data-i18n="hideHeaderTitle">Hide Header & Border</span>
+            <span class="setting-desc" id="hideHeaderAndBorderDesc" data-i18n="hideHeaderDesc">Show drag handle bar only on hover</span>
           </div>
           <label class="switch">
-            <input type="checkbox" id="hideHeaderAndBorder">
+            <input type="checkbox" id="hideHeaderAndBorder" aria-labelledby="hideHeaderAndBorderLabel" aria-describedby="hideHeaderAndBorderDesc">
             <span class="slider round"></span>
           </label>
         </div>
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title" data-i18n="hideRowBgTitle">Hide Chat Row Backgrounds</span>
-            <span class="setting-desc" data-i18n="hideRowBgDesc">Show floating text & avatar over video</span>
+            <span class="setting-title" id="hideItemBgLabel" data-i18n="hideRowBgTitle">Hide Chat Row Backgrounds</span>
+            <span class="setting-desc" id="hideItemBgDesc" data-i18n="hideRowBgDesc">Show floating text & avatar over video</span>
           </div>
           <label class="switch">
-            <input type="checkbox" id="hideItemBg">
+            <input type="checkbox" id="hideItemBg" aria-labelledby="hideItemBgLabel" aria-describedby="hideItemBgDesc">
             <span class="slider round"></span>
           </label>
         </div>
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title" data-i18n="hideInputTitle">Hide Input Box & Footer</span>
-            <span class="setting-desc" data-i18n="hideInputDesc">Hide the floating chat input and footer, even on hover</span>
+            <span class="setting-title" id="hideInputBoxLabel" data-i18n="hideInputTitle">Hide Input Box & Footer</span>
+            <span class="setting-desc" id="hideInputBoxDesc" data-i18n="hideInputDesc">Hide the floating chat input and footer, even on hover</span>
           </div>
           <label class="switch">
-            <input type="checkbox" id="hideInputBox">
+            <input type="checkbox" id="hideInputBox" aria-labelledby="hideInputBoxLabel" aria-describedby="hideInputBoxDesc">
             <span class="slider round"></span>
           </label>
         </div>
@@ -138,21 +138,21 @@
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title" data-i18n="authorTextColor">Username color</span>
+            <span class="setting-title" id="authorTextColorLabel" data-i18n="authorTextColor">Username color</span>
           </div>
-          <input type="color" id="authorTextColor" value="#ff88aa" class="color-picker">
+          <input type="color" id="authorTextColor" aria-labelledby="authorTextColorLabel" value="#ff88aa" class="color-picker">
         </div>
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title" data-i18n="chatTextColor">Message text color</span>
+            <span class="setting-title" id="chatTextColorLabel" data-i18n="chatTextColor">Message text color</span>
           </div>
-          <input type="color" id="chatTextColor" value="#ffffff" class="color-picker">
+          <input type="color" id="chatTextColor" aria-labelledby="chatTextColorLabel" value="#ffffff" class="color-picker">
         </div>
 
         <div class="slider-group">
           <div class="slider-header">
-            <span data-i18n="bgOpacityLabel">Chat window background opacity</span>
+            <label for="bgOpacity" data-i18n="bgOpacityLabel">Chat window background opacity</label>
             <span class="slider-value" id="bgOpacityVal">20%</span>
           </div>
           <input type="range" id="bgOpacity" min="0" max="100" value="20" step="5">
@@ -164,7 +164,7 @@
 
         <div class="slider-group">
           <div class="slider-header">
-            <span data-i18n="chatFontSizeLabel">Chat text font size</span>
+            <label for="chatFontSize" data-i18n="chatFontSizeLabel">Chat text font size</label>
             <span class="slider-value" id="chatFontSizeVal">14px</span>
           </div>
           <input type="range" id="chatFontSize" min="11" max="24" value="14" step="1">
@@ -192,36 +192,36 @@
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title" data-i18n="danmakuTextColor">Danmaku text color</span>
+            <span class="setting-title" id="danmakuTextColorLabel" data-i18n="danmakuTextColor">Danmaku text color</span>
           </div>
-          <input type="color" id="danmakuTextColor" value="#ffffff" class="color-picker">
+          <input type="color" id="danmakuTextColor" aria-labelledby="danmakuTextColorLabel" value="#ffffff" class="color-picker">
         </div>
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title" data-i18n="danmakuStrokeTitle">Danmaku text stroke outline</span>
-            <span class="setting-desc" data-i18n="danmakuStrokeDesc">Draw dark stroke around text</span>
+            <span class="setting-title" id="danmakuTextStrokeLabel" data-i18n="danmakuStrokeTitle">Danmaku text stroke outline</span>
+            <span class="setting-desc" id="danmakuTextStrokeDesc" data-i18n="danmakuStrokeDesc">Draw dark stroke around text</span>
           </div>
           <label class="switch">
-            <input type="checkbox" id="danmakuTextStroke">
+            <input type="checkbox" id="danmakuTextStroke" aria-labelledby="danmakuTextStrokeLabel" aria-describedby="danmakuTextStrokeDesc">
             <span class="slider round"></span>
           </label>
         </div>
 
         <div class="setting-row">
           <div class="setting-info">
-            <span class="setting-title" data-i18n="danmakuShadowTitle">Danmaku text shadow</span>
-            <span class="setting-desc" data-i18n="danmakuShadowDesc">Add drop shadow effect to text</span>
+            <span class="setting-title" id="danmakuTextShadowLabel" data-i18n="danmakuShadowTitle">Danmaku text shadow</span>
+            <span class="setting-desc" id="danmakuTextShadowDesc" data-i18n="danmakuShadowDesc">Add drop shadow effect to text</span>
           </div>
           <label class="switch">
-            <input type="checkbox" id="danmakuTextShadow">
+            <input type="checkbox" id="danmakuTextShadow" aria-labelledby="danmakuTextShadowLabel" aria-describedby="danmakuTextShadowDesc">
             <span class="slider round"></span>
           </label>
         </div>
 
         <div class="slider-group">
           <div class="slider-header">
-            <span data-i18n="danmakuSpeedLabel">Comment scroll speed</span>
+            <label for="danmakuSpeed" data-i18n="danmakuSpeedLabel">Comment scroll speed</label>
             <span class="slider-value" id="danmakuSpeedVal">10s</span>
           </div>
           <input type="range" id="danmakuSpeed" min="4" max="20" value="10" step="1">
@@ -233,7 +233,7 @@
 
         <div class="slider-group">
           <div class="slider-header">
-            <span data-i18n="danmakuFontSizeLabel">Danmaku font size</span>
+            <label for="danmakuFontSize" data-i18n="danmakuFontSizeLabel">Danmaku font size</label>
             <span class="slider-value" id="danmakuFontSizeVal">22px</span>
           </div>
           <input type="range" id="danmakuFontSize" min="14" max="38" value="22" step="1">
@@ -241,7 +241,7 @@
 
         <div class="slider-group">
           <div class="slider-header">
-            <span data-i18n="danmakuOpacityLabel">Danmaku opacity</span>
+            <label for="danmakuOpacity" data-i18n="danmakuOpacityLabel">Danmaku opacity</label>
             <span class="slider-value" id="danmakuOpacityVal">90%</span>
           </div>
           <input type="range" id="danmakuOpacity" min="20" max="100" value="90" step="5">
@@ -249,7 +249,7 @@
 
         <div class="slider-group">
           <div class="slider-header">
-            <span data-i18n="danmakuAreaLabel">On-screen display area</span>
+            <label for="danmakuArea" data-i18n="danmakuAreaLabel">On-screen display area</label>
             <span class="slider-value" id="danmakuAreaVal">Top Half (50%)</span>
           </div>
           <select id="danmakuArea" class="select-input">
@@ -282,7 +282,7 @@
 
     <!-- Footer Banner & Credits -->
     <footer class="footer-card">
-      <div id="status" class="status-banner">
+      <div id="status" class="status-banner" role="status" aria-live="polite" aria-atomic="true">
         <span class="status-dot"></span>
         <span id="statusText" class="status-text" data-i18n="statusReady">Ready</span>
       </div>

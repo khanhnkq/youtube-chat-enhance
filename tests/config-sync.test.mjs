@@ -305,28 +305,39 @@ test('page applies only relevant settings once and resets on every command witho
 async function popupHarness(initial) {
   const harness = storageHarness(initial);
   const elements = new Map();
-  const inputs = [];
+  const nodes = [];
   const commands = [];
   const html = source('popup/popup.html');
-  for (const match of html.matchAll(/<[^>]+\bid="([^"]+)"[^>]*>/g)) {
+  for (const match of html.matchAll(/<([a-z][\w:-]*)\b([^<>]*)>/gi)) {
     const handlers = {};
+    const attributes = Object.fromEntries([...match[2].matchAll(/([\w-]+)="([^"]*)"/g)].map(attr => [attr[1], attr[2]]));
     const element = {
-      id: match[1], value: '', checked: false, textContent: '',
+      id: attributes.id, tagName: match[1].toUpperCase(), value: attributes.value ?? '', checked: false,
+      textContent: html.slice(match.index + match[0].length).split('<')[0].trim(),
+      attributes,
+      setAttribute(name, value) { this.attributes[name] = value; },
+      getAttribute(name) { return this.attributes[name]; },
+      closest() { return attributes['data-lang'] ? element : null; },
       classList: { add() {}, remove() {} },
       addEventListener(type, fn) { (handlers[type] ??= []).push(fn); },
-      async dispatch(type) {
-        for (const fn of handlers[type] ?? []) await fn({ target: element });
+      async dispatch(type, event = {}) {
+        for (const fn of handlers[type] ?? []) await fn({ target: element, ...event });
       }
     };
-    elements.set(element.id, element);
-    if (/type="(range|color)"/.test(match[0])) inputs.push(element);
+    nodes.push(element);
+    if (element.id) elements.set(element.id, element);
   }
   let start;
   const ctx = harness.context({
     document: {
       documentElement: {},
       getElementById: id => elements.get(id),
-      querySelectorAll: selector => selector.startsWith('input[type=') ? inputs : [],
+      querySelectorAll(selector) {
+        if (selector === '[data-i18n]') return nodes.filter(el => el.attributes['data-i18n']);
+        if (selector === '#langSwitch .lang-opt') return nodes.filter(el => el.attributes['data-lang']);
+        if (selector === 'input, select, button') return nodes.filter(el => ['INPUT', 'SELECT', 'BUTTON'].includes(el.tagName));
+        return [];
+      },
       addEventListener(type, fn) { if (type === 'DOMContentLoaded') start = fn; }
     },
     setTimeout: () => 1, clearTimeout() {}, Date,
@@ -342,8 +353,118 @@ async function popupHarness(initial) {
   vm.runInContext(source('popup/config-writer.js'), ctx);
   vm.runInContext(source('popup/popup.js'), ctx);
   await start();
-  return { ...harness, elements, commands };
+  return { ...harness, elements, nodes, commands };
 }
+
+test('all popup toggles save one boolean key immediately without replacing other settings', async () => {
+  const saved = {
+    ytChatDefaultsVersion: 1, bgBlur: 17, legacyKey: 'keep',
+    enableFloatingChat: false, enableDanmaku: true, autoHideNativeChat: false,
+    hideHeaderAndBorder: true, hideItemBg: false, hideInputBox: true,
+    danmakuTextStroke: true, danmakuTextShadow: false
+  };
+  const popup = await popupHarness(saved);
+  assert.deepEqual(popup.calls, [], 'opening must not write settings');
+  let changes = 0;
+  for (const id of [
+    'enableFloatingChat', 'enableDanmaku', 'autoHideNativeChat',
+    'hideHeaderAndBorder', 'hideItemBg', 'hideInputBox', 'danmakuTextStroke', 'danmakuTextShadow'
+  ]) {
+    const input = popup.elements.get(id);
+    assert.equal(input.checked, saved[id]);
+    input.checked = !saved[id];
+    await input.dispatch('change');
+    assert.equal(popup.calls.length, ++changes);
+    assert.deepEqual(popup.calls.at(-1), { [id]: !saved[id] });
+  }
+  assert.equal(popup.data.bgBlur, 17);
+  assert.equal(popup.data.legacyKey, 'keep');
+  assert.deepEqual(popup.commands, []);
+});
+
+test('every range keeps numeric storage, visible units, spoken values and final change commits', async () => {
+  const ranges = {
+    bgOpacity: [35, 65, '%'], chatFontSize: [15, 18, 'px'], danmakuSpeed: [8, 12, 's'],
+    danmakuFontSize: [20, 25, 'px'], danmakuOpacity: [60, 85, '%']
+  };
+  const popup = await popupHarness({
+    ytChatDefaultsVersion: 1, ...Object.fromEntries(Object.entries(ranges).map(([id, [value]]) => [id, value]))
+  });
+  let changes = 0;
+  for (const [id, [before, after, unit]] of Object.entries(ranges)) {
+    const input = popup.elements.get(id);
+    assert.equal(String(input.value), String(before));
+    assert.equal(popup.elements.get(`${id}Val`).textContent, `${before}${unit}`);
+    input.value = String(after);
+    await input.dispatch('input');
+    assert.equal(popup.elements.get(`${id}Val`).textContent, `${after}${unit}`);
+    assert.equal(input.getAttribute('aria-valuetext'), `${after}${unit}`);
+    assert.equal(popup.data[id], before, 'input remains coalesced until commit/timer');
+    await input.dispatch('change');
+    assert.equal(popup.calls.length, ++changes, 'one final commit per interaction');
+    assert.deepEqual(popup.calls.at(-1), { [id]: after });
+  }
+});
+
+test('all color bindings commit independent string keys and do not send reset commands', async () => {
+  const popup = await popupHarness({ ytChatDefaultsVersion: 1, bgBlur: 17 });
+  for (const [i, id] of ['authorTextColor', 'chatTextColor', 'danmakuTextColor'].entries()) {
+    const input = popup.elements.get(id);
+    const value = ['#112233', '#445566', '#778899'][i];
+    input.value = value;
+    await input.dispatch('input');
+    await input.dispatch('change');
+    assert.deepEqual(popup.calls.at(-1), { [id]: value });
+    assert.equal(popup.calls.length, i + 1);
+  }
+  assert.equal(popup.data.bgBlur, 17);
+  assert.deepEqual(popup.commands, []);
+});
+
+test('native language button updates translated names and area labels but saves only language', async () => {
+  const saved = { ytChatDefaultsVersion: 1, lang: 'vi', danmakuArea: '0.75', bgBlur: 17 };
+  const popup = await popupHarness(saved);
+  const button = popup.elements.get('langSwitch');
+  assert.equal(button.tagName, 'BUTTON');
+  assert.equal(button.getAttribute('type'), 'button');
+  assert.equal(button.getAttribute('aria-label'), 'Đổi ngôn ngữ sang tiếng Anh');
+  assert.equal(popup.elements.get('hideInputBoxLabel').textContent, 'Ẩn Khung Nhập Chat & Footer');
+  assert.equal(popup.elements.get('danmakuAreaVal').textContent, '3/4 Màn hình');
+  await button.dispatch('click'); // Enter/Space activation is provided by the native button.
+  assert.equal(button.getAttribute('aria-label'), 'Switch language to Vietnamese');
+  assert.equal(popup.elements.get('hideInputBoxLabel').textContent, 'Hide Input Box & Footer');
+  assert.equal(popup.elements.get('danmakuAreaVal').textContent, 'Top 3/4 Screen');
+  assert.deepEqual(popup.calls, [{ lang: 'en' }]);
+  const area = popup.elements.get('danmakuArea');
+  area.value = '0.33';
+  await area.dispatch('change');
+  assert.equal(popup.elements.get('danmakuAreaVal').textContent, 'Top 1/3 Screen');
+  assert.deepEqual(popup.calls.at(-1), { danmakuArea: '0.33' });
+  const vi = popup.nodes.find(el => el.getAttribute('data-lang') === 'vi');
+  await button.dispatch('click', { target: vi });
+  assert.equal(popup.elements.get('danmakuAreaVal').textContent, '1/3 Màn hình trên');
+  assert.deepEqual(popup.data, { ...saved, lang: 'vi', danmakuArea: '0.33' });
+});
+
+test('popup controls have named label/description references and a polite status region', async () => {
+  const { nodes, elements } = await popupHarness({ ytChatDefaultsVersion: 1 });
+  const ids = nodes.filter(el => el.id).map(el => el.id);
+  assert.equal(new Set(ids).size, ids.length, 'label ids must be unique');
+  for (const node of nodes.filter(el => el.tagName === 'INPUT' || el.tagName === 'SELECT')) {
+    if (['checkbox', 'color'].includes(node.getAttribute('type'))) {
+      const name = node.getAttribute('aria-labelledby');
+      assert.ok(name, `${node.id} must be named`);
+      for (const ref of name.split(' ')) assert.ok(elements.get(ref)?.textContent, `${node.id}: missing ${ref}`);
+      if (node.getAttribute('type') === 'checkbox') assert.ok(elements.get(node.getAttribute('aria-describedby'))?.textContent);
+    } else {
+      assert.ok(nodes.some(label => label.tagName === 'LABEL' && label.getAttribute('for') === node.id && label.textContent), node.id);
+    }
+  }
+  assert.equal(elements.get('status').getAttribute('role'), 'status');
+  assert.equal(elements.get('status').getAttribute('aria-live'), 'polite');
+  assert.equal(elements.get('status').getAttribute('aria-atomic'), 'true');
+  assert.ok(nodes.every(node => !(Number(node.getAttribute('tabindex')) > 0)), 'keep native focus order');
+});
 
 test('popup reopens with saved stroke/shadow state and keyboard change commits the final slider value', async () => {
   const { elements, data, commands } = await popupHarness({

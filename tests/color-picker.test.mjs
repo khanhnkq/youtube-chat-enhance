@@ -15,13 +15,18 @@ class Element extends EventTarget {
   focus() { this.focused = true; }
 }
 
-function pickerHarness(color = '#123456') {
+function pickerHarness(color = '#123456', id = 'authorTextColor') {
   const doc = { createElement: () => new Element() };
   const row = new Element();
   const info = new Element();
+  const title = new Element();
+  title.id = `${id}Label`;
+  title.textContent = id;
+  info.append(title);
   row.querySelector = () => info;
   row.replaceWith = node => { row.replacement = node; };
   const input = new Element();
+  input.id = id;
   input.type = 'color';
   input.value = color;
   input.ownerDocument = doc;
@@ -31,9 +36,9 @@ function pickerHarness(color = '#123456') {
   ctx.setupColorPicker(input);
   const details = row.replacement;
   const [summary, editor] = details.children;
-  const sliders = editor.children.slice(1, 4).map(label => label.children[0]);
-  const outputs = editor.children.slice(1, 4).map(label => label.children[1]);
-  const hex = editor.children[4].children[0];
+  const sliders = editor.children.slice(1, 4).map(label => label.children.find(child => child.type === 'range'));
+  const outputs = editor.children.slice(1, 4).map(label => label.children.at(-1));
+  const hex = editor.children[4].children.find(child => child.type === 'text');
   return { ctx, input, details, summary, sliders, outputs, hex };
 }
 
@@ -45,6 +50,34 @@ test('saved color initializes inline RGB/HEX controls and hides the native OS pi
   assert.equal(hex.value, '#33ee99');
   assert.equal(summary.children[1].style.backgroundColor, '#33ee99');
   assert.ok(sliders.every(slider => slider.type === 'range' && slider.max === '255'));
+});
+
+test('each inline color editor has contextual channel/HEX names and exposes its selected value', () => {
+  const ids = new Set();
+  for (const id of ['authorTextColor', 'chatTextColor', 'danmakuTextColor']) {
+    const { details, summary, input, sliders, hex } = pickerHarness('#112233', id);
+    const nodes = [];
+    function visit(node) { nodes.push(node); node.children.forEach(visit); }
+    visit(details);
+    const byId = new Map(nodes.filter(node => node.id).map(node => [node.id, node]));
+    for (const node of [summary, ...sliders, hex]) {
+      const refs = node.attributes['aria-labelledby'].split(' ');
+      assert.equal(refs[0], `${id}Label`, 'names must identify which color is edited');
+      for (const ref of refs) assert.ok(byId.get(ref)?.textContent, `missing name ${ref}`);
+    }
+    assert.ok(byId.has(summary.attributes['aria-controls']));
+    for (const name of ['Red', 'Green', 'Blue']) {
+      assert.equal(byId.get(`${id}${name}Label`).attributes['data-i18n'], `color${name}`);
+    }
+    sliders[0].value = '255';
+    sliders[0].dispatchEvent(new Event('input'));
+    assert.equal(input.value, '#ff2233');
+    assert.equal(byId.get(`${id}CurrentValue`).textContent, '#ff2233');
+    for (const key of byId.keys()) {
+      assert.ok(!ids.has(key), `duplicate id ${key}`);
+      ids.add(key);
+    }
+  }
 });
 
 test('inline RGB dragging coalesces through the real writer and change commits the final color', async () => {
