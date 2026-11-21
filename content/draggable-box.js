@@ -200,6 +200,8 @@ class DraggableChatBox {
     this.isDragging = true;
     this.dragStartPointer = { x: e.clientX, y: e.clientY };
     this.dragStartPos = { left: this.overlay.style.left, top: this.overlay.style.top };
+    // A click on the minimized chat reopens it, so ignore jitter there until the pointer clearly moves.
+    this.dragNeedsThreshold = this.overlay.classList.contains('is-minimized');
     this.latestMouseX = e.clientX;
     this.latestMouseY = e.clientY;
     const rect = this.overlay.getBoundingClientRect();
@@ -240,6 +242,10 @@ class DraggableChatBox {
   applyDragFrame = () => {
     this.dragRafPending = false;
     if (!this.isDragging || !this.overlay || !this.cachedPlayerRect) return;
+    if (this.dragNeedsThreshold) {
+      if (!this.pointerTravelled()) return;
+      this.dragNeedsThreshold = false;
+    }
 
     const maxLeft = Math.max(0, this.cachedPlayerRect.width - this.cachedOverlayWidth);
     const maxTop = Math.max(0, this.cachedPlayerRect.height - this.cachedOverlayHeight);
@@ -255,6 +261,11 @@ class DraggableChatBox {
     this.overlay.style.right = 'auto';
     this.overlay.style.bottom = 'auto';
   };
+
+  pointerTravelled() {
+    const start = this.dragStartPointer;
+    return !!start && (Math.abs(this.latestMouseX - start.x) > 3 || Math.abs(this.latestMouseY - start.y) > 3);
+  }
 
   onStopDrag = () => {
     if (!this.isDragging) return;
@@ -275,13 +286,11 @@ class DraggableChatBox {
     document.removeEventListener('mouseup', this.onStopDrag);
     // A plain click (e.g. reopening the minimized chat) must not replace the chosen placement.
     // A drag counts if the chat moved, or the pointer travelled while the chat stayed clamped at an edge.
-    const start = this.dragStartPointer;
     const startPos = this.dragStartPos;
-    if (this.overlay && start && startPos) {
+    if (this.overlay && startPos) {
       const { left, top } = this.overlay.style;
       const moved = left !== startPos.left || top !== startPos.top;
-      const travelled = Math.abs(this.latestMouseX - start.x) > 3 || Math.abs(this.latestMouseY - start.y) > 3;
-      if (moved || travelled) this.preferredPos = { left, top };
+      if (moved || this.pointerTravelled()) this.preferredPos = { left, top };
     }
     this.dragStartPointer = null;
     this.dragStartPos = null;

@@ -312,3 +312,23 @@ test('releasing before the drag frame runs still applies and saves the drop posi
   assert.equal(overlay.style.left, '507px');
   assert.equal(state.chatBoxPos.left, '507px');
 });
+
+test('pointer jitter while clicking the minimized chat open keeps the chosen placement', async () => {
+  const { box, overlay, player } = placementHarness({
+    saved: { left: '960px', top: '540px', width: '320px', height: '420px' },
+    player: { width: 1280, height: 960 }
+  });
+  await box.restorePositionAndSize();
+  box.toggleMinimize();
+  Object.assign(player, { width: 877, height: 440 });
+  box.onFullscreenChange(false, {});
+  assert.equal(overlay.style.left, '797px');
+  box.onDragStart({ target: { closest: () => null }, clientX: 800, clientY: 420, preventDefault() {} });
+  box.onDrag({ clientX: 799, clientY: 420 });
+  box.onStopDrag();
+  assert.equal(overlay.style.left, '797px');
+  box.toggleMinimize();
+  Object.assign(player, { width: 1280, height: 960 });
+  box.onFullscreenChange(true, {});
+  assert.equal(overlay.style.left, '960px');
+});
