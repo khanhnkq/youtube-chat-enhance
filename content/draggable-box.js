@@ -20,7 +20,7 @@ class DraggableChatBox {
 
   init(playerElement, config = {}) {
     try {
-      this.playerEl = playerElement || document.querySelector('#movie_player, .html5-video-player');
+      this.playerEl = playerElement || document.querySelector(YTChatRuntime.selectors.player);
       if (!this.playerEl) return false;
 
       this.config = config || {};
@@ -55,8 +55,8 @@ class DraggableChatBox {
       this.onFullscreenChange(this.isFS || false, this.config);
 
       return true;
-    } catch (e) {
-      console.warn('[YT Chat Extension] DraggableChatBox init warning:', e);
+    } catch (error) {
+      YTChatRuntime.diagnostics.report('floating chat init', error);
       return false;
     }
   }
@@ -67,7 +67,10 @@ class DraggableChatBox {
         const data = this.playerEl.getVideoData();
         if (data && data.video_id) return data.video_id;
       }
-    } catch (e) {}
+    } catch (error) {
+      // The URL below still identifies the video.
+      YTChatRuntime.diagnostics.report('player video id', error);
+    }
 
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('v')) return urlParams.get('v');
@@ -111,7 +114,9 @@ class DraggableChatBox {
         iframe.replaceWith(this.createChatIframe(targetSrc));
         this.currentVideoId = videoId;
       }
-    } catch (e) {}
+    } catch (error) {
+      YTChatRuntime.diagnostics.report('floating chat iframe', error);
+    }
   }
 
   applyStyles(config) {
@@ -127,7 +132,9 @@ class DraggableChatBox {
       } else {
         this.overlay.classList.remove('yt-frameless-mode');
       }
-    } catch (e) {}
+    } catch (error) {
+      YTChatRuntime.diagnostics.report('floating chat styles', error);
+    }
   }
 
   toggleMinimize() {
@@ -189,7 +196,9 @@ class DraggableChatBox {
       if (this.resizeHandle) {
         this.resizeHandle.addEventListener('mousedown', this.onResizeStart);
       }
-    } catch (e) {}
+    } catch (error) {
+      YTChatRuntime.diagnostics.report('floating chat listeners', error);
+    }
   }
 
   onDragStart = (e) => {
@@ -230,14 +239,12 @@ class DraggableChatBox {
         this.dragRafPending = false;
         if (!this.isDragging || !this.overlay || !this.cachedPlayerRect) return;
 
-        const maxLeft = Math.max(0, this.cachedPlayerRect.width - this.cachedOverlayWidth);
-        const maxTop = Math.max(0, this.cachedPlayerRect.height - this.cachedOverlayHeight);
-
-        let left = this.latestMouseX - this.cachedPlayerRect.left - this.dragOffset.x;
-        let top = this.latestMouseY - this.cachedPlayerRect.top - this.dragOffset.y;
-
-        left = Math.max(0, Math.min(left, maxLeft));
-        top = Math.max(0, Math.min(top, maxTop));
+        const { left, top } = YTChatRuntime.clampPosition({
+          left: this.latestMouseX - this.cachedPlayerRect.left - this.dragOffset.x,
+          top: this.latestMouseY - this.cachedPlayerRect.top - this.dragOffset.y,
+          width: this.cachedOverlayWidth,
+          height: this.cachedOverlayHeight
+        }, this.cachedPlayerRect);
 
         this.overlay.style.left = `${left}px`;
         this.overlay.style.top = `${top}px`;
@@ -339,7 +346,9 @@ class DraggableChatBox {
         height: this.overlay.style.height
       };
       await chrome.storage.local.set({ chatBoxPos: posData });
-    } catch (err) {}
+    } catch (error) {
+      YTChatRuntime.diagnostics.report('floating chat position save', error);
+    }
   }
 
   async restorePositionAndSize() {
@@ -357,7 +366,8 @@ class DraggableChatBox {
       } else {
         this.resetPosition();
       }
-    } catch (err) {
+    } catch (error) {
+      YTChatRuntime.diagnostics.report('floating chat position restore', error);
       this.resetPosition();
     }
   }
@@ -384,7 +394,9 @@ class DraggableChatBox {
       } else {
         this.overlay.classList.remove('is-hidden');
       }
-    } catch (e) {}
+    } catch (error) {
+      YTChatRuntime.diagnostics.report('floating chat visibility', error);
+    }
   }
 
   updateConfig(newConfig) {
@@ -394,7 +406,9 @@ class DraggableChatBox {
       this.applyStyles(this.config);
       this.updateChatIframe();
       this.onFullscreenChange(this.isFS || false, this.config);
-    } catch (e) {}
+    } catch (error) {
+      YTChatRuntime.diagnostics.report('floating chat config update', error);
+    }
   }
 
   destroy() {

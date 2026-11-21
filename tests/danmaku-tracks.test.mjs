@@ -3,8 +3,10 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
 
-const source = readFileSync(new URL('../content/danmaku-engine.js', import.meta.url), 'utf8');
+const read = file => readFileSync(new URL(`../content/${file}`, import.meta.url), 'utf8');
+const source = read('danmaku-engine.js');
 const context = vm.createContext({ window: {} });
+vm.runInContext(read('runtime.js'), context);
 new vm.Script(`${source}\nglobalThis.DanmakuEngine = window.ytDanmakuEngine.constructor;`).runInContext(context);
 const { DanmakuEngine } = context;
 

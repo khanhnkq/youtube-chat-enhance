@@ -52,9 +52,11 @@ async function readerHarness() {
   let nextTimer = 0;
   const timers = new Map();
   const posted = [];
+  const warnings = [];
   let onMutations = null;
   const chatList = { isConnected: true, querySelectorAll: () => [] };
   const ctx = vm.createContext({
+    console: { warn: (...args) => warnings.push(args) },
     Date: { now: () => now },
     setTimeout(fn, delay) { const id = ++nextTimer; timers.set(id, { fn, at: now + delay }); return id; },
     clearTimeout(id) { timers.delete(id); },
@@ -81,6 +83,7 @@ async function readerHarness() {
     parent: { postMessage: data => posted.push(...data.batch) }
   };
   vm.runInContext(source('content/config.js'), ctx);
+  vm.runInContext(source('content/runtime.js'), ctx);
   vm.runInContext(source('content/chat-iframe.js'), ctx);
   await settle();
 
@@ -98,6 +101,7 @@ async function readerHarness() {
   }
   return {
     posted,
+    warnings,
     advance,
     add: (...nodes) => onMutations([{ addedNodes: nodes }]),
     pendingTimers: () => timers.size
@@ -184,4 +188,26 @@ test('an element that stays empty stops being re-read after a bounded number of 
   await reader.advance(60_000);
   assert.equal(element.reads, reads);
   assert.equal(reader.posted.length, 0);
+});
+
+test('messages that cannot be read are reported a few times, not once per message, and later ones still arrive', async () => {
+  const reader = await readerHarness();
+  for (let i = 0; i < 50; i++) {
+    const broken = chatMessage();
+    broken.querySelector = () => { throw new Error('YouTube changed the message markup'); };
+    reader.add(broken);
+  }
+  reader.add(chatMessage({ parts: [textNode('vẫn tới')] }));
+  await reader.advance(5_000);
+  assert.equal(reader.warnings.length, 3);
+  assert.match(String(reader.warnings[0][0]), /chat message parse/);
+  assert.deepEqual(reader.posted.map(message => message.text), ['vẫn tới']);
+  assert.equal(reader.pendingTimers(), 0);
+});
+
+test('a message without a YouTube id is sent with an empty id instead of an invented one', async () => {
+  const reader = await readerHarness();
+  reader.add(chatMessage({ id: '', parts: [textNode('không có id')] }));
+  await reader.advance(5_000);
+  assert.deepEqual(reader.posted.map(message => [message.id, message.text]), [['', 'không có id']]);
 });

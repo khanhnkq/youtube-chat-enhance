@@ -131,6 +131,7 @@ test('overlay iframe applies a text style once and ignores language and placemen
       head: { appendChild() {} }, addEventListener() {}
     }
   });
+  vm.runInContext(source('content/runtime.js'), ctx);
   vm.runInContext(source('content/chat-iframe.js'), ctx);
   await settle();
   const initialWrites = writes;
@@ -241,6 +242,7 @@ test('page applies only relevant settings once and resets on every command witho
   });
   ctx.chrome.runtime = { onMessage: { addListener: fn => runtimeListeners.push(fn) } };
   await ctx.YTChatConfig.load();
+  vm.runInContext(source('content/runtime.js'), ctx);
   vm.runInContext(source('content/chat-injector.js'), ctx);
   await harness.storage.local.set({ lang: 'vi', chatBoxPos: { left: '5px' } });
   assert.equal(danmakuUpdates.length, 0);
