@@ -11,6 +11,8 @@ class DraggableChatBox {
     this.dragOffset = { x: 0, y: 0 };
     this.resizeStart = { width: 0, height: 0, x: 0, y: 0 };
     this.cachedPlayerRect = null;
+    // Placement the viewer chose; the displayed one may be clamped to a smaller player.
+    this.preferredPos = null;
     this.cachedOverlayWidth = 0;
     this.cachedOverlayHeight = 0;
     this.currentVideoId = null;
@@ -146,6 +148,7 @@ class DraggableChatBox {
 
       this.overlay.style.width = `${this.lastWidth || 320}px`;
       this.overlay.style.height = `${this.lastHeight || 420}px`;
+      this.keepInsidePlayer();
     } else {
       // Minimize into pure text button "Live Chat"
       this.lastWidth = this.overlay.offsetWidth;
@@ -195,6 +198,12 @@ class DraggableChatBox {
   onDragStart = (e) => {
     if (e.target.closest('.yt-drag-btn')) return;
     this.isDragging = true;
+    this.dragStartPointer = { x: e.clientX, y: e.clientY };
+    this.dragStartPos = { left: this.overlay.style.left, top: this.overlay.style.top };
+    // A click on the minimized chat reopens it, so ignore jitter there until the pointer clearly moves.
+    this.dragNeedsThreshold = this.overlay.classList.contains('is-minimized');
+    this.latestMouseX = e.clientX;
+    this.latestMouseY = e.clientY;
     const rect = this.overlay.getBoundingClientRect();
     this.dragOffset.x = e.clientX - rect.left;
     this.dragOffset.y = e.clientY - rect.top;
@@ -226,29 +235,42 @@ class DraggableChatBox {
 
     if (!this.dragRafPending) {
       this.dragRafPending = true;
-      requestAnimationFrame(() => {
-        this.dragRafPending = false;
-        if (!this.isDragging || !this.overlay || !this.cachedPlayerRect) return;
-
-        const maxLeft = Math.max(0, this.cachedPlayerRect.width - this.cachedOverlayWidth);
-        const maxTop = Math.max(0, this.cachedPlayerRect.height - this.cachedOverlayHeight);
-
-        let left = this.latestMouseX - this.cachedPlayerRect.left - this.dragOffset.x;
-        let top = this.latestMouseY - this.cachedPlayerRect.top - this.dragOffset.y;
-
-        left = Math.max(0, Math.min(left, maxLeft));
-        top = Math.max(0, Math.min(top, maxTop));
-
-        this.overlay.style.left = `${left}px`;
-        this.overlay.style.top = `${top}px`;
-        this.overlay.style.right = 'auto';
-        this.overlay.style.bottom = 'auto';
-      });
+      requestAnimationFrame(this.applyDragFrame);
     }
   };
 
+  applyDragFrame = () => {
+    this.dragRafPending = false;
+    if (!this.isDragging || !this.overlay || !this.cachedPlayerRect) return;
+    if (this.dragNeedsThreshold) {
+      if (!this.pointerTravelled()) return;
+      this.dragNeedsThreshold = false;
+    }
+
+    const maxLeft = Math.max(0, this.cachedPlayerRect.width - this.cachedOverlayWidth);
+    const maxTop = Math.max(0, this.cachedPlayerRect.height - this.cachedOverlayHeight);
+
+    let left = this.latestMouseX - this.cachedPlayerRect.left - this.dragOffset.x;
+    let top = this.latestMouseY - this.cachedPlayerRect.top - this.dragOffset.y;
+
+    left = Math.max(0, Math.min(left, maxLeft));
+    top = Math.max(0, Math.min(top, maxTop));
+
+    this.overlay.style.left = `${left}px`;
+    this.overlay.style.top = `${top}px`;
+    this.overlay.style.right = 'auto';
+    this.overlay.style.bottom = 'auto';
+  };
+
+  pointerTravelled() {
+    const start = this.dragStartPointer;
+    return !!start && (Math.abs(this.latestMouseX - start.x) > 3 || Math.abs(this.latestMouseY - start.y) > 3);
+  }
+
   onStopDrag = () => {
     if (!this.isDragging) return;
+    // Apply a move still waiting for its animation frame before the placement is read.
+    if (this.dragRafPending) this.applyDragFrame();
     this.isDragging = false;
     this.dragRafPending = false;
     this.cachedPlayerRect = null;
@@ -262,6 +284,16 @@ class DraggableChatBox {
 
     document.removeEventListener('mousemove', this.onDrag);
     document.removeEventListener('mouseup', this.onStopDrag);
+    // A plain click (e.g. reopening the minimized chat) must not replace the chosen placement.
+    // A drag counts if the chat moved, or the pointer travelled while the chat stayed clamped at an edge.
+    const startPos = this.dragStartPos;
+    if (this.overlay && startPos) {
+      const { left, top } = this.overlay.style;
+      const moved = left !== startPos.left || top !== startPos.top;
+      if (moved || this.pointerTravelled()) this.preferredPos = { left, top };
+    }
+    this.dragStartPointer = null;
+    this.dragStartPos = null;
     this.savePositionAndSize();
   };
 
@@ -332,9 +364,10 @@ class DraggableChatBox {
     if (!this.overlay || this.overlay.classList.contains('is-minimized')) return;
     try {
       if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.id) return;
+      const pos = this.preferredPos || this.overlay.style;
       const posData = {
-        left: this.overlay.style.left,
-        top: this.overlay.style.top,
+        left: pos.left,
+        top: pos.top,
         width: this.overlay.style.width,
         height: this.overlay.style.height
       };
@@ -354,6 +387,8 @@ class DraggableChatBox {
         if (chatBoxPos.height) this.overlay.style.height = chatBoxPos.height;
         this.overlay.style.right = 'auto';
         this.overlay.style.bottom = 'auto';
+        this.preferredPos = { left: this.overlay.style.left, top: this.overlay.style.top };
+        this.keepInsidePlayer();
       } else {
         this.resetPosition();
       }
@@ -362,8 +397,27 @@ class DraggableChatBox {
     }
   }
 
+  // A placement saved in a larger player (e.g. fullscreen) can fall outside a smaller one, hiding the header.
+  keepInsidePlayer() {
+    if (!this.overlay || !this.playerEl || !this.overlay.offsetWidth) return;
+    const pos = this.preferredPos || this.overlay.style;
+    const left = parseFloat(pos.left);
+    const top = parseFloat(pos.top);
+    if (Number.isNaN(left) && Number.isNaN(top)) return;
+    const player = this.playerEl.getBoundingClientRect();
+    if (!player.width || !player.height) return;
+    // Use the target size: offsetWidth/Height lag behind while the size transition runs.
+    const width = parseFloat(this.overlay.style.width) || this.overlay.offsetWidth;
+    const height = parseFloat(this.overlay.style.height) || this.overlay.offsetHeight;
+    const maxLeft = Math.max(0, player.width - width);
+    const maxTop = Math.max(0, player.height - height);
+    if (!Number.isNaN(left)) this.overlay.style.left = `${Math.max(0, Math.min(left, maxLeft))}px`;
+    if (!Number.isNaN(top)) this.overlay.style.top = `${Math.max(0, Math.min(top, maxTop))}px`;
+  }
+
   resetPosition() {
     if (!this.overlay) return;
+    this.preferredPos = null;
     this.overlay.style.top = '20px';
     this.overlay.style.left = 'auto';
     this.overlay.style.right = '20px';
@@ -383,6 +437,7 @@ class DraggableChatBox {
         this.overlay.classList.add('is-hidden');
       } else {
         this.overlay.classList.remove('is-hidden');
+        this.keepInsidePlayer();
       }
     } catch (e) {}
   }
