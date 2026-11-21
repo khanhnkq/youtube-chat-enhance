@@ -207,6 +207,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   danmakuArea.value = config.danmakuArea;
   updateAreaLabel(config.danmakuArea);
 
+  [authorTextColor, chatTextColor, danmakuTextColor].forEach(globalThis.setupColorPicker);
+
   // Event Listeners for controls
   enableFloatingChat.addEventListener('change', async (e) => {
     await saveAndNotify({ enableFloatingChat: e.target.checked });

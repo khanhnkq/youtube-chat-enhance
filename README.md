@@ -34,6 +34,7 @@
 - **Minimized Floating Badge (`Live Chat`)**: Collapse the chat into a small, elegant badge at the corner of your video with one click.
 - **Auto-Hide Native Chat in Fullscreen**: Automatically hides YouTube's native side chat in Fullscreen mode to expand the video player to 100% full screen width, restoring the original layout when exiting.
 - **Live Color & Styling Pickers**: Adjust username colors, chat message colors, and background opacity. Continuous input is coalesced at 120ms intervals; ending an interaction commits the final value immediately.
+- **Inline Color Editing**: Expand a color swatch to adjust RGB sliders or enter a hex color without leaving the popup; no operating-system chooser that can dismiss Firefox's popup and lose the selection.
 - **No Video Blur**: The ineffective background-blur slider has been removed; the extension does not add blur over the video.
 - **Saved Preferences**: New profiles start with Floating Chat on and Danmaku off. Profiles with existing settings keep their saved values and legacy Danmaku default, including when only some settings were saved. An empty storage profile is treated as new.
 

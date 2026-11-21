@@ -241,13 +241,60 @@ body {
   border-color: #ff0055;
 }
 
-.color-picker::-webkit-color-swatch-wrapper {
-  padding: 2px;
+.color-picker-control {
+  display: block;
 }
 
-.color-picker::-webkit-color-swatch {
-  border: none;
+.color-picker-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.color-picker-summary::-webkit-details-marker {
+  display: none;
+}
+
+.color-picker-summary:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 3px;
+}
+
+.color-editor {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.color-editor label {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.color-editor input[type="range"] {
+  width: 100%;
+  margin: 0;
+}
+
+.color-editor input[type="text"] {
+  grid-column: 2 / 4;
+  min-width: 0;
+  padding: 5px;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: monospace;
+  user-select: text;
 }
 
 /* Toggle Switch */

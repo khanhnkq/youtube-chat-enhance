@@ -329,7 +329,8 @@ async function popupHarness(initial) {
       querySelectorAll: selector => selector.startsWith('input[type=') ? inputs : [],
       addEventListener(type, fn) { if (type === 'DOMContentLoaded') start = fn; }
     },
-    setTimeout: () => 1, clearTimeout() {}, Date
+    setTimeout: () => 1, clearTimeout() {}, Date,
+    setupColorPicker() {} // The inline widget has separate DOM/event tests.
   });
   ctx.chrome.tabs = {
     async query() { return [{ id: 1 }, { id: 2 }]; },
