@@ -21,7 +21,7 @@
 ### 1. 🎆 60FPS Hardware-Accelerated Danmaku (Bullet Screen Comments)
 - **On-Screen Flying Comments**: Streams live chat messages horizontally across your video from right to left in real-time (Bilibili / Niconico style).
 - **DOM/WAAPI Danmaku Renderer**: Comments travel with compositor-only transforms, avoiding per-frame canvas redraws while maintaining smooth motion.
-- **Smart Track Allocation**: Intelligent line-collision algorithms ensure comments never overlap awkwardly.
+- **Smart Track Allocation**: Intelligent line-collision algorithms keep comments from overlapping; comments received while paused wait until playback resumes.
 - **Customizable Appearance**: Customize text speed (4s - 20s), font size (14px - 38px), opacity, text color, outline stroke, and display area (Top 1/3, Top 50%, Top 75%, or Fullscreen).
 
 ### 2. 💬 Transparent Floating Chat Overlay
