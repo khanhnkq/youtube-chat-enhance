@@ -138,11 +138,13 @@ function placementHarness({ saved, player }) {
       contains(n) { return this.names.has(n); }
     },
     querySelector: () => null,
+    getBoundingClientRect() { return { left: parseFloat(this.style.left) || 0, top: parseFloat(this.style.top) || 0 }; },
     // Rendered size stays at the CSS default, as while the size transition is still running.
     offsetWidth: 320,
     offsetHeight: 420
   };
-  const ctx = vm.createContext({ chrome: { runtime: { id: 'test' }, storage }, window: {}, document: {}, URLSearchParams });
+  const document = { body: { style: {} }, addEventListener() {}, removeEventListener() {} };
+  const ctx = vm.createContext({ chrome: { runtime: { id: 'test' }, storage }, window: {}, document, URLSearchParams });
   vm.runInContext(source('content/draggable-box.js'), ctx);
   const box = ctx.window.ytDraggableChatBox;
   Object.assign(box, {
@@ -235,4 +237,34 @@ test('reopening a minimized chat after the player resized keeps it inside the pl
   box.toggleMinimize();
   assert.equal(overlay.style.left, '680px');
   assert.equal(overlay.style.top, '180px');
+});
+
+test('clicking the minimized chat open keeps the chosen placement; a real drag replaces it', async () => {
+  const { box, overlay, player, state } = placementHarness({
+    saved: { left: '750px', top: '10px', width: '320px', height: '420px' },
+    player: { width: 1280, height: 960 }
+  });
+  const press = { target: { closest: () => null }, clientX: 760, clientY: 15, preventDefault() {} };
+  await box.restorePositionAndSize();
+  box.toggleMinimize();
+  Object.assign(player, { width: 877, height: 440 });
+  box.onFullscreenChange(false, {});
+  assert.equal(overlay.style.left, '750px');
+
+  box.onDragStart(press);
+  box.onStopDrag();
+  box.toggleMinimize();
+  assert.equal(overlay.style.left, '557px');
+
+  Object.assign(player, { width: 1280, height: 960 });
+  box.onFullscreenChange(true, {});
+  assert.equal(overlay.style.left, '750px');
+  await box.savePositionAndSize();
+  assert.equal(state.chatBoxPos.left, '750px');
+
+  box.onDragStart(press);
+  overlay.style.left = '300px';
+  box.onStopDrag();
+  await box.savePositionAndSize();
+  assert.equal(state.chatBoxPos.left, '300px');
 });

@@ -198,6 +198,7 @@ class DraggableChatBox {
   onDragStart = (e) => {
     if (e.target.closest('.yt-drag-btn')) return;
     this.isDragging = true;
+    this.dragStartPos = { left: this.overlay.style.left, top: this.overlay.style.top };
     const rect = this.overlay.getBoundingClientRect();
     this.dragOffset.x = e.clientX - rect.left;
     this.dragOffset.y = e.clientY - rect.top;
@@ -265,7 +266,12 @@ class DraggableChatBox {
 
     document.removeEventListener('mousemove', this.onDrag);
     document.removeEventListener('mouseup', this.onStopDrag);
-    this.preferredPos = null;
+    // A plain click (e.g. reopening the minimized chat) must not replace the chosen placement.
+    const { left, top } = this.overlay ? this.overlay.style : {};
+    if (this.dragStartPos && (left !== this.dragStartPos.left || top !== this.dragStartPos.top)) {
+      this.preferredPos = { left, top };
+    }
+    this.dragStartPos = null;
     this.savePositionAndSize();
   };
 
