@@ -27,13 +27,14 @@
 ### 2. 💬 Transparent Floating Chat Overlay
 - **Direct Video Overlay**: Floating transparent live chat rendered over your video in both Fullscreen and Theatre mode.
 - **Frameless & Borderless**: Eliminates dark headers, black bars, and unnecessary borders for a 100% clean video view.
-- **Hover-to-Type Interface**: The chat stays transparent while watching. Hovering over the overlay gracefully fades in the input box, drag handle, and resize controls (`opacity: 1`) to let you send messages or SuperChats smoothly.
+- **Optional Chat Input**: “Hide Input Box & Footer” hides those controls in the floating overlay, including on hover. Turn it off to show YouTube's input or sign-in prompt immediately; the native chat is unchanged. Drag and resize controls still appear on hover.
 
 ### 3. 🎛️ Real-time Customization Control Panel
 - **Draggable & Resizable**: Drag the title bar to position the chat box anywhere over your video. Resize from the bottom-right handle.
 - **Minimized Floating Badge (`Live Chat`)**: Collapse the chat into a small, elegant badge at the corner of your video with one click.
 - **Auto-Hide Native Chat in Fullscreen**: Automatically hides YouTube's native side chat in Fullscreen mode to expand the video player to 100% full screen width, restoring the original layout when exiting.
 - **Live Color & Styling Pickers**: Adjust username colors, chat message colors, and background opacity. Continuous input is coalesced at 120ms intervals; ending an interaction commits the final value immediately.
+- **No Video Blur**: The ineffective background-blur slider has been removed; the extension does not add blur over the video.
 - **Saved Preferences**: New profiles start with Floating Chat on and Danmaku off. Profiles with existing settings keep their saved values and legacy Danmaku default, including when only some settings were saved. An empty storage profile is treated as new.
 
 ### ⚡ 4. Zero-Lag Performance Architecture

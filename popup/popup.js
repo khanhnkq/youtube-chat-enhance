@@ -16,14 +16,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       hideRowBgTitle: 'Ẩn Nền Từng Dòng Chat',
       hideRowBgDesc: 'Chỉ hiện chữ & avatar nổi trên video',
       hideInputTitle: 'Ẩn Khung Nhập Chat & Footer',
-      hideInputDesc: 'Ẩn ô nhập tin nhắn và thanh thông báo',
+      hideInputDesc: 'Ẩn ô nhập và chân khung chat nổi, kể cả khi rê chuột',
       cardColorFloatingChat: 'Màu Sắc & Khung Chat Nổi',
       authorTextColor: 'Màu tên người dùng',
       chatTextColor: 'Màu nội dung tin nhắn',
       bgOpacityLabel: 'Độ trong suốt nền khung chat',
       bgOpacityMin: 'Trong suốt (0%)',
       bgOpacityMax: 'Trong mờ (100%)',
-      bgBlurLabel: 'Hiệu ứng kính mờ (Blur)',
       chatFontSizeLabel: 'Cỡ chữ trong khung chat',
       resetPosBtn: 'Đặt lại Vị trí & Kích thước khung',
       cardDanmakuSettings: 'Tùy Chỉnh Danmaku',
@@ -64,14 +63,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       hideRowBgTitle: 'Hide Chat Row Backgrounds',
       hideRowBgDesc: 'Show floating text & avatar over video',
       hideInputTitle: 'Hide Input Box & Footer',
-      hideInputDesc: 'Hide message input box and notice bar',
+      hideInputDesc: 'Hide the floating chat input and footer, even on hover',
       cardColorFloatingChat: 'Color & Floating Chat',
       authorTextColor: 'Username color',
       chatTextColor: 'Message text color',
       bgOpacityLabel: 'Chat window background opacity',
       bgOpacityMin: 'Transparent (0%)',
       bgOpacityMax: 'Opaque (100%)',
-      bgBlurLabel: 'Background blur (Blur)',
       chatFontSizeLabel: 'Chat text font size',
       resetPosBtn: 'Reset Window Position & Size',
       cardDanmakuSettings: 'Danmaku Settings',
@@ -124,8 +122,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const danmakuTextShadow = document.getElementById('danmakuTextShadow');
   const bgOpacity = document.getElementById('bgOpacity');
   const bgOpacityVal = document.getElementById('bgOpacityVal');
-  const bgBlur = document.getElementById('bgBlur');
-  const bgBlurVal = document.getElementById('bgBlurVal');
   const chatFontSize = document.getElementById('chatFontSize');
   const chatFontSizeVal = document.getElementById('chatFontSizeVal');
   const danmakuSpeed = document.getElementById('danmakuSpeed');
@@ -196,9 +192,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   bgOpacity.value = config.bgOpacity;
   bgOpacityVal.textContent = `${config.bgOpacity}%`;
 
-  bgBlur.value = config.bgBlur;
-  bgBlurVal.textContent = `${config.bgBlur}px`;
-
   chatFontSize.value = config.chatFontSize;
   chatFontSizeVal.textContent = `${config.chatFontSize}px`;
 
@@ -267,12 +260,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const val = parseInt(e.target.value, 10);
     bgOpacityVal.textContent = `${val}%`;
     await saveAndNotify({ bgOpacity: val }, false);
-  });
-
-  bgBlur.addEventListener('input', async (e) => {
-    const val = parseInt(e.target.value, 10);
-    bgBlurVal.textContent = `${val}px`;
-    await saveAndNotify({ bgBlur: val }, false);
   });
 
   chatFontSize.addEventListener('input', async (e) => {

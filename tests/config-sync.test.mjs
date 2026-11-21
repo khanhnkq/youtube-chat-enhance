@@ -141,6 +141,54 @@ test('overlay iframe applies a text style once and ignores language and placemen
   assert.match(css, /#123456/);
 });
 
+function iframeStyleHarness(harness, custom = true) {
+  let css = '';
+  const attached = [];
+  const style = {
+    set textContent(value) { css = value; },
+    get textContent() { return css; }
+  };
+  const ctx = harness.context({
+    window: { location: { hash: custom ? '#yt_custom_overlay=1' : '' }, name: '' },
+    document: {
+      readyState: 'loading', createElement: () => style,
+      head: { appendChild(node) { attached.push(node); } }, addEventListener() {}
+    }
+  });
+  vm.runInContext(source('content/chat-iframe.js'), ctx);
+  return { get css() { return css; }, attached };
+}
+
+function inputRule(css) {
+  const match = css.match(/yt-live-chat-message-input-renderer,\s*#input-panel,\s*#footer\s*\{([^}]*)\}/);
+  assert.ok(match, 'input and footer share a visibility rule');
+  return match[1];
+}
+
+test('saved hide-input value applies on load and updates both overlays, never the native chat', async () => {
+  const harness = storageHarness({ hideInputBox: false });
+  const overlays = [iframeStyleHarness(harness), iframeStyleHarness(harness)];
+  const native = iframeStyleHarness(harness, false);
+  await settle();
+  for (const frame of overlays) assert.doesNotMatch(inputRule(frame.css), /display:\s*none/);
+  for (const hidden of [true, false, true]) {
+    await harness.storage.local.set({ hideInputBox: hidden });
+    for (const frame of overlays) {
+      assert.equal(/display:\s*none\s*!important/.test(inputRule(frame.css)), hidden);
+      assert.doesNotMatch(frame.css, /body:hover|yt-live-chat-renderer:hover/,
+        'hover must not override the saved hide-input choice');
+    }
+    assert.equal(native.attached.length, 0);
+    assert.equal(native.css, '', 'native chat must not receive overlay styles');
+  }
+});
+
+test('new profiles hide the floating chat input by default', async () => {
+  const frame = iframeStyleHarness(storageHarness());
+  await settle();
+  assert.match(inputRule(frame.css), /display:\s*none\s*!important/);
+});
+
 function writerHarness(setter) {
   let now = 0;
   let nextTimer = 0;
@@ -309,6 +357,48 @@ test('popup reopens with saved stroke/shadow state and keyboard change commits t
   await opacity.dispatch('change');
   assert.equal(data.bgOpacity, 80);
   assert.deepEqual(commands, [], 'ordinary settings must not broadcast a second update');
+});
+
+test('popup removes blur, saves hide-input immediately and reopens without overwriting legacy settings', async () => {
+  const legacy = {
+    ytChatDefaultsVersion: 1, hideInputBox: false, bgBlur: 17,
+    enableDanmaku: true, enableFloatingChat: false, chatFontSize: 19,
+    danmakuTextStroke: true, danmakuTextShadow: false,
+    chatTextColor: '#abcd12', authorTextColor: '#112233',
+    chatBoxPos: { left: '75px', top: '20px' }, extraLegacyKey: 'keep'
+  };
+  const { elements, data, calls } = await popupHarness(legacy);
+  assert.equal(elements.has('bgBlur'), false);
+  assert.equal(elements.has('bgBlurVal'), false);
+  assert.equal(elements.get('hideInputBox').checked, false);
+  assert.deepEqual(data, legacy, 'opening the popup must not rewrite any saved choice');
+  const toggle = elements.get('hideInputBox');
+  toggle.checked = true;
+  await toggle.dispatch('change');
+  assert.deepEqual(calls, [{ hideInputBox: true }]);
+  assert.deepEqual(data, { ...legacy, hideInputBox: true });
+  const reopened = await popupHarness(data);
+  assert.equal(reopened.elements.get('hideInputBox').checked, true);
+  assert.deepEqual(reopened.data, data);
+});
+
+test('continuous popup color edits commit the final color to both tabs without replacing other preferences', async () => {
+  const popup = await popupHarness({ ytChatDefaultsVersion: 1, hideInputBox: false, bgBlur: 22 });
+  const frames = [iframeStyleHarness(popup), iframeStyleHarness(popup)];
+  await settle();
+  const picker = popup.elements.get('chatTextColor');
+  for (let i = 0; i < 50; i++) {
+    picker.value = `#${i.toString(16).padStart(6, '0')}`;
+    await picker.dispatch('input');
+  }
+  await picker.dispatch('change');
+  assert.equal(popup.data.chatTextColor, '#000031');
+  assert.equal(popup.data.hideInputBox, false);
+  assert.equal(popup.data.bgBlur, 22);
+  for (const frame of frames) assert.match(frame.css, /#000031/);
+  const reopened = await popupHarness(popup.data);
+  assert.equal(reopened.elements.get('chatTextColor').value, '#000031');
+  assert.deepEqual(popup.commands, []);
 });
 
 test('each reset click clears placement and sends a transient top-frame command, even with receiverless tabs', async () => {
