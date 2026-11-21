@@ -148,6 +148,7 @@ class DraggableChatBox {
 
       this.overlay.style.width = `${this.lastWidth || 320}px`;
       this.overlay.style.height = `${this.lastHeight || 420}px`;
+      this.keepInsidePlayer();
     } else {
       // Minimize into pure text button "Live Chat"
       this.lastWidth = this.overlay.offsetWidth;

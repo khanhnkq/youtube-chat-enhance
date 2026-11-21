@@ -131,7 +131,13 @@ function placementHarness({ saved, player }) {
   const { storage, state } = storageHarness({ chatBoxPos: saved });
   const overlay = {
     style: { left: '', top: '', width: '', height: '' },
-    classList: { add() {}, remove() {}, contains: () => false },
+    classList: {
+      names: new Set(),
+      add(n) { this.names.add(n); },
+      remove(n) { this.names.delete(n); },
+      contains(n) { return this.names.has(n); }
+    },
+    querySelector: () => null,
     // Rendered size stays at the CSS default, as while the size transition is still running.
     offsetWidth: 320,
     offsetHeight: 420
@@ -214,4 +220,19 @@ test('resizing a clamped chat keeps the saved placement; dragging replaces it', 
   box.preferredPos = null;
   await box.savePositionAndSize();
   assert.equal(state.chatBoxPos.left, '557px');
+});
+
+test('reopening a minimized chat after the player resized keeps it inside the player', async () => {
+  const { box, overlay, player } = placementHarness({
+    saved: { left: '960px', top: '540px', width: '320px', height: '420px' },
+    player: { width: 877, height: 440 }
+  });
+  await box.restorePositionAndSize();
+  box.toggleMinimize();
+  Object.assign(player, { width: 1000, height: 600 });
+  box.onFullscreenChange(false, {});
+  assert.equal(overlay.style.left, '920px');
+  box.toggleMinimize();
+  assert.equal(overlay.style.left, '680px');
+  assert.equal(overlay.style.top, '180px');
 });
