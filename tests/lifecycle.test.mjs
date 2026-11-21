@@ -68,6 +68,7 @@ test('switching videos replaces the overlay iframe instead of navigating it', ()
 function nativeChatHarness({ collapsed }) {
   const video = { id: 'live1' };
   const { storage } = storageHarness({ enableFloatingChat: true, enableDanmaku: true });
+  const clickListeners = [];
   const chatFrame = {
     collapsed, clicks: 0,
     hasAttribute(name) { return name === 'collapsed' && this.collapsed; },
@@ -80,23 +81,31 @@ function nativeChatHarness({ collapsed }) {
       ytDraggableChatBox: { getVideoId: () => video.id, updateConfig() {}, onFullscreenChange() {} }
     },
     document: {
-      readyState: 'loading', addEventListener() {},
+      readyState: 'loading',
+      addEventListener(type, listener) { if (type === 'click') clickListeners.push(listener); },
       body: { classList: { add() {}, remove() {} } },
       querySelector: selector => (selector === 'ytd-live-chat-frame' ? chatFrame : null)
     },
     setTimeout, clearTimeout, Date
   });
   vm.runInContext(source('content/config.js'), ctx);
-  return { ctx, storage, chatFrame, video };
+  const viewerToggle = () => {
+    chatFrame.collapsed = !chatFrame.collapsed;
+    for (const listener of clickListeners) {
+      listener({ isTrusted: true, target: { closest: selector => (selector.includes('#show-hide-button') ? {} : null) } });
+    }
+  };
+  return { ctx, storage, chatFrame, video, viewerToggle };
 }
 
-for (const [label, startsCollapsed, endsCollapsed, nextVideo] of [
+for (const [label, startsCollapsed, endsCollapsed, nextVideo, viewerReopensAndHides] of [
   ['re-expands the native chat it collapsed so Danmaku keeps a message source', false, false],
   ['re-expands it after YouTube carried the collapsed chat to the next video', false, false, 'live2'],
-  ['leaves a native chat the viewer had already collapsed alone', true, true]
+  ['leaves a native chat the viewer had already collapsed alone', true, true],
+  ['leaves the native chat closed when the viewer reopened and hid it again', false, true, null, true]
 ]) {
   test(`turning the floating chat off ${label}`, async () => {
-    const { ctx, storage, chatFrame, video } = nativeChatHarness({ collapsed: startsCollapsed });
+    const { ctx, storage, chatFrame, video, viewerToggle } = nativeChatHarness({ collapsed: startsCollapsed });
     await ctx.YTChatConfig.load();
     vm.runInContext(source('content/chat-injector.js'), ctx);
     await storage.local.set({ enableFloatingChat: false });
@@ -106,10 +115,14 @@ for (const [label, startsCollapsed, endsCollapsed, nextVideo] of [
     await settle();
     assert.equal(chatFrame.collapsed, true);
     if (nextVideo) video.id = nextVideo;
+    if (viewerReopensAndHides) {
+      viewerToggle();
+      viewerToggle();
+    }
 
     await storage.local.set({ enableFloatingChat: false });
     await settle();
     assert.equal(chatFrame.collapsed, endsCollapsed);
-    assert.equal(chatFrame.clicks, startsCollapsed ? 0 : 2);
+    assert.equal(chatFrame.clicks, startsCollapsed ? 0 : (viewerReopensAndHides ? 1 : 2));
   });
 }

@@ -291,6 +291,14 @@
     } catch (e) {}
   }
 
+  // A viewer toggling YouTube's chat owns its state from then on; only the extension's own collapse is undone.
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (event.isTrusted && target && target.closest && target.closest('ytd-live-chat-frame #show-hide-button')) {
+      nativeChatAutoCollapsed = false;
+    }
+  }, true);
+
   // Fullscreen state listeners
   document.addEventListener('fullscreenchange', handleFullscreenState);
   document.addEventListener('webkitfullscreenchange', handleFullscreenState);
