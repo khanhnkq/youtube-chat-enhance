@@ -78,6 +78,14 @@ class DraggableChatBox {
     return null;
   }
 
+  createChatIframe(src) {
+    const iframe = document.createElement('iframe');
+    iframe.name = 'yt_custom_chat_frame';
+    iframe.allow = 'autoplay; encrypted-media';
+    iframe.src = src;
+    return iframe;
+  }
+
   updateChatIframe() {
     try {
       if (!this.iframeContainer) return;
@@ -96,15 +104,11 @@ class DraggableChatBox {
       let iframe = this.iframeContainer.querySelector('iframe');
 
       if (!iframe) {
-        iframe = document.createElement('iframe');
-        iframe.name = 'yt_custom_chat_frame';
-        iframe.allow = 'autoplay; encrypted-media';
-        iframe.src = targetSrc;
-        this.iframeContainer.appendChild(iframe);
+        this.iframeContainer.appendChild(this.createChatIframe(targetSrc));
         this.currentVideoId = videoId;
       } else if (this.currentVideoId !== videoId || iframe.src !== targetSrc) {
-        iframe.name = 'yt_custom_chat_frame';
-        iframe.src = targetSrc;
+        // Changing src would add a session history entry, so Back would rewind the chat instead of the page.
+        iframe.replaceWith(this.createChatIframe(targetSrc));
         this.currentVideoId = videoId;
       }
     } catch (e) {}

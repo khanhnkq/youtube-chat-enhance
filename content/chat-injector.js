@@ -6,6 +6,7 @@
   let initialized = false;
   let watchFlexyObserver = null;
   let nativeChatCollapsedFor = null;
+  let nativeChatAutoCollapsed = false;
   let nativeChatCollapsePoll = null;
   let resizeTimeout = null;
   const receivedMsgCache = new Map();
@@ -62,6 +63,7 @@
         if (toggleButton) {
           toggleButton.click();
           nativeChatCollapsedFor = videoId;
+          nativeChatAutoCollapsed = true;
           clearNativeChatCollapsePoll();
           return;
         }
@@ -77,10 +79,23 @@
     poll();
   }
 
+  // The native chat is the only Danmaku source while the floating chat is off.
+  // YouTube keeps the collapsed state across SPA navigation, so this is not tied to one video.
+  function restoreAutoCollapsedNativeChat() {
+    const chatFrame = document.querySelector('ytd-live-chat-frame');
+    if (nativeChatAutoCollapsed && chatFrame && chatFrame.hasAttribute('collapsed')) {
+      const toggleButton = chatFrame.querySelector('#show-hide-button button');
+      if (toggleButton) toggleButton.click();
+    }
+    nativeChatAutoCollapsed = false;
+    nativeChatCollapsedFor = null;
+  }
+
   function handleFloatingChatConfigChange(wasEnabled) {
     const isEnabled = currentConfig.enableFloatingChat !== false;
     if (wasEnabled && !isEnabled) {
       clearNativeChatCollapsePoll();
+      restoreAutoCollapsedNativeChat();
     } else if (!wasEnabled && isEnabled) {
       clearNativeChatCollapsePoll();
       nativeChatCollapsedFor = null;
