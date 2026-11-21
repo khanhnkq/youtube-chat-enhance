@@ -175,6 +175,7 @@
   // Real-time Extension Config Listener via postMessage
   window.addEventListener('message', (event) => {
     try {
+      if (event.source !== window.parent || event.origin !== 'https://www.youtube.com') return;
       if (event.data && event.data.type === 'YT_CHAT_STYLE_UPDATE') {
         currentConfig = { ...currentConfig, ...(event.data.config || {}) };
         if (isCustomOverlayFrame) {
@@ -334,7 +335,7 @@
         type: 'YT_DANMAKU_BATCH',
         frameSource: isCustomOverlayFrame ? 'custom' : 'native',
         batch: batch
-      }, '*');
+      }, 'https://www.youtube.com');
     } catch (e) {}
   }
 

@@ -19,6 +19,7 @@
   let watchFlexyObserver = null;
   let nativeChatCollapsedFor = null;
   let nativeChatCollapsePoll = null;
+  let resizeTimeout = null;
   const receivedMsgCache = new Map();
 
   function getCurrentVideoId() {
@@ -215,8 +216,24 @@
     return payload;
   }
 
+  function isTrustedChatSource(source) {
+    const overlayIframe = document.querySelector('.yt-custom-chat-overlay iframe');
+    const nativeIframe = document.querySelector('ytd-live-chat-frame iframe');
+    return (
+      (overlayIframe && overlayIframe.contentWindow === source) ||
+      (nativeIframe && nativeIframe.contentWindow === source)
+    );
+  }
+
   window.addEventListener('message', (event) => {
     if (!event.data) return;
+    if (
+      event.data.type !== 'YT_DANMAKU_BATCH' &&
+      event.data.type !== 'YT_DANMAKU_MESSAGE'
+    ) {
+      return;
+    }
+    if (event.origin !== 'https://www.youtube.com' || !isTrustedChatSource(event.source)) return;
 
     if (event.data.type === 'YT_DANMAKU_BATCH') {
       const batch = event.data.batch;
@@ -298,10 +315,20 @@
   // Fullscreen state listeners
   document.addEventListener('fullscreenchange', handleFullscreenState);
   document.addEventListener('webkitfullscreenchange', handleFullscreenState);
-  window.addEventListener('resize', handleFullscreenState);
+  window.addEventListener('resize', () => {
+    if (resizeTimeout !== null) clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      resizeTimeout = null;
+      handleFullscreenState();
+    }, 150);
+  });
 
   function resetOnNavigation() {
     initialized = false;
+    if (resizeTimeout !== null) {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = null;
+    }
     clearNativeChatCollapsePoll();
     receivedMsgCache.clear();
     if (watchFlexyObserver) {
