@@ -24,7 +24,7 @@ function storageHarness(initial = {}) {
       async remove() {}
     }
   };
-  return { storage };
+  return { storage, state: data };
 }
 
 test('switching videos replaces the overlay iframe instead of navigating it', () => {
@@ -128,12 +128,13 @@ for (const [label, startsCollapsed, endsCollapsed, nextVideo, viewerReopensAndHi
 }
 
 function placementHarness({ saved, player }) {
-  const { storage } = storageHarness({ chatBoxPos: saved });
+  const { storage, state } = storageHarness({ chatBoxPos: saved });
   const overlay = {
     style: { left: '', top: '', width: '', height: '' },
     classList: { add() {}, remove() {}, contains: () => false },
-    get offsetWidth() { return parseFloat(this.style.width) || 320; },
-    get offsetHeight() { return parseFloat(this.style.height) || 420; }
+    // Rendered size stays at the CSS default, as while the size transition is still running.
+    offsetWidth: 320,
+    offsetHeight: 420
   };
   const ctx = vm.createContext({ chrome: { runtime: { id: 'test' }, storage }, window: {}, document: {}, URLSearchParams });
   vm.runInContext(source('content/draggable-box.js'), ctx);
@@ -142,7 +143,7 @@ function placementHarness({ saved, player }) {
     overlay, config: {},
     playerEl: { getBoundingClientRect: () => ({ left: 0, top: 0, width: player.width, height: player.height }) }
   });
-  return { box, overlay, player };
+  return { box, overlay, player, state };
 }
 
 test('a placement saved in fullscreen is pulled back inside a smaller player on restore', async () => {
@@ -173,4 +174,44 @@ test('leaving fullscreen pulls the chat back inside the smaller player', () => {
   box.onFullscreenChange(false, {});
   assert.equal(overlay.style.left, '557px');
   assert.equal(overlay.style.top, '20px');
+});
+
+test('a larger saved size is clamped by its target size, not the size mid-transition', async () => {
+  const { box, overlay } = placementHarness({
+    saved: { left: '960px', top: '540px', width: '500px', height: '300px' },
+    player: { width: 877, height: 440 }
+  });
+  await box.restorePositionAndSize();
+  assert.equal(overlay.style.left, '377px');
+  assert.equal(overlay.style.top, '140px');
+});
+
+test('returning to fullscreen brings back the placement the viewer chose', async () => {
+  const { box, overlay, player } = placementHarness({
+    saved: { left: '960px', top: '540px', width: '320px', height: '420px' },
+    player: { width: 877, height: 440 }
+  });
+  await box.restorePositionAndSize();
+  assert.equal(overlay.style.left, '557px');
+  Object.assign(player, { width: 1280, height: 960 });
+  box.onFullscreenChange(true, {});
+  assert.equal(overlay.style.left, '960px');
+  assert.equal(overlay.style.top, '540px');
+});
+
+test('resizing a clamped chat keeps the saved placement; dragging replaces it', async () => {
+  const { box, overlay, state } = placementHarness({
+    saved: { left: '960px', top: '540px', width: '320px', height: '420px' },
+    player: { width: 877, height: 440 }
+  });
+  await box.restorePositionAndSize();
+  overlay.style.width = '200px';
+  await box.savePositionAndSize();
+  assert.equal(state.chatBoxPos.left, '960px');
+  assert.equal(state.chatBoxPos.top, '540px');
+  assert.equal(state.chatBoxPos.width, '200px');
+
+  box.preferredPos = null;
+  await box.savePositionAndSize();
+  assert.equal(state.chatBoxPos.left, '557px');
 });

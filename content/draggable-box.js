@@ -11,6 +11,8 @@ class DraggableChatBox {
     this.dragOffset = { x: 0, y: 0 };
     this.resizeStart = { width: 0, height: 0, x: 0, y: 0 };
     this.cachedPlayerRect = null;
+    // Placement the viewer chose; the displayed one may be clamped to a smaller player.
+    this.preferredPos = null;
     this.cachedOverlayWidth = 0;
     this.cachedOverlayHeight = 0;
     this.currentVideoId = null;
@@ -262,6 +264,7 @@ class DraggableChatBox {
 
     document.removeEventListener('mousemove', this.onDrag);
     document.removeEventListener('mouseup', this.onStopDrag);
+    this.preferredPos = null;
     this.savePositionAndSize();
   };
 
@@ -332,9 +335,10 @@ class DraggableChatBox {
     if (!this.overlay || this.overlay.classList.contains('is-minimized')) return;
     try {
       if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.id) return;
+      const pos = this.preferredPos || this.overlay.style;
       const posData = {
-        left: this.overlay.style.left,
-        top: this.overlay.style.top,
+        left: pos.left,
+        top: pos.top,
         width: this.overlay.style.width,
         height: this.overlay.style.height
       };
@@ -354,6 +358,7 @@ class DraggableChatBox {
         if (chatBoxPos.height) this.overlay.style.height = chatBoxPos.height;
         this.overlay.style.right = 'auto';
         this.overlay.style.bottom = 'auto';
+        this.preferredPos = { left: this.overlay.style.left, top: this.overlay.style.top };
         this.keepInsidePlayer();
       } else {
         this.resetPosition();
@@ -366,19 +371,24 @@ class DraggableChatBox {
   // A placement saved in a larger player (e.g. fullscreen) can fall outside a smaller one, hiding the header.
   keepInsidePlayer() {
     if (!this.overlay || !this.playerEl || !this.overlay.offsetWidth) return;
-    const left = parseFloat(this.overlay.style.left);
-    const top = parseFloat(this.overlay.style.top);
+    const pos = this.preferredPos || this.overlay.style;
+    const left = parseFloat(pos.left);
+    const top = parseFloat(pos.top);
     if (Number.isNaN(left) && Number.isNaN(top)) return;
     const player = this.playerEl.getBoundingClientRect();
     if (!player.width || !player.height) return;
-    const maxLeft = Math.max(0, player.width - this.overlay.offsetWidth);
-    const maxTop = Math.max(0, player.height - this.overlay.offsetHeight);
+    // Use the target size: offsetWidth/Height lag behind while the size transition runs.
+    const width = parseFloat(this.overlay.style.width) || this.overlay.offsetWidth;
+    const height = parseFloat(this.overlay.style.height) || this.overlay.offsetHeight;
+    const maxLeft = Math.max(0, player.width - width);
+    const maxTop = Math.max(0, player.height - height);
     if (!Number.isNaN(left)) this.overlay.style.left = `${Math.max(0, Math.min(left, maxLeft))}px`;
     if (!Number.isNaN(top)) this.overlay.style.top = `${Math.max(0, Math.min(top, maxTop))}px`;
   }
 
   resetPosition() {
     if (!this.overlay) return;
+    this.preferredPos = null;
     this.overlay.style.top = '20px';
     this.overlay.style.left = 'auto';
     this.overlay.style.right = '20px';
