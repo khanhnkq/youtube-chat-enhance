@@ -144,7 +144,7 @@ function placementHarness({ saved, player }) {
     offsetHeight: 420
   };
   const document = { body: { style: {} }, addEventListener() {}, removeEventListener() {} };
-  const ctx = vm.createContext({ chrome: { runtime: { id: 'test' }, storage }, window: {}, document, URLSearchParams });
+  const ctx = vm.createContext({ chrome: { runtime: { id: 'test' }, storage }, window: {}, document, URLSearchParams, requestAnimationFrame: fn => fn() });
   vm.runInContext(source('content/draggable-box.js'), ctx);
   const box = ctx.window.ytDraggableChatBox;
   Object.assign(box, {
@@ -263,8 +263,24 @@ test('clicking the minimized chat open keeps the chosen placement; a real drag r
   assert.equal(state.chatBoxPos.left, '750px');
 
   box.onDragStart(press);
-  overlay.style.left = '300px';
+  box.onDrag({ clientX: 310, clientY: 15 });
   box.onStopDrag();
   await box.savePositionAndSize();
   assert.equal(state.chatBoxPos.left, '300px');
+});
+
+test('a drag pushed against the player edge saves the displayed placement', async () => {
+  const { box, overlay, state } = placementHarness({
+    saved: { left: '960px', top: '540px', width: '320px', height: '420px' },
+    player: { width: 877, height: 440 }
+  });
+  await box.restorePositionAndSize();
+  assert.equal(overlay.style.left, '557px');
+  box.onDragStart({ target: { closest: () => null }, clientX: 600, clientY: 30, preventDefault() {} });
+  box.onDrag({ clientX: 700, clientY: 200 });
+  box.onStopDrag();
+  assert.equal(overlay.style.left, '557px');
+  assert.equal(overlay.style.top, '20px');
+  assert.equal(state.chatBoxPos.left, '557px');
+  assert.equal(state.chatBoxPos.top, '20px');
 });

@@ -198,7 +198,9 @@ class DraggableChatBox {
   onDragStart = (e) => {
     if (e.target.closest('.yt-drag-btn')) return;
     this.isDragging = true;
-    this.dragStartPos = { left: this.overlay.style.left, top: this.overlay.style.top };
+    this.dragStartPointer = { x: e.clientX, y: e.clientY };
+    this.latestMouseX = e.clientX;
+    this.latestMouseY = e.clientY;
     const rect = this.overlay.getBoundingClientRect();
     this.dragOffset.x = e.clientX - rect.left;
     this.dragOffset.y = e.clientY - rect.top;
@@ -267,11 +269,13 @@ class DraggableChatBox {
     document.removeEventListener('mousemove', this.onDrag);
     document.removeEventListener('mouseup', this.onStopDrag);
     // A plain click (e.g. reopening the minimized chat) must not replace the chosen placement.
-    const { left, top } = this.overlay ? this.overlay.style : {};
-    if (this.dragStartPos && (left !== this.dragStartPos.left || top !== this.dragStartPos.top)) {
-      this.preferredPos = { left, top };
+    // Compare pointer travel, not position: a drag against the player edge leaves the clamped position unchanged.
+    const start = this.dragStartPointer;
+    if (this.overlay && start &&
+        (Math.abs(this.latestMouseX - start.x) > 3 || Math.abs(this.latestMouseY - start.y) > 3)) {
+      this.preferredPos = { left: this.overlay.style.left, top: this.overlay.style.top };
     }
-    this.dragStartPos = null;
+    this.dragStartPointer = null;
     this.savePositionAndSize();
   };
 
