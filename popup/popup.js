@@ -3,6 +3,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const translations = {
     vi: {
       brandSub: 'Nâng tầm xem Livestream YouTube',
+      languageAction: 'Đổi ngôn ngữ sang tiếng Anh',
+      colorRed: 'Đỏ',
+      colorGreen: 'Xanh lá',
+      colorBlue: 'Xanh dương',
       cardOperatingModes: 'Chế Độ Hoạt Động',
       floatingChatTitle: 'Khung Chat Nổi Trong Suốt',
       floatingChatDesc: 'Hiển thị khung chat đè video full màn',
@@ -16,14 +20,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       hideRowBgTitle: 'Ẩn Nền Từng Dòng Chat',
       hideRowBgDesc: 'Chỉ hiện chữ & avatar nổi trên video',
       hideInputTitle: 'Ẩn Khung Nhập Chat & Footer',
-      hideInputDesc: 'Ẩn ô nhập tin nhắn và thanh thông báo',
+      hideInputDesc: 'Ẩn ô nhập và chân khung chat nổi, kể cả khi rê chuột',
       cardColorFloatingChat: 'Màu Sắc & Khung Chat Nổi',
       authorTextColor: 'Màu tên người dùng',
       chatTextColor: 'Màu nội dung tin nhắn',
       bgOpacityLabel: 'Độ trong suốt nền khung chat',
       bgOpacityMin: 'Trong suốt (0%)',
       bgOpacityMax: 'Trong mờ (100%)',
-      bgBlurLabel: 'Hiệu ứng kính mờ (Blur)',
       chatFontSizeLabel: 'Cỡ chữ trong khung chat',
       resetPosBtn: 'Đặt lại Vị trí & Kích thước khung',
       cardDanmakuSettings: 'Tùy Chỉnh Danmaku',
@@ -51,6 +54,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     },
     en: {
       brandSub: 'Elevate Your YouTube Livestreaming Experience',
+      languageAction: 'Switch language to Vietnamese',
+      colorRed: 'Red',
+      colorGreen: 'Green',
+      colorBlue: 'Blue',
       cardOperatingModes: 'Operating Modes',
       floatingChatTitle: 'Transparent Floating Chat',
       floatingChatDesc: 'Display floating chat overlay over video',
@@ -64,14 +71,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       hideRowBgTitle: 'Hide Chat Row Backgrounds',
       hideRowBgDesc: 'Show floating text & avatar over video',
       hideInputTitle: 'Hide Input Box & Footer',
-      hideInputDesc: 'Hide message input box and notice bar',
+      hideInputDesc: 'Hide the floating chat input and footer, even on hover',
       cardColorFloatingChat: 'Color & Floating Chat',
       authorTextColor: 'Username color',
       chatTextColor: 'Message text color',
       bgOpacityLabel: 'Chat window background opacity',
       bgOpacityMin: 'Transparent (0%)',
       bgOpacityMax: 'Opaque (100%)',
-      bgBlurLabel: 'Background blur (Blur)',
       chatFontSizeLabel: 'Chat text font size',
       resetPosBtn: 'Reset Window Position & Size',
       cardDanmakuSettings: 'Danmaku Settings',
@@ -111,29 +117,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const writer = createConfigWriter(chrome.storage.local, { onError: showSaveError });
 
   // UI Elements
-  const enableFloatingChat = document.getElementById('enableFloatingChat');
-  const enableDanmaku = document.getElementById('enableDanmaku');
-  const autoHideNativeChat = document.getElementById('autoHideNativeChat');
-  const hideHeaderAndBorder = document.getElementById('hideHeaderAndBorder');
-  const hideItemBg = document.getElementById('hideItemBg');
-  const hideInputBox = document.getElementById('hideInputBox');
-  const authorTextColor = document.getElementById('authorTextColor');
-  const chatTextColor = document.getElementById('chatTextColor');
-  const danmakuTextColor = document.getElementById('danmakuTextColor');
-  const danmakuTextStroke = document.getElementById('danmakuTextStroke');
-  const danmakuTextShadow = document.getElementById('danmakuTextShadow');
-  const bgOpacity = document.getElementById('bgOpacity');
-  const bgOpacityVal = document.getElementById('bgOpacityVal');
-  const bgBlur = document.getElementById('bgBlur');
-  const bgBlurVal = document.getElementById('bgBlurVal');
-  const chatFontSize = document.getElementById('chatFontSize');
-  const chatFontSizeVal = document.getElementById('chatFontSizeVal');
-  const danmakuSpeed = document.getElementById('danmakuSpeed');
-  const danmakuSpeedVal = document.getElementById('danmakuSpeedVal');
-  const danmakuFontSize = document.getElementById('danmakuFontSize');
-  const danmakuFontSizeVal = document.getElementById('danmakuFontSizeVal');
-  const danmakuOpacity = document.getElementById('danmakuOpacity');
-  const danmakuOpacityVal = document.getElementById('danmakuOpacityVal');
   const danmakuArea = document.getElementById('danmakuArea');
   const danmakuAreaVal = document.getElementById('danmakuAreaVal');
   const resetPosBtn = document.getElementById('resetPosBtn');
@@ -160,11 +143,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
+    langSwitch.setAttribute('aria-label', dict.languageAction);
     updateAreaLabel(danmakuArea.value);
   }
-
-  // Initialize Language
-  applyLanguage(currentLang);
 
   // Language Switcher Click Event
   const langSwitch = document.getElementById('langSwitch');
@@ -179,125 +160,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Populate UI with stored config
-  enableFloatingChat.checked = config.enableFloatingChat;
-  enableDanmaku.checked = config.enableDanmaku;
-  autoHideNativeChat.checked = config.autoHideNativeChat !== false;
-  hideHeaderAndBorder.checked = config.hideHeaderAndBorder;
-  hideItemBg.checked = config.hideItemBg;
-  hideInputBox.checked = config.hideInputBox;
-  danmakuTextStroke.checked = config.danmakuTextStroke;
-  danmakuTextShadow.checked = config.danmakuTextShadow;
+  // Group controls by value type; all saves still use the same serialized writer.
+  for (const id of [
+    'enableFloatingChat', 'enableDanmaku', 'autoHideNativeChat',
+    'hideHeaderAndBorder', 'hideItemBg', 'hideInputBox',
+    'danmakuTextStroke', 'danmakuTextShadow'
+  ]) {
+    const input = document.getElementById(id);
+    input.checked = id === 'autoHideNativeChat' ? config[id] !== false : config[id];
+    input.addEventListener('change', () => saveAndNotify({ [id]: input.checked }));
+  }
 
-  authorTextColor.value = config.authorTextColor || '#ff88aa';
-  chatTextColor.value = config.chatTextColor || '#ffffff';
-  danmakuTextColor.value = config.danmakuTextColor || '#ffffff';
+  for (const id of ['authorTextColor', 'chatTextColor', 'danmakuTextColor']) {
+    const input = document.getElementById(id);
+    input.value = config[id] || YTChatConfig.defaults[id];
+    globalThis.setupColorPicker(input);
+    bindContinuousControl(input, () => input.value);
+  }
 
-  bgOpacity.value = config.bgOpacity;
-  bgOpacityVal.textContent = `${config.bgOpacity}%`;
-
-  bgBlur.value = config.bgBlur;
-  bgBlurVal.textContent = `${config.bgBlur}px`;
-
-  chatFontSize.value = config.chatFontSize;
-  chatFontSizeVal.textContent = `${config.chatFontSize}px`;
-
-  danmakuSpeed.value = config.danmakuSpeed;
-  danmakuSpeedVal.textContent = `${config.danmakuSpeed}s`;
-
-  danmakuFontSize.value = config.danmakuFontSize;
-  danmakuFontSizeVal.textContent = `${config.danmakuFontSize}px`;
-
-  danmakuOpacity.value = config.danmakuOpacity;
-  danmakuOpacityVal.textContent = `${config.danmakuOpacity}%`;
+  for (const [id, unit] of Object.entries({
+    bgOpacity: '%', chatFontSize: 'px', danmakuSpeed: 's',
+    danmakuFontSize: 'px', danmakuOpacity: '%'
+  })) {
+    const input = document.getElementById(id);
+    const label = document.getElementById(`${id}Val`);
+    input.value = config[id];
+    bindContinuousControl(input, () => parseInt(input.value, 10), () => {
+      label.textContent = `${input.value}${unit}`;
+      input.setAttribute('aria-valuetext', label.textContent);
+    });
+  }
 
   danmakuArea.value = config.danmakuArea;
-  updateAreaLabel(config.danmakuArea);
+  // Include the generated color-channel names in initial translation.
+  applyLanguage(currentLang);
 
-  // Event Listeners for controls
-  enableFloatingChat.addEventListener('change', async (e) => {
-    await saveAndNotify({ enableFloatingChat: e.target.checked });
-  });
-
-  enableDanmaku.addEventListener('change', async (e) => {
-    await saveAndNotify({ enableDanmaku: e.target.checked });
-  });
-
-  autoHideNativeChat.addEventListener('change', async (e) => {
-    await saveAndNotify({ autoHideNativeChat: e.target.checked });
-  });
-
-  hideHeaderAndBorder.addEventListener('change', async (e) => {
-    await saveAndNotify({ hideHeaderAndBorder: e.target.checked });
-  });
-
-  hideItemBg.addEventListener('change', async (e) => {
-    await saveAndNotify({ hideItemBg: e.target.checked });
-  });
-
-  hideInputBox.addEventListener('change', async (e) => {
-    await saveAndNotify({ hideInputBox: e.target.checked });
-  });
-
-  authorTextColor.addEventListener('input', async (e) => {
-    await saveAndNotify({ authorTextColor: e.target.value }, false);
-  });
-
-  chatTextColor.addEventListener('input', async (e) => {
-    await saveAndNotify({ chatTextColor: e.target.value }, false);
-  });
-
-  danmakuTextColor.addEventListener('input', async (e) => {
-    await saveAndNotify({ danmakuTextColor: e.target.value }, false);
-  });
-
-  if (danmakuTextStroke) {
-    danmakuTextStroke.addEventListener('change', async (e) => {
-      await saveAndNotify({ danmakuTextStroke: e.target.checked });
+  function bindContinuousControl(input, readValue, render = () => {}) {
+    render();
+    input.addEventListener('input', () => {
+      render();
+      return saveAndNotify({ [input.id]: readValue() }, false);
     });
+    // Pointer release and native keyboard change commit the final pending value.
+    input.addEventListener('change', () => writer.flush().catch(showSaveError));
   }
-
-  if (danmakuTextShadow) {
-    danmakuTextShadow.addEventListener('change', async (e) => {
-      await saveAndNotify({ danmakuTextShadow: e.target.checked });
-    });
-  }
-
-  bgOpacity.addEventListener('input', async (e) => {
-    const val = parseInt(e.target.value, 10);
-    bgOpacityVal.textContent = `${val}%`;
-    await saveAndNotify({ bgOpacity: val }, false);
-  });
-
-  bgBlur.addEventListener('input', async (e) => {
-    const val = parseInt(e.target.value, 10);
-    bgBlurVal.textContent = `${val}px`;
-    await saveAndNotify({ bgBlur: val }, false);
-  });
-
-  chatFontSize.addEventListener('input', async (e) => {
-    const val = parseInt(e.target.value, 10);
-    chatFontSizeVal.textContent = `${val}px`;
-    await saveAndNotify({ chatFontSize: val }, false);
-  });
-
-  danmakuSpeed.addEventListener('input', async (e) => {
-    const val = parseInt(e.target.value, 10);
-    danmakuSpeedVal.textContent = `${val}s`;
-    await saveAndNotify({ danmakuSpeed: val }, false);
-  });
-
-  danmakuFontSize.addEventListener('input', async (e) => {
-    const val = parseInt(e.target.value, 10);
-    danmakuFontSizeVal.textContent = `${val}px`;
-    await saveAndNotify({ danmakuFontSize: val }, false);
-  });
-
-  danmakuOpacity.addEventListener('input', async (e) => {
-    const val = parseInt(e.target.value, 10);
-    danmakuOpacityVal.textContent = `${val}%`;
-    await saveAndNotify({ danmakuOpacity: val }, false);
-  });
 
   danmakuArea.addEventListener('change', async (e) => {
     const val = e.target.value;
@@ -320,11 +226,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
       showSaveError();
     }
-  });
-
-  // Commit the final value before a pointer/keyboard interaction ends.
-  document.querySelectorAll('input[type="range"], input[type="color"]').forEach(input => {
-    input.addEventListener('change', () => writer.flush().catch(showSaveError));
   });
 
   const coffeeBtn = document.getElementById('coffeeBtn');

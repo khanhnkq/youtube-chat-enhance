@@ -1,6 +1,6 @@
 # YouTube Custom Chat & Danmaku - Chrome Web Store Listing Metadata
 
-**Last Updated:** 2026-07-22  
+**Last Updated:** 2026-11-21  
 **Extension Version:** 1.2.0  
 **Manifest Version:** Manifest V3  
 
@@ -22,7 +22,7 @@ Elevate your YouTube livestream and video watching experience with this feature-
 ✨ **KEY FEATURES:**
 1. **Transparent Floating Chat Overlays Video:**
    - Displays the live chat box directly over the video player during Fullscreen or Theatre Mode.
-   - Adjust background opacity smoothly from 100% transparent (0%) to frosted glass (Glassmorphism 100%).
+   - Adjust background opacity smoothly from fully transparent (0%) to opaque (100%).
 2. **Draggable & Resizable Floating Box:**
    - Drag and drop to position the chat window anywhere over the video player.
    - Resize width and height easily using the bottom-right corner resize handle.
@@ -46,3 +46,14 @@ Elevate your YouTube livestream and video watching experience with this feature-
 
 - **Data Collection:** The extension does **NOT** collect, track, store, or transmit any user personal data or browsing activity.
 - **Local State:** All user preferences and visual configurations are stored locally in the browser via `chrome.storage.local`.
+
+---
+
+## 5. Package to Upload
+
+Packages are built, not stored in the repository:
+```bash
+npm ci
+npm run build
+```
+Upload `dist/YouTube-Custom-Chat-Chrome-v<version>.zip` (the version comes from `manifest.json`).

@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Performance](https://img.shields.io/badge/Performance-60FPS%20DOM%2FWAAPI-ff0055.svg)](#-supercharged-performance-60fps)
 
-> **YouTube Chat Enhance** is a high-performance **Chrome Extension (Manifest V3)** designed to revolutionize your YouTube live stream and video watching experience. Features include **60FPS Hardware-Accelerated Danmaku Bullet Comments**, **Transparent Floating Chat Overlays**, **Real-time Live Color & Opacity Styling**, and **Auto-Hide Native Chat in Fullscreen Mode**.
+> **YouTube Chat Enhance** is a high-performance **Manifest V3 browser extension for Chrome-based browsers and Firefox** designed to revolutionize your YouTube live stream and video watching experience. Features include **60FPS Hardware-Accelerated Danmaku Bullet Comments**, **Transparent Floating Chat Overlays**, **Real-time Live Color & Opacity Styling**, and **Auto-Hide Native Chat in Fullscreen Mode**.
 
 ---
 
@@ -27,13 +27,15 @@
 ### 2. 💬 Transparent Floating Chat Overlay
 - **Direct Video Overlay**: Floating transparent live chat rendered over your video in both Fullscreen and Theatre mode.
 - **Frameless & Borderless**: Eliminates dark headers, black bars, and unnecessary borders for a 100% clean video view.
-- **Hover-to-Type Interface**: The chat stays transparent while watching. Hovering over the overlay gracefully fades in the input box, drag handle, and resize controls (`opacity: 1`) to let you send messages or SuperChats smoothly.
+- **Optional Chat Input**: “Hide Input Box & Footer” hides those controls in the floating overlay, including on hover. Turn it off to show YouTube's input or sign-in prompt immediately; the native chat is unchanged. Drag and resize controls still appear on hover.
 
 ### 3. 🎛️ Real-time Customization Control Panel
 - **Draggable & Resizable**: Drag the title bar to position the chat box anywhere over your video. Resize from the bottom-right handle.
 - **Minimized Floating Badge (`Live Chat`)**: Collapse the chat into a small, elegant badge at the corner of your video with one click.
 - **Auto-Hide Native Chat in Fullscreen**: Automatically hides YouTube's native side chat in Fullscreen mode to expand the video player to 100% full screen width, restoring the original layout when exiting.
 - **Live Color & Styling Pickers**: Adjust username colors, chat message colors, and background opacity. Continuous input is coalesced at 120ms intervals; ending an interaction commits the final value immediately.
+- **Inline Color Editing**: Expand a color swatch to adjust RGB sliders or enter a hex color without leaving the popup; no operating-system chooser that can dismiss Firefox's popup and lose the selection.
+- **No Video Blur**: The ineffective background-blur slider has been removed; the extension does not add blur over the video.
 - **Saved Preferences**: New profiles start with Floating Chat on and Danmaku off. Profiles with existing settings keep their saved values and legacy Danmaku default, including when only some settings were saved. An empty storage profile is treated as new.
 
 ### ⚡ 4. Zero-Lag Performance Architecture
@@ -55,14 +57,24 @@
   3. Select `manifest.json` from the project folder (or `dist/firefox/manifest.json`).
 
 ### 2. Multi-Browser Production Packaging
-Build clean, lightweight ZIP packages (~33KB) for both Chrome Web Store and Mozilla Add-ons (AMO):
+Build clean, lightweight packages (about 37 KB each) for both Chrome Web Store and Mozilla Add-ons (AMO):
 ```bash
+npm ci
 npm run build
 ```
-Output files will be generated in `dist/`:
-- `dist/YouTube-Custom-Chat-Chrome-v1.2.0.zip` (for Chrome Web Store)
-- `dist/YouTube-Custom-Chat-Firefox-v1.2.0.zip` (for Mozilla Add-ons / AMO)
-- `dist/YouTube-Custom-Chat-Firefox-v1.2.0.xpi` (Firefox Add-on XPI)
+The version comes from `manifest.json`. Output is written to `dist/`:
+- `dist/chrome/` and `dist/firefox/`: unpacked builds for local testing.
+- `dist/YouTube-Custom-Chat-Chrome-v<version>.zip` (for Chrome Web Store)
+- `dist/YouTube-Custom-Chat-Firefox-v<version>.zip` (for Mozilla Add-ons / AMO)
+- `dist/YouTube-Custom-Chat-Firefox-v<version>.xpi` (the same Firefox package with the `.xpi` extension)
+
+The packages contain only `manifest.json`, `content/`, `popup/`, the icons the extension uses and `LICENSE`; documentation, screenshots, tests and build scripts are left out.
+
+### 3. Release Packages
+Built packages are release artifacts, not source: `dist/` and `*.zip`, `*.xpi`, `*.crx` are ignored by git, and `npm test` fails if one is committed. Get a package from one of these places instead:
+- **Build it** with `npm run build` (above).
+- **Pull request / `main` builds**: the `Checks` workflow uploads the three files as the `extension-packages` artifact (kept 14 days).
+- **Releases**: attach the built files to the GitHub release for the tag, for example `gh release upload v<version> dist/*.zip dist/*.xpi`. Store uploads (Chrome Web Store, AMO) use the same files; see `CHROMEWEBSTORE.md` and `FIREFOXAMO.md`.
 
 ### Checks
 Every pull request runs the checks in `.github/workflows/checks.yml`. Run the same set locally after `npm ci`:
@@ -85,21 +97,30 @@ Compare the results with the extension disabled.
 
 ```
 youtube-chat-enhance/
-├── manifest.json         # Manifest V3 Extension Configuration
-├── popup/
-├── popup/popup.html      # Ultra-Clean Dark Glassmorphic Control Panel
-├── popup/popup.css       # Neon Accents & Glassmorphism Styling
-├── popup/popup.js        # Settings UI & Transient Commands
-└── popup/config-writer.js # Coalesced, Serialized Storage Writes
+├── manifest.json               # Manifest V3 configuration (Firefox settings included)
 ├── content/
-├── content/config.js         # Shared Defaults, Profile Migration & Storage Subscription
-├── content/chat-injector.js  # Main Content Script for YouTube Watch/Live Pages
-├── content/chat-iframe.js    # Live Chat Iframe Parser & IPC Batcher
-├── content/draggable-box.js  # Drag, Resize & Compositor Layer Manager
-├── content/danmaku-engine.js # DOM/WAAPI Danmaku Renderer
-└── content/overlay.css       # Clean Layout, Frameless Overlay & Fullscreen Expansion Rules
-├── icons/                # High-Res Icons (icon.svg, 16px, 48px, 128px PNGs)
-└── README.md             # Project Documentation
+│   ├── config.js               # Shared defaults, profile migration & storage subscription
+│   ├── chat-injector.js        # Watch/live page script: wires the chat overlay and Danmaku to the player
+│   ├── chat-iframe.js          # Live chat iframe: message reader, 80ms batcher, overlay styling
+│   ├── draggable-box.js        # Floating chat box: drag, resize, minimize, saved position
+│   ├── danmaku-engine.js       # DOM/WAAPI Danmaku renderer and track allocation
+│   └── overlay.css             # Overlay, Danmaku and fullscreen layout rules
+├── popup/
+│   ├── popup.html              # Settings panel markup
+│   ├── popup.css               # Settings panel styles
+│   ├── popup.js                # Settings UI, English/Vietnamese text, reset command
+│   └── config-writer.js        # Coalesced, serialized storage writes
+├── icons/                      # Extension icons (SVG + 16/48/128px PNG) and their generator
+├── assets/                     # README screenshots (not packaged)
+├── scripts/
+│   ├── build.js                # Builds dist/chrome, dist/firefox and the ZIP/XPI packages
+│   ├── lint-firefox.js         # web-ext lint on dist/firefox with a known-warnings list
+│   └── perf/profile.mjs        # CPU/frame profiler over the Chrome DevTools Protocol
+├── tests/                      # Unit tests (node --test)
+├── .github/workflows/checks.yml  # Tests, lint, build and package upload on every PR
+├── CHROMEWEBSTORE.md           # Chrome Web Store listing text
+├── FIREFOXAMO.md               # Firefox Add-ons (AMO) listing text and submission steps
+└── docs/archive/               # Completed plans, kept for history
 ```
 
 ---

@@ -17,6 +17,7 @@
 
   function buildDynamicStyles(config = {}) {
     const hideItemBg = config.hideItemBg !== false;
+    const hideInputBox = config.hideInputBox !== false;
     const fontSize = config.chatFontSize || 14;
     const authorColor = config.authorTextColor || '#ff88aa';
     const messageColor = config.chatTextColor || '#ffffff';
@@ -63,27 +64,15 @@
         display: none !important;
       }
 
-      /* Chat Input Panel & Footer - AUTO HIDE by default, FADE IN on Mouse Hover */
+      /* Only the custom overlay receives this stylesheet. Leave YouTube's
+         own visibility rules intact when the hide-input setting is off. */
       yt-live-chat-message-input-renderer,
       #input-panel,
       #footer {
-        opacity: 0 !important;
-        pointer-events: none !important;
-        transition: opacity 0.2s ease !important;
+        ${hideInputBox ? 'display: none !important;' : ''}
         background: rgba(0, 0, 0, 0.7) !important;
         border-radius: 8px !important;
         margin-top: 4px !important;
-      }
-
-      /* FADE IN Input Box when Hovering mouse over Chat Box */
-      body:hover yt-live-chat-message-input-renderer,
-      body:hover #input-panel,
-      body:hover #footer,
-      yt-live-chat-renderer:hover yt-live-chat-message-input-renderer,
-      yt-live-chat-renderer:hover #input-panel,
-      yt-live-chat-renderer:hover #footer {
-        opacity: 1 !important;
-        pointer-events: auto !important;
       }
 
       /* Lightweight Chat Message Items */
@@ -126,7 +115,7 @@
 
   YTChatConfig.subscribe((updated) => {
     currentConfig = { ...currentConfig, ...updated };
-    if (isCustomOverlayFrame && ['hideItemBg', 'chatFontSize', 'authorTextColor', 'chatTextColor'].some(key => key in updated)) {
+    if (isCustomOverlayFrame && ['hideInputBox', 'hideItemBg', 'chatFontSize', 'authorTextColor', 'chatTextColor'].some(key => key in updated)) {
       styleEl.textContent = buildDynamicStyles(currentConfig);
     }
   });

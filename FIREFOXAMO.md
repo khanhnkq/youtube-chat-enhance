@@ -1,6 +1,6 @@
 # YouTube Custom Chat & Danmaku - Firefox Add-ons (AMO) Listing Metadata
 
-**Last Updated:** 2026-10-08  
+**Last Updated:** 2026-11-21  
 **Extension Version:** 1.2.0  
 **Manifest Version:** Manifest V3  
 **Gecko Add-on ID:** `youtube-custom-chat@khanhnkq`  
@@ -31,8 +31,8 @@ Elevate your YouTube livestream and video watching experience with **YouTube Cus
 
 1. **Transparent Floating Chat Overlays Video:**
    - Displays live chat directly over the video player during Fullscreen, Theatre Mode, or Windowed mode.
-   - Adjust background opacity smoothly from 100% transparent (0%) to frosted glass (Glassmorphism 100%).
-   - Adjustable background blur effect and customizable font sizes.
+   - Adjust background opacity smoothly from fully transparent (0%) to opaque (100%).
+   - Customizable chat font size.
 
 2. **Draggable & Resizable Floating Box:**
    - Drag and drop to position the chat window anywhere across the video player.
@@ -58,8 +58,8 @@ Nâng tầm trải nghiệm xem livestream và video YouTube với tiện ích *
 
 1. **Khung Chat Trong Suốt Nổi Trên Video:**
    - Hiển thị khung chat trực tiếp đè lên video ở cả chế độ Toàn màn hình (Fullscreen) và Rạp chiếu phim (Theatre Mode).
-   - Tùy chỉnh độ mờ nền linh hoạt từ trong suốt 100% (0%) đến kính mờ (Glassmorphism 100%).
-   - Tùy chỉnh hiệu ứng mờ nền (blur) và kích thước chữ.
+   - Tùy chỉnh độ mờ nền linh hoạt từ trong suốt hoàn toàn (0%) đến đặc (100%).
+   - Tùy chỉnh kích thước chữ của khung chat.
 
 2. **Kéo Thả & Đổi Kích Thước Tự Do:**
    - Kéo thả khung chat đến bất kỳ vị trí thuận tiện nào trên màn hình video.
@@ -126,19 +126,21 @@ Chạy lệnh sau tại thư mục gốc của project:
 npm run build
 ```
 File đóng gói cho Firefox sẽ được tạo tại:
-- `dist/YouTube-Custom-Chat-Firefox-v1.2.0.zip` (hoặc `dist/YouTube-Custom-Chat-Firefox-v1.2.0.xpi`)
+- `dist/YouTube-Custom-Chat-Firefox-v<version>.zip` (hoặc `dist/YouTube-Custom-Chat-Firefox-v<version>.xpi`), với `<version>` lấy từ `manifest.json`.
+
+Gói cài đặt không được lưu trong repo; luôn build lại từ mã nguồn của phiên bản cần nộp.
 
 ### Bước 2: Kiểm tra tính hợp lệ trước khi upload
 ```bash
 npm run lint:firefox
 ```
-Đảm bảo kết quả trả về `errors: 0`.
+Đảm bảo kết quả trả về `0 errors, 0 new warnings`. Hai cảnh báo đã biết về `data_collection_permissions` (liệt kê trong `scripts/firefox-lint-known-warnings.json`) được chấp nhận.
 
 ### Bước 3: Nộp lên Mozilla Add-ons (AMO)
 1. Đăng nhập vào [AMO Developer Hub](https://addons.mozilla.org/developers/).
 2. Nhấn nút **Submit a New Add-on** (hoặc **Submit a New Version** nếu cập nhật).
 3. Chọn kênh phân phối: **On this site** (Phát hành công khai trên kho tiện ích Mozilla).
-4. Upload file `dist/YouTube-Custom-Chat-Firefox-v1.2.0.zip`.
+4. Upload file `dist/YouTube-Custom-Chat-Firefox-v<version>.zip`.
 5. Hệ thống sẽ quét tự động (Automated validation) và xác nhận hợp lệ.
 6. Copy các thông tin từ mục **1. AMO Store Metadata**, **2. Detailed Description**, và **5. Reviewer Notes** ở trên dán vào các trường tương ứng.
 7. Nhấn **Submit Version** để hoàn tất nộp cho kiểm duyệt viên.
