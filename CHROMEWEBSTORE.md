@@ -38,7 +38,7 @@ Elevate your YouTube livestream and video watching experience with this feature-
 | Permission / Host Permission | Purpose / Justification |
 | --- | --- |
 | `storage` | Save user preferences (chat window position/size, opacity, Danmaku speed & font size). |
-| `https://www.youtube.com/*` | Inject content scripts to customize YouTube live chat layout and render Danmaku canvas over video player. |
+| `https://www.youtube.com/*` | Inject content scripts to customize YouTube live chat layout and render DOM/WAAPI Danmaku over the video player. |
 
 ---
 

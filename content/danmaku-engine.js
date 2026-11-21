@@ -1,11 +1,12 @@
 class DanmakuEngine {
   constructor() {
-    this.canvas = null;
-    this.ctx = null;
+    this.layer = null;
     this.playerEl = null;
     this.videoEl = null;
+    this.measureContext = null;
+    this.resizeObserver = null;
     this.isEnabled = true;
-    this.speed = 10; // seconds
+    this.speed = 10;
     this.fontSize = 22;
     this.opacity = 0.9;
     this.displayAreaRatio = 0.5;
@@ -14,64 +15,99 @@ class DanmakuEngine {
     this.hasShadow = true;
     this.config = {};
     this.tracks = [];
-    this.comments = [];
-    this.avatarCache = new Map();
-    this.animFrameId = null;
+    this.activeItems = [];
+    this.nodePool = [];
+    this.layerWidth = 0;
+    this.layerHeight = 0;
     this.isFS = false;
-    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
-    this.lastPauseTime = 0;
 
-    // Stable bound functions for proper cleanup
-    this.boundResize = this.resizeCanvas.bind(this);
-    this.boundVisibilityChange = this.onVisibilityChange.bind(this);
     this.boundVideoPlay = this.onVideoPlay.bind(this);
     this.boundVideoPause = this.onVideoPause.bind(this);
   }
 
   init(playerElement, config = {}) {
     try {
-      this.playerEl = playerElement || document.querySelector('#movie_player, .html5-video-player');
-      if (!this.playerEl) return false;
+      const player = playerElement || document.querySelector('#movie_player, .html5-video-player');
+      if (!player) return false;
 
+      if (this.playerEl && this.playerEl !== player) this.destroy();
+      if (this.resizeObserver) {
+        this.resizeObserver.disconnect();
+        this.resizeObserver = null;
+      }
+      this.clear();
+
+      this.playerEl = player;
       this.config = config || {};
-      this.speed = this.config.danmakuSpeed || 10;
-      this.fontSize = this.config.danmakuFontSize || 22;
-      this.opacity = (this.config.danmakuOpacity !== undefined ? this.config.danmakuOpacity : 90) / 100;
-      this.displayAreaRatio = parseFloat(this.config.danmakuArea || '0.5');
-      this.textColor = this.config.danmakuTextColor || '#ffffff';
-      this.hasStroke = !!this.config.danmakuTextStroke;
-      this.hasShadow = this.config.danmakuTextShadow !== false;
-      this.isEnabled = this.config.enableDanmaku !== undefined ? this.config.enableDanmaku : true;
+      this.applyConfig(this.config, true);
 
-      // Locate or create high-performance Canvas element inside YouTube Player
-      this.canvas = this.playerEl.querySelector('.yt-danmaku-canvas');
-      if (!this.canvas) {
-        this.canvas = document.createElement('canvas');
-        this.canvas.className = 'yt-danmaku-canvas';
-        this.canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:25;';
-        this.playerEl.appendChild(this.canvas);
+      for (const canvas of this.playerEl.querySelectorAll('.yt-danmaku-canvas')) {
+        canvas.remove();
       }
 
-      this.ctx = this.canvas.getContext('2d', { alpha: true });
-      this.resizeCanvas();
+      this.layer = this.playerEl.querySelector('.yt-danmaku-layer');
+      if (!this.layer) {
+        this.layer = document.createElement('div');
+        this.layer.className = 'yt-danmaku-layer';
+        this.playerEl.appendChild(this.layer);
+      }
 
-      // Hook Video State for Smart Sleep/Wake
+      if (!this.measureContext) {
+        this.measureContext = document.createElement('canvas').getContext('2d');
+      }
+
+      this.layerWidth = this.playerEl.clientWidth;
+      this.layerHeight = this.playerEl.clientHeight * this.displayAreaRatio;
+      this.updateLayerStyle();
+      this.recalculateTracks();
       this.attachVideoListeners();
 
-      // Hook Visibility Change to freeze/resume
-      document.removeEventListener('visibilitychange', this.boundVisibilityChange);
-      document.addEventListener('visibilitychange', this.boundVisibilityChange);
+      if (typeof ResizeObserver !== 'undefined') {
+        this.resizeObserver = new ResizeObserver(entries => {
+          const entry = entries.find(item => item.target === this.layer);
+          if (!entry) return;
+          this.layerWidth = entry.contentRect.width;
+          this.layerHeight = entry.contentRect.height;
+          this.recalculateTracks();
+        });
+        this.resizeObserver.observe(this.layer);
+      }
 
-      window.removeEventListener('resize', this.boundResize);
-      window.addEventListener('resize', this.boundResize);
-
-      // Always show canvas if Danmaku is enabled
-      this.onFullscreenChange(this.isFS || false, this.config);
-
+      this.updateLayerStyle();
+      this.recalculateTracks();
       return true;
     } catch (e) {
-      console.warn('[YT Chat Extension] Canvas DanmakuEngine init warning:', e);
+      console.warn('[YT Chat Extension] DOM DanmakuEngine init warning:', e);
       return false;
+    }
+  }
+
+  applyConfig(config, isInitial = false) {
+    if (isInitial) {
+      this.speed = config.danmakuSpeed || 10;
+      this.fontSize = config.danmakuFontSize || 22;
+      this.opacity = (config.danmakuOpacity !== undefined ? config.danmakuOpacity : 90) / 100;
+      this.displayAreaRatio = parseFloat(config.danmakuArea || '0.5');
+      this.textColor = config.danmakuTextColor || '#ffffff';
+      this.hasStroke = !!config.danmakuTextStroke;
+      this.hasShadow = config.danmakuTextShadow !== false;
+      this.isEnabled = config.enableDanmaku !== undefined ? config.enableDanmaku : true;
+      return;
+    }
+
+    if (config.enableDanmaku !== undefined) this.isEnabled = config.enableDanmaku;
+    if (config.danmakuSpeed !== undefined) this.speed = config.danmakuSpeed;
+    if (config.danmakuFontSize !== undefined) this.fontSize = config.danmakuFontSize;
+    if (config.danmakuOpacity !== undefined) this.opacity = config.danmakuOpacity / 100;
+    if (config.danmakuTextColor !== undefined) this.textColor = config.danmakuTextColor;
+    if (config.danmakuTextStroke !== undefined) this.hasStroke = !!config.danmakuTextStroke;
+    if (config.danmakuTextShadow !== undefined) this.hasShadow = config.danmakuTextShadow !== false;
+    if (config.danmakuArea !== undefined) {
+      const previousAreaRatio = this.displayAreaRatio;
+      this.displayAreaRatio = parseFloat(config.danmakuArea);
+      if (previousAreaRatio && Number.isFinite(this.displayAreaRatio)) {
+        this.layerHeight *= this.displayAreaRatio / previousAreaRatio;
+      }
     }
   }
 
@@ -92,97 +128,70 @@ class DanmakuEngine {
 
   isVideoPaused() {
     if (this.videoEl) return this.videoEl.paused;
-    const v = this.playerEl ? this.playerEl.querySelector('video') : document.querySelector('video');
-    return v ? v.paused : false;
+    const video = this.playerEl ? this.playerEl.querySelector('video') : document.querySelector('video');
+    return video ? video.paused : false;
   }
 
   onVideoPlay() {
-    if (this.lastPauseTime > 0) {
-      const now = Date.now();
-      const pauseDuration = now - this.lastPauseTime;
-      for (let i = 0; i < this.comments.length; i++) {
-        if (this.comments[i].startTime < this.lastPauseTime) {
-          this.comments[i].startTime += pauseDuration;
-        } else {
-          this.comments[i].startTime = now;
-        }
-      }
-      this.lastPauseTime = 0;
-    }
-    if (this.comments.length > 0 && this.isEnabled) {
-      this.startLoop();
+    for (const item of this.activeItems) {
+      if (item.animation) item.animation.play();
     }
   }
 
   onVideoPause() {
-    this.lastPauseTime = Date.now();
-    this.stopLoop();
-  }
-
-  onVisibilityChange() {
-    if (document.hidden) {
-      this.stopLoop();
-    } else {
-      if (!this.videoEl) this.attachVideoListeners();
-      if (this.comments.length > 0 && this.isEnabled && !this.isVideoPaused()) {
-        this.startLoop();
-      }
+    for (const item of this.activeItems) {
+      if (item.animation) item.animation.pause();
     }
   }
 
-  resizeCanvas() {
-    try {
-      if (!this.canvas || !this.playerEl) return;
-      this.dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const width = this.playerEl.clientWidth || window.innerWidth;
-      const height = this.playerEl.clientHeight || window.innerHeight;
+  parseHexColor(color) {
+    const match = /^#([a-f\d]{3}|[a-f\d]{6})$/i.exec(color);
+    if (!match) return null;
+    const hex = match[1].length === 3
+      ? [...match[1]].map(character => character + character).join('')
+      : match[1];
+    return [0, 2, 4].map(index => parseInt(hex.slice(index, index + 2), 16));
+  }
 
-      const targetW = Math.round(width * this.dpr);
-      const targetH = Math.round(height * this.dpr);
-
-      if (this.canvas.width !== targetW || this.canvas.height !== targetH) {
-        this.canvas.width = targetW;
-        this.canvas.height = targetH;
-      }
-      this.recalculateTracks();
-    } catch (e) {}
+  updateLayerStyle() {
+    if (!this.layer) return;
+    this.layer.style.position = 'absolute';
+    this.layer.style.top = '0';
+    this.layer.style.left = '0';
+    this.layer.style.width = '100%';
+    this.layer.style.height = `${this.displayAreaRatio * 100}%`;
+    this.layer.style.setProperty('--dm-font-size', `${this.fontSize}px`);
+    const color = this.textColor || '#ffffff';
+    const rgb = this.parseHexColor(color);
+    if (rgb) {
+      this.layer.style.setProperty('--dm-color', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${this.opacity})`);
+      this.layer.style.removeProperty('opacity');
+    } else {
+      this.layer.style.setProperty('--dm-color', color);
+      this.layer.style.opacity = this.opacity;
+    }
+    this.layer.style.setProperty('--dm-shadow-color', `rgba(0, 0, 0, ${0.85 * this.opacity})`);
+    this.layer.classList.toggle('dm-shadow', this.hasShadow);
+    this.layer.classList.toggle('dm-stroke', this.hasStroke);
+    this.layer.style.display = this.isEnabled ? '' : 'none';
+    if (!this.isEnabled) this.clear();
   }
 
   recalculateTracks() {
-    try {
-      if (!this.canvas) return;
-      const canvasHeight = (this.canvas.height > 0) ? (this.canvas.height / this.dpr) : 720;
-      const availableHeight = canvasHeight * this.displayAreaRatio;
-      const lineHeight = this.fontSize * 1.35;
-      const totalTracks = Math.max(1, Math.floor(availableHeight / lineHeight));
-
-      this.tracks = new Array(totalTracks).fill(0);
-    } catch (e) {
-      this.tracks = new Array(5).fill(0);
-    }
+    const lineHeight = this.fontSize * 1.35;
+    const trackCount = Math.max(1, Math.floor(this.layerHeight / lineHeight));
+    this.tracks = Number.isFinite(trackCount) ? new Array(trackCount).fill(0) : new Array(5).fill(0);
   }
 
   onFullscreenChange(isFullscreen, newConfig) {
     try {
       this.isFS = isFullscreen;
-      if (newConfig) this.config = { ...this.config, ...newConfig };
-      if (newConfig && newConfig.enableDanmaku !== undefined) {
-        this.isEnabled = newConfig.enableDanmaku;
+      if (newConfig) {
+        this.config = { ...this.config, ...newConfig };
+        if (newConfig.enableDanmaku !== undefined) this.isEnabled = newConfig.enableDanmaku;
       }
-
-      // Danmaku should ALWAYS be visible when enabled, both in Windowed & Fullscreen mode
-      const shouldShow = !!this.isEnabled;
-
-      if (this.canvas) {
-        this.canvas.style.display = shouldShow ? 'block' : 'none';
-        if (!shouldShow) {
-          this.stopLoop();
-          this.clear();
-        } else if (this.comments.length > 0 && !this.isVideoPaused()) {
-          this.startLoop();
-        }
-      }
-      this.resizeCanvas();
+      this.updateLayerStyle();
+      this.recalculateTracks();
     } catch (e) {}
   }
 
@@ -190,89 +199,55 @@ class DanmakuEngine {
     try {
       if (!newConfig) return;
       this.config = { ...this.config, ...newConfig };
-      if (newConfig.enableDanmaku !== undefined) {
-        this.isEnabled = newConfig.enableDanmaku;
-      }
-      if (newConfig.danmakuSpeed !== undefined) this.speed = newConfig.danmakuSpeed;
-      if (newConfig.danmakuFontSize !== undefined) this.fontSize = newConfig.danmakuFontSize;
-      if (newConfig.danmakuOpacity !== undefined) this.opacity = newConfig.danmakuOpacity / 100;
-      if (newConfig.danmakuTextColor !== undefined) this.textColor = newConfig.danmakuTextColor;
-      if (newConfig.danmakuTextStroke !== undefined) this.hasStroke = !!newConfig.danmakuTextStroke;
-      if (newConfig.danmakuTextShadow !== undefined) this.hasShadow = newConfig.danmakuTextShadow !== false;
-      if (newConfig.danmakuArea !== undefined) this.displayAreaRatio = parseFloat(newConfig.danmakuArea);
-
-      if (this.canvas) {
-        if (this.isEnabled) {
-          this.canvas.style.display = 'block';
-          if (this.comments.length > 0 && !this.isVideoPaused()) {
-            this.startLoop();
-          }
-        } else {
-          this.canvas.style.display = 'none';
-          this.clear();
-          this.stopLoop();
-        }
-      }
-
-      this.onFullscreenChange(this.isFS || false, newConfig);
+      this.applyConfig(newConfig);
+      this.updateLayerStyle();
+      this.recalculateTracks();
     } catch (e) {}
   }
 
-  getOrCreateCircularAvatar(url) {
-    if (!url) return null;
-    if (this.avatarCache.has(url)) {
-      return this.avatarCache.get(url);
+  getItemNode() {
+    const node = this.nodePool.pop() || document.createElement('div');
+    node.replaceChildren();
+    for (const attribute of [...node.attributes]) {
+      node.removeAttribute(attribute.name);
     }
+    node.className = 'yt-danmaku-item';
+    return node;
+  }
 
-    const img = new Image();
-    const entry = { canvas: null, ready: false };
-    this.avatarCache.set(url, entry);
+  recycleNode(node) {
+    if (this.nodePool.length < 40) this.nodePool.push(node);
+  }
 
-    if (this.avatarCache.size > 200) {
-      const firstKey = this.avatarCache.keys().next().value;
-      this.avatarCache.delete(firstKey);
+  removeActiveItem(item, recycle = true) {
+    const index = this.activeItems.indexOf(item);
+    if (index !== -1) this.activeItems.splice(index, 1);
+    if (item.animation) {
+      item.animation.onfinish = null;
+      item.animation.oncancel = null;
+      item.animation.cancel();
+      item.animation = null;
     }
+    item.el.remove();
+    if (recycle) this.recycleNode(item.el);
+  }
 
-    img.onload = () => {
-      try {
-        const size = 64; // High-res offscreen stamp
-        const offCanvas = document.createElement('canvas');
-        offCanvas.width = size;
-        offCanvas.height = size;
-        const octx = offCanvas.getContext('2d');
-        octx.beginPath();
-        octx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
-        octx.closePath();
-        octx.clip();
-        octx.drawImage(img, 0, 0, size, size);
-
-        entry.canvas = offCanvas;
-        entry.ready = true;
-      } catch (err) {
-        entry.canvas = img;
-        entry.ready = true;
-      }
-    };
-    img.onerror = () => {
-      this.avatarCache.delete(url);
-    };
-    img.src = url;
-
-    return entry;
+  finishItem(item) {
+    if (!this.activeItems.includes(item)) return;
+    this.removeActiveItem(item);
   }
 
   addComment(msgData) {
     try {
-      if (!this.isEnabled || !this.ctx || !msgData || !msgData.text) return;
+      if (!this.isEnabled || !this.layer || !this.measureContext || !msgData || !msgData.text) return;
 
-      if (this.comments.length >= 120) {
-        this.comments.shift(); // Evict oldest comment to always display fresh incoming live chat
+      if (this.activeItems.length >= 80) {
+        this.removeActiveItem(this.activeItems[0]);
       }
 
       const now = Date.now();
       if (!this.tracks || this.tracks.length === 0) this.recalculateTracks();
 
-      // Find available track
       let trackIndex = -1;
       for (let i = 0; i < this.tracks.length; i++) {
         if (this.tracks[i] <= now) {
@@ -292,54 +267,65 @@ class DanmakuEngine {
       }
       if (trackIndex === -1) trackIndex = 0;
 
-      // Pre-measure text width
-      this.ctx.font = `bold ${this.fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-      const textMetrics = this.ctx.measureText(msgData.text);
-      const textWidth = textMetrics.width;
-
-      // Offscreen circular avatar cache
-      const avatarEntry = msgData.avatar ? this.getOrCreateCircularAvatar(msgData.avatar) : null;
-
-      // Pre-measure badge width for SuperChat
-      let badgeWidth = 0;
-      let badgeText = '';
-      if (msgData.isSuperChat) {
-        badgeText = msgData.amount || 'SuperChat';
-        badgeWidth = this.ctx.measureText(badgeText).width + 10;
-      }
-
-      const avatarSpacing = avatarEntry ? this.fontSize * 1.3 : 0;
-      const badgeSpacing = msgData.isSuperChat ? badgeWidth + 8 : 0;
+      const text = String(msgData.text);
+      this.measureContext.font = `bold ${this.fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      const textWidth = this.measureContext.measureText(text).width;
+      const hasAvatar = !!msgData.avatar;
+      const isSuperChat = !!msgData.isSuperChat;
+      const badgeText = isSuperChat ? (msgData.amount || 'SuperChat') : '';
+      const badgeTextWidth = isSuperChat ? this.measureContext.measureText(badgeText).width : 0;
+      const avatarSpacing = hasAvatar ? this.fontSize * 1.1 + 6 : 0;
+      const badgeSpacing = isSuperChat ? badgeTextWidth + 10 + 6 : 0;
       const totalWidth = textWidth + avatarSpacing + badgeSpacing;
-
-      const canvasWidth = (this.canvas && this.canvas.width > 0) ? (this.canvas.width / this.dpr) : (window.innerWidth || 1280);
-      const speedPxPerMs = (canvasWidth + totalWidth) / (this.speed * 1000);
+      const speedPxPerMs = (this.layerWidth + totalWidth) / (this.speed * 1000);
       const timeToClearRightEdge = (totalWidth + 30) / speedPxPerMs;
 
       this.tracks[trackIndex] = now + Math.min(timeToClearRightEdge, this.speed * 800);
 
-      this.comments.push({
-        text: msgData.text,
-        author: msgData.author || '',
-        avatarEntry,
-        isSuperChat: msgData.isSuperChat || false,
-        badgeText,
-        badgeWidth,
-        trackIndex,
-        startTime: now,
-        width: totalWidth,
-        textWidth
-      });
+      const lineHeight = this.fontSize * 1.35;
+      const y = trackIndex * lineHeight + 12;
+      const node = this.getItemNode();
+      node.textContent = text;
 
-      // Lazy re-check video listeners if needed
-      if (!this.videoEl) {
-        this.attachVideoListeners();
+      if (hasAvatar) {
+        const avatar = document.createElement('img');
+        avatar.className = 'yt-danmaku-avatar';
+        avatar.decoding = 'async';
+        avatar.src = msgData.avatar;
+        avatar.alt = '';
+        node.insertBefore(avatar, node.firstChild);
       }
 
-      // Wake up render loop if not running
-      if (!this.animFrameId && !document.hidden) {
-        this.startLoop();
+      if (isSuperChat) {
+        const badge = document.createElement('span');
+        badge.className = 'yt-danmaku-badge';
+        badge.textContent = badgeText;
+        node.insertBefore(badge, hasAvatar ? node.childNodes[1] : node.firstChild);
       }
+
+      this.layer.appendChild(node);
+      let animation;
+      try {
+        animation = node.animate([
+          { transform: `translate3d(${this.layerWidth}px,${y}px,0)` },
+          { transform: `translate3d(${-totalWidth}px,${y}px,0)` }
+        ], {
+          duration: this.speed * 1000,
+          easing: 'linear',
+          fill: 'none'
+        });
+      } catch (e) {
+        node.remove();
+        this.recycleNode(node);
+        return;
+      }
+
+      const item = { el: node, animation };
+      this.activeItems.push(item);
+      animation.onfinish = () => this.finishItem(item);
+
+      if (!this.videoEl) this.attachVideoListeners();
+      if (this.isVideoPaused()) animation.pause();
     } catch (e) {}
   }
 
@@ -350,141 +336,30 @@ class DanmakuEngine {
     }
   }
 
-  startLoop() {
-    if (this.animFrameId) return;
-    const loop = () => {
-      this.render();
-      if (this.comments.length > 0 && this.isEnabled && !document.hidden && !this.isVideoPaused()) {
-        this.animFrameId = requestAnimationFrame(loop);
-      } else {
-        // Sleep when no comments, tab hidden, or video paused
-        this.stopLoop();
-      }
-    };
-    this.animFrameId = requestAnimationFrame(loop);
-  }
-
-  stopLoop() {
-    if (this.animFrameId) {
-      cancelAnimationFrame(this.animFrameId);
-      this.animFrameId = null;
-    }
-  }
-
-  render() {
-    try {
-      if (!this.isEnabled || !this.ctx || !this.canvas) return;
-
-      const now = Date.now();
-      const canvasWidth = this.canvas.width / this.dpr;
-      const canvasHeight = this.canvas.height / this.dpr;
-
-      // Clear canvas
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-      if (this.comments.length === 0) return;
-
-      this.ctx.save();
-      this.ctx.scale(this.dpr, this.dpr);
-      this.ctx.globalAlpha = this.opacity;
-      this.ctx.font = `bold ${this.fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-      this.ctx.textBaseline = 'top';
-
-      const durationMs = this.speed * 1000;
-      const lineHeight = this.fontSize * 1.35;
-      const remainingComments = [];
-
-      // Setup Shadow properties once per frame
-      if (this.hasShadow) {
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-        this.ctx.shadowBlur = 4;
-        this.ctx.shadowOffsetX = 1;
-        this.ctx.shadowOffsetY = 2;
-      } else {
-        this.ctx.shadowColor = 'transparent';
-        this.ctx.shadowBlur = 0;
-        this.ctx.shadowOffsetX = 0;
-        this.ctx.shadowOffsetY = 0;
-      }
-
-      for (let i = 0; i < this.comments.length; i++) {
-        const item = this.comments[i];
-        const elapsed = now - item.startTime;
-        if (elapsed > durationMs) continue; // Out of life
-
-        const progress = elapsed / durationMs;
-        const x = canvasWidth - progress * (canvasWidth + item.width);
-        const y = item.trackIndex * lineHeight + 12;
-
-        if (x + item.width < 0) continue; // Out of screen
-
-        let currentX = x;
-
-        // Blazing Fast Offscreen Pre-rendered Avatar (Zero clipping overhead)
-        if (item.avatarEntry && item.avatarEntry.ready && item.avatarEntry.canvas) {
-          const avatarSize = this.fontSize * 1.1;
-          this.ctx.drawImage(item.avatarEntry.canvas, currentX, y, avatarSize, avatarSize);
-          currentX += avatarSize + 6;
-        }
-
-        // Render SuperChat Badge (Pre-calculated metrics)
-        if (item.isSuperChat && item.badgeWidth > 0) {
-          const badgeH = this.fontSize * 1.1;
-          this.ctx.fillStyle = '#ffb300';
-          this.ctx.beginPath();
-          if (this.ctx.roundRect) {
-            this.ctx.roundRect(currentX, y, item.badgeWidth, badgeH, 4);
-          } else {
-            this.ctx.rect(currentX, y, item.badgeWidth, badgeH);
-          }
-          this.ctx.fill();
-
-          this.ctx.fillStyle = '#000000';
-          this.ctx.fillText(item.badgeText, currentX + 5, y + 1);
-          currentX += item.badgeWidth + 8;
-        }
-
-        // Render Comment Text
-        if (this.hasStroke) {
-          this.ctx.lineWidth = 3;
-          this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
-          this.ctx.strokeText(item.text, currentX, y);
-        }
-
-        this.ctx.fillStyle = this.textColor || '#ffffff';
-        this.ctx.fillText(item.text, currentX, y);
-
-        remainingComments.push(item);
-      }
-
-      this.ctx.restore();
-      this.comments = remainingComments;
-    } catch (e) {}
-  }
-
   clear() {
-    try {
-      this.comments = [];
-      if (this.ctx && this.canvas) {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      }
-    } catch (e) {}
+    for (const item of this.activeItems.slice()) {
+      this.removeActiveItem(item, false);
+    }
+    this.activeItems = [];
+    this.nodePool = [];
   }
 
   destroy() {
-    this.stopLoop();
     this.clear();
-    window.removeEventListener('resize', this.boundResize);
-    document.removeEventListener('visibilitychange', this.boundVisibilityChange);
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
     if (this.videoEl) {
       this.videoEl.removeEventListener('play', this.boundVideoPlay);
       this.videoEl.removeEventListener('pause', this.boundVideoPause);
       this.videoEl = null;
     }
-    if (this.canvas && this.canvas.parentNode) {
-      this.canvas.parentNode.removeChild(this.canvas);
-      this.canvas = null;
+    if (this.layer) {
+      this.layer.remove();
+      this.layer = null;
     }
+    this.playerEl = null;
   }
 }
 

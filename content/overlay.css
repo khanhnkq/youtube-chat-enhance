@@ -187,68 +187,6 @@
 }
 
 /* ---------------------------------------------------- */
-/* DANMAKU / BULLET COMMENT LAYER */
-/* ---------------------------------------------------- */
-.yt-danmaku-container {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-  z-index: 2147483646 !important;
-  contain: layout style paint !important;
-}
-
-.yt-danmaku-container.is-hidden {
-  display: none !important;
-}
-
-.yt-danmaku-item {
-  position: absolute;
-  white-space: nowrap;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-weight: 700;
-  line-height: 1.2;
-  color: #ffffff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  will-change: transform;
-  pointer-events: none !important;
-  user-select: none;
-  contain: layout style paint !important;
-}
-
-.yt-danmaku-avatar {
-  width: 1.2em;
-  height: 1.2em;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-}
-
-.yt-danmaku-badge {
-  font-size: 0.75em;
-  padding: 1px 4px;
-  border-radius: 4px;
-  background: rgba(255, 0, 85, 0.85);
-  color: #fff;
-  font-weight: bold;
-}
-
-@keyframes ytDanmakuFly {
-  0% {
-    transform: translate3d(100vw, 0, 0);
-  }
-  100% {
-    transform: translate3d(-100%, 0, 0);
-  }
-}
-
-/* ---------------------------------------------------- */
 /* AUTO-HIDE NATIVE YOUTUBE CHAT & EXPAND VIDEO PLAYER  */
 /* ---------------------------------------------------- */
 body.yt-native-chat-hidden #secondary,
@@ -299,4 +237,50 @@ body.yt-native-chat-hidden ytd-watch-flexy {
   --ytd-watch-flexy-sidebar-width: 0px !important;
 }
 
+/* ---------------------------------------------------- */
+/* DOM / WAAPI DANMAKU LAYER */
+/* ---------------------------------------------------- */
+.yt-danmaku-layer {
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 25;
+  contain: strict;
+}
 
+.yt-danmaku-item {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: pre;
+  font: bold var(--dm-font-size) -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.35;
+  color: var(--dm-color);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dm-shadow .yt-danmaku-item {
+  text-shadow: 1px 1px 0 var(--dm-shadow-color), 0 0 1px var(--dm-shadow-color);
+}
+
+.dm-stroke .yt-danmaku-item {
+  -webkit-text-stroke: 1.5px var(--dm-shadow-color);
+  paint-order: stroke fill;
+}
+
+img.yt-danmaku-avatar {
+  width: calc(var(--dm-font-size) * 1.1);
+  height: calc(var(--dm-font-size) * 1.1);
+  border-radius: 50%;
+  flex: none;
+}
+
+span.yt-danmaku-badge {
+  background: #ffb300;
+  color: #000;
+  border-radius: 4px;
+  padding: 0 5px;
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+}

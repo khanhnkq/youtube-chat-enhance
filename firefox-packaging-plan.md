@@ -8,7 +8,7 @@
 
 1. **Tuân thủ chuẩn Firefox MV3 & AMO**: Đáp ứng 100% tiêu chuẩn manifest của Mozilla Firefox (Firefox 109+), vượt qua `web-ext lint` với 0 lỗi (0 errors, 0 warnings).
 2. **Tự động hóa build 2 nền tảng (Chrome & Firefox)**: Xây dựng script đóng gói tự động (`scripts/build.js`), tạo ra 2 bản zip riêng biệt (`dist/chrome` và `dist/firefox`), loại bỏ file rác/ảnh demo nặng (~700KB) để tối ưu kích thước gói cài đặt chỉ còn ~30KB.
-3. **Đảm bảo tính tương thích chéo (Cross-browser Compatibility)**: Kiểm tra hoạt động của toàn bộ logic Content Scripts, Canvas Danmaku, Iframe Observer, Draggable Box và Popup Settings trên engine Gecko của Firefox.
+3. **Đảm bảo tính tương thích chéo (Cross-browser Compatibility)**: Kiểm tra hoạt động của toàn bộ logic Content Scripts, DOM/WAAPI Danmaku, Iframe Observer, Draggable Box và Popup Settings trên engine Gecko của Firefox.
 4. **Bộ tài liệu đăng tải AMO (`FIREFOXAMO.md`)**: Chuẩn bị sẵn thông tin mô tả, danh mục, giải trình quyền hạn và khai báo Data Collection Consent theo chính sách mới nhất của Mozilla.
 
 ---
@@ -42,7 +42,7 @@
   - Namespace `chrome.storage.local`, `chrome.storage.onChanged`, `chrome.runtime.onMessage`, `chrome.tabs.query` tương thích hoàn toàn trên Firefox 109+.
 
 - [x] **Task 2.2 - Kiểm tra CSS & Canvas Rendering**:
-  - CSS glassmorphism, flex layout, `backdrop-filter`, Canvas 2D engine tương thích chuẩn với Gecko engine.
+  - CSS glassmorphism, flex layout, `backdrop-filter`, DOM/WAAPI renderer tương thích chuẩn với Gecko engine.
 
 ---
 
