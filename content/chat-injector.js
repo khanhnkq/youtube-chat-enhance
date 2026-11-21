@@ -17,7 +17,87 @@
 
   let initialized = false;
   let watchFlexyObserver = null;
+  let nativeChatCollapsedFor = null;
+  let nativeChatCollapsePoll = null;
   const receivedMsgCache = new Map();
+
+  function getCurrentVideoId() {
+    const chatBox = window.ytDraggableChatBox;
+    return chatBox && typeof chatBox.getVideoId === 'function' ? chatBox.getVideoId() : null;
+  }
+
+  function clearNativeChatCollapsePoll() {
+    if (!nativeChatCollapsePoll) return;
+    if (nativeChatCollapsePoll.timer !== null) {
+      clearTimeout(nativeChatCollapsePoll.timer);
+    }
+    nativeChatCollapsePoll = null;
+  }
+
+  function collapseNativeChatForVideo() {
+    if (currentConfig.enableFloatingChat === false) {
+      clearNativeChatCollapsePoll();
+      return;
+    }
+
+    const videoId = getCurrentVideoId();
+    if (!videoId || videoId === nativeChatCollapsedFor) return;
+    if (nativeChatCollapsePoll && nativeChatCollapsePoll.videoId === videoId) return;
+
+    clearNativeChatCollapsePoll();
+    const pollState = { videoId, startedAt: Date.now(), timer: null };
+    nativeChatCollapsePoll = pollState;
+
+    const poll = () => {
+      if (nativeChatCollapsePoll !== pollState) return;
+      pollState.timer = null;
+
+      if (
+        currentConfig.enableFloatingChat === false ||
+        getCurrentVideoId() !== videoId ||
+        nativeChatCollapsedFor === videoId
+      ) {
+        clearNativeChatCollapsePoll();
+        return;
+      }
+
+      const chatFrame = document.querySelector('ytd-live-chat-frame');
+      if (chatFrame) {
+        if (chatFrame.hasAttribute('collapsed')) {
+          nativeChatCollapsedFor = videoId;
+          clearNativeChatCollapsePoll();
+          return;
+        }
+
+        const toggleButton = chatFrame.querySelector('#show-hide-button button');
+        if (toggleButton) {
+          toggleButton.click();
+          nativeChatCollapsedFor = videoId;
+          clearNativeChatCollapsePoll();
+          return;
+        }
+      }
+
+      if (Date.now() - pollState.startedAt >= 10_000) {
+        clearNativeChatCollapsePoll();
+        return;
+      }
+      pollState.timer = setTimeout(poll, 500);
+    };
+
+    poll();
+  }
+
+  function handleFloatingChatConfigChange(wasEnabled) {
+    const isEnabled = currentConfig.enableFloatingChat !== false;
+    if (wasEnabled && !isEnabled) {
+      clearNativeChatCollapsePoll();
+    } else if (!wasEnabled && isEnabled) {
+      clearNativeChatCollapsePoll();
+      nativeChatCollapsedFor = null;
+      collapseNativeChatForVideo();
+    }
+  }
 
   function checkFullscreen() {
     const playerEl = document.querySelector('#movie_player, .html5-video-player');
@@ -111,6 +191,7 @@
         window.ytDraggableChatBox.init(playerEl, currentConfig);
       }
 
+      collapseNativeChatForVideo();
       setupWatchFlexyObserver();
       handleFullscreenState();
       initialized = true;
@@ -166,6 +247,7 @@
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
     chrome.storage.onChanged.addListener((changes, areaName) => {
       if (areaName === 'local') {
+        const wasFloatingChatEnabled = currentConfig.enableFloatingChat !== false;
         const updatedConfig = {};
         for (const key in changes) {
           updatedConfig[key] = changes[key].newValue;
@@ -180,6 +262,7 @@
           window.ytDraggableChatBox.updateConfig(updatedConfig);
         }
 
+        handleFloatingChatConfigChange(wasFloatingChatEnabled);
         handleFullscreenState();
       }
     });
@@ -190,6 +273,7 @@
     try {
       chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message && message.action === 'UPDATE_CONFIG') {
+          const wasFloatingChatEnabled = currentConfig.enableFloatingChat !== false;
           const newConfig = message.config || {};
           currentConfig = { ...currentConfig, ...newConfig };
 
@@ -201,6 +285,7 @@
             window.ytDraggableChatBox.updateConfig(newConfig);
           }
 
+          handleFloatingChatConfigChange(wasFloatingChatEnabled);
           handleFullscreenState();
 
           sendResponse({ status: 'OK' });
@@ -217,6 +302,7 @@
 
   function resetOnNavigation() {
     initialized = false;
+    clearNativeChatCollapsePoll();
     receivedMsgCache.clear();
     if (watchFlexyObserver) {
       watchFlexyObserver.disconnect();
