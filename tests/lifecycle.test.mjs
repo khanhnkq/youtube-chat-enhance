@@ -50,6 +50,7 @@ test('switching videos replaces the overlay iframe instead of navigating it', ()
     document: { createElement: createIframe },
     URLSearchParams
   });
+  vm.runInContext(source('content/runtime.js'), ctx);
   vm.runInContext(source('content/draggable-box.js'), ctx);
   const box = ctx.window.ytDraggableChatBox;
   Object.assign(box, { iframeContainer: container, config: {}, playerEl: { getVideoData: () => ({ video_id: videoId }) } });
@@ -107,6 +108,7 @@ for (const [label, startsCollapsed, endsCollapsed, nextVideo, viewerReopensAndHi
   test(`turning the floating chat off ${label}`, async () => {
     const { ctx, storage, chatFrame, video, viewerToggle } = nativeChatHarness({ collapsed: startsCollapsed });
     await ctx.YTChatConfig.load();
+    vm.runInContext(source('content/runtime.js'), ctx);
     vm.runInContext(source('content/chat-injector.js'), ctx);
     await storage.local.set({ enableFloatingChat: false });
     await settle();
@@ -145,6 +147,7 @@ function placementHarness({ saved, player, frames = null }) {
   };
   const document = { body: { style: {} }, addEventListener() {}, removeEventListener() {} };
   const ctx = vm.createContext({ chrome: { runtime: { id: 'test' }, storage }, window: {}, document, URLSearchParams, requestAnimationFrame: fn => (frames ? frames.push(fn) : fn()) });
+  vm.runInContext(source('content/runtime.js'), ctx);
   vm.runInContext(source('content/draggable-box.js'), ctx);
   const box = ctx.window.ytDraggableChatBox;
   Object.assign(box, {

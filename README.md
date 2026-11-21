@@ -82,7 +82,7 @@ Every pull request runs the checks in `.github/workflows/checks.yml`. Run the sa
 npm run check
 ```
 - `npm test`: unit tests.
-- `npm run lint`: ESLint; fails on unused variables and empty blocks. The empty `catch` blocks that already existed are counted per file in `eslint-suppressions.json`, so only new ones fail. After removing one, run `npx eslint . --prune-suppressions`.
+- `npm run lint`: ESLint; fails on unused variables and empty blocks. A `catch` in a content script reports through `YTChatRuntime.diagnostics.report` (`content/runtime.js`), which logs an unexpected error a few times per source and then only counts it.
 - `npm run build`: builds both packages.
 - `npm run lint:firefox`: `web-ext lint` on `dist/firefox`; fails on errors and on warnings that are not listed in `scripts/firefox-lint-known-warnings.json`.
 

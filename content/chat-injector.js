@@ -1,6 +1,9 @@
 (function () {
   'use strict';
 
+  const { selectors, diagnostics, createDedupeCache } = YTChatRuntime;
+  const MAX_PLAYER_LOOKUPS = 10;
+
   let currentConfig = { ...YTChatConfig.defaults };
 
   let initialized = false;
@@ -9,7 +12,8 @@
   let nativeChatAutoCollapsed = false;
   let nativeChatCollapsePoll = null;
   let resizeTimeout = null;
-  const receivedMsgCache = new Map();
+  let playerLookups = 0;
+  const receivedMessages = createDedupeCache();
 
   function getCurrentVideoId() {
     const chatBox = window.ytDraggableChatBox;
@@ -51,7 +55,7 @@
         return;
       }
 
-      const chatFrame = document.querySelector('ytd-live-chat-frame');
+      const chatFrame = document.querySelector(selectors.nativeChatFrame);
       if (chatFrame) {
         if (chatFrame.hasAttribute('collapsed')) {
           nativeChatCollapsedFor = videoId;
@@ -59,7 +63,7 @@
           return;
         }
 
-        const toggleButton = chatFrame.querySelector('#show-hide-button button');
+        const toggleButton = chatFrame.querySelector(selectors.nativeChatToggle);
         if (toggleButton) {
           toggleButton.click();
           nativeChatCollapsedFor = videoId;
@@ -82,9 +86,9 @@
   // The native chat is the only Danmaku source while the floating chat is off.
   // YouTube keeps the collapsed state across SPA navigation, so this is not tied to one video.
   function restoreAutoCollapsedNativeChat() {
-    const chatFrame = document.querySelector('ytd-live-chat-frame');
+    const chatFrame = document.querySelector(selectors.nativeChatFrame);
     if (nativeChatAutoCollapsed && chatFrame && chatFrame.hasAttribute('collapsed')) {
-      const toggleButton = chatFrame.querySelector('#show-hide-button button');
+      const toggleButton = chatFrame.querySelector(selectors.nativeChatToggle);
       if (toggleButton) toggleButton.click();
     }
     nativeChatAutoCollapsed = false;
@@ -104,8 +108,8 @@
   }
 
   function checkFullscreen() {
-    const playerEl = document.querySelector('#movie_player, .html5-video-player');
-    const watchFlexy = document.querySelector('ytd-watch-flexy');
+    const playerEl = document.querySelector(selectors.player);
+    const watchFlexy = document.querySelector(selectors.watchFlexy);
 
     const isFullscreen = !!(
       document.fullscreenElement ||
@@ -126,7 +130,7 @@
 
   function setupWatchFlexyObserver() {
     try {
-      const watchFlexy = document.querySelector('ytd-watch-flexy');
+      const watchFlexy = document.querySelector(selectors.watchFlexy);
       if (!watchFlexy) return;
 
       if (watchFlexyObserver) {
@@ -142,7 +146,9 @@
         attributes: true,
         attributeFilter: ['fullscreen', 'theater', 'is-two-columns_']
       });
-    } catch (e) {}
+    } catch (error) {
+      diagnostics.report('watch layout observer', error);
+    }
   }
 
   function handleFullscreenState() {
@@ -172,19 +178,21 @@
       if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
         currentConfig = await YTChatConfig.load();
       }
-    } catch (e) {}
+    } catch (error) {
+      // The page keeps working with the defaults or the last loaded settings.
+      diagnostics.report('page config load', error);
+    }
 
     try {
-      const playerEl = document.querySelector('#movie_player, .html5-video-player');
+      const playerEl = document.querySelector(selectors.player);
       if (!playerEl) {
-        if (!window.__ytChatRetryCount) window.__ytChatRetryCount = 0;
-        if (window.__ytChatRetryCount < 10) {
-          window.__ytChatRetryCount++;
+        if (playerLookups < MAX_PLAYER_LOOKUPS) {
+          playerLookups++;
           setTimeout(initExtension, 500);
         }
         return;
       }
-      window.__ytChatRetryCount = 0;
+      playerLookups = 0;
 
       if (window.ytDanmakuEngine) {
         window.ytDanmakuEngine.init(playerEl, currentConfig);
@@ -198,29 +206,14 @@
       setupWatchFlexyObserver();
       handleFullscreenState();
       initialized = true;
-    } catch (err) {}
-  }
-
-  function processPayload(payload, now) {
-    if (!payload || !payload.text) return null;
-
-    const dedupeKey = (payload.id && payload.id.length > 8 && !payload.id.startsWith('rand_'))
-      ? payload.id
-      : `${payload.author || ''}_${payload.text}_${Math.floor(now / 1500)}`;
-
-    if (receivedMsgCache.has(dedupeKey)) return null;
-
-    receivedMsgCache.set(dedupeKey, now);
-    if (receivedMsgCache.size > 300) {
-      const firstKey = receivedMsgCache.keys().next().value;
-      receivedMsgCache.delete(firstKey);
+    } catch (error) {
+      diagnostics.report('page init', error);
     }
-    return payload;
   }
 
   function isTrustedChatSource(source) {
     const overlayIframe = document.querySelector('.yt-custom-chat-overlay iframe');
-    const nativeIframe = document.querySelector('ytd-live-chat-frame iframe');
+    const nativeIframe = document.querySelector(selectors.nativeChatIframe);
     return (
       (overlayIframe && overlayIframe.contentWindow === source) ||
       (nativeIframe && nativeIframe.contentWindow === source)
@@ -228,38 +221,15 @@
   }
 
   window.addEventListener('message', (event) => {
-    if (!event.data) return;
-    if (
-      event.data.type !== 'YT_DANMAKU_BATCH' &&
-      event.data.type !== 'YT_DANMAKU_MESSAGE'
-    ) {
-      return;
-    }
+    if (!event.data || event.data.type !== 'YT_DANMAKU_BATCH') return;
     if (event.origin !== 'https://www.youtube.com' || !isTrustedChatSource(event.source)) return;
 
-    if (event.data.type === 'YT_DANMAKU_BATCH') {
-      const batch = event.data.batch;
-      if (!Array.isArray(batch) || batch.length === 0) return;
+    const batch = event.data.batch;
+    if (!Array.isArray(batch) || !window.ytDanmakuEngine || !currentConfig.enableDanmaku) return;
 
-      if (!window.ytDanmakuEngine || !currentConfig.enableDanmaku) return;
-
-      const now = Date.now();
-      const validPayloads = [];
-      for (let i = 0; i < batch.length; i++) {
-        const item = processPayload(batch[i], now);
-        if (item) validPayloads.push(item);
-      }
-
-      if (validPayloads.length > 0) {
-        window.ytDanmakuEngine.addCommentBatch(validPayloads);
-      }
-    } else if (event.data.type === 'YT_DANMAKU_MESSAGE') {
-      const payload = event.data.payload;
-      const valid = processPayload(payload, Date.now());
-      if (valid && window.ytDanmakuEngine && currentConfig.enableDanmaku) {
-        window.ytDanmakuEngine.addComment(valid);
-      }
-    }
+    const now = Date.now();
+    const newMessages = batch.filter(payload => payload && payload.text && receivedMessages.accept(payload, now));
+    if (newMessages.length > 0) window.ytDanmakuEngine.addCommentBatch(newMessages);
   });
 
   // Storage is the only configuration update channel.
@@ -288,13 +258,15 @@
           sendResponse({ status: 'OK' });
         }
       });
-    } catch (e) {}
+    } catch (error) {
+      diagnostics.report('popup command listener', error);
+    }
   }
 
   // A viewer toggling YouTube's chat owns its state from then on; only the extension's own collapse is undone.
   document.addEventListener('click', (event) => {
     const target = event.target;
-    if (event.isTrusted && target && target.closest && target.closest('ytd-live-chat-frame #show-hide-button')) {
+    if (event.isTrusted && target && target.closest && target.closest(selectors.nativeChatToggleArea)) {
       nativeChatAutoCollapsed = false;
     }
   }, true);
@@ -317,7 +289,7 @@
       resizeTimeout = null;
     }
     clearNativeChatCollapsePoll();
-    receivedMsgCache.clear();
+    receivedMessages.clear();
     if (watchFlexyObserver) {
       watchFlexyObserver.disconnect();
       watchFlexyObserver = null;

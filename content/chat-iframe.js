@@ -1,6 +1,9 @@
 (function () {
   'use strict';
 
+  const { selectors, messageTags, diagnostics } = YTChatRuntime;
+  const messageTagNames = Object.values(messageTags);
+
   let currentConfig = { ...YTChatConfig.defaults };
 
   const isCustomOverlayFrame =
@@ -108,7 +111,7 @@
   const configReady = YTChatConfig.load().then((stored) => {
     currentConfig = stored;
     if (isCustomOverlayFrame) styleEl.textContent = buildDynamicStyles(currentConfig);
-  }).catch(() => {});
+  }).catch(error => diagnostics.report('chat reader config load', error));
 
   YTChatConfig.subscribe((updated) => {
     currentConfig = { ...currentConfig, ...updated };
@@ -136,30 +139,22 @@
   let flushTimer = null;
 
   function isMessageElement(el) {
-    if (!el || !el.tagName) return false;
-    const tag = el.tagName.toLowerCase();
-    return tag === 'yt-live-chat-text-message-renderer' ||
-           tag === 'yt-live-chat-paid-message-renderer' ||
-           tag === 'yt-live-chat-membership-item-renderer';
+    return !!el && !!el.tagName && messageTagNames.includes(el.tagName.toLowerCase());
   }
 
   function startChatObserver() {
     try {
-      const chatList = document.querySelector(
-        '#items.yt-live-chat-item-list-renderer, yt-live-chat-item-list-renderer #items, #contents.yt-live-chat-renderer, #chat-messages #items, yt-live-chat-renderer #items'
-      );
+      const chatList = document.querySelector(selectors.chatList);
       if (!chatList) {
         setTimeout(startChatObserver, 500);
         return;
       }
 
-      if (observer) {
-        try { observer.disconnect(); } catch (err) {}
-      }
+      if (observer) observer.disconnect();
 
       observer = new MutationObserver((mutations) => {
         if (!chatList.isConnected) {
-          try { observer.disconnect(); } catch (err) {}
+          observer.disconnect();
           startChatObserver();
           return;
         }
@@ -174,9 +169,7 @@
               if (isMessageElement(node)) {
                 parseAndSendChatMessage(node);
               } else {
-                const sub = node.querySelectorAll(
-                  'yt-live-chat-text-message-renderer, yt-live-chat-paid-message-renderer, yt-live-chat-membership-item-renderer'
-                );
+                const sub = node.querySelectorAll(selectors.chatMessage);
                 for (let k = 0; k < sub.length; k++) {
                   parseAndSendChatMessage(sub[k]);
                 }
@@ -190,14 +183,14 @@
       observer.observe(chatList, { childList: true, subtree: true });
 
       // Parse initial visible messages (latest 5 to immediately verify on load)
-      const initialItems = chatList.querySelectorAll(
-        'yt-live-chat-text-message-renderer, yt-live-chat-paid-message-renderer, yt-live-chat-membership-item-renderer'
-      );
+      const initialItems = chatList.querySelectorAll(selectors.chatMessage);
       const startIdx = Math.max(0, initialItems.length - 5);
       for (let i = startIdx; i < initialItems.length; i++) {
         parseAndSendChatMessage(initialItems[i]);
       }
-    } catch (e) {}
+    } catch (error) {
+      diagnostics.report('chat observer setup', error);
+    }
   }
 
   // Unicode emoji carry the character in alt; channel emoji carry a bare name and a data-emoji-id.
@@ -234,23 +227,23 @@
       let isSuperChat = false;
       let amount = '';
 
-      const authorEl = element.querySelector('#author-name');
+      const authorEl = element.querySelector(selectors.messageAuthor);
       if (authorEl) author = authorEl.textContent.trim();
 
-      const imgEl = element.querySelector('#img, yt-img-shadow img');
+      const imgEl = element.querySelector(selectors.messageAvatar);
       if (imgEl) avatar = imgEl.currentSrc || imgEl.src || '';
 
-      const messageEl = element.querySelector('#message');
+      const messageEl = element.querySelector(selectors.messageText);
       if (messageEl) {
         text = readMessageText(messageEl).trim();
       }
 
-      if (tagName === 'yt-live-chat-paid-message-renderer') {
+      if (tagName === messageTags.paid) {
         isSuperChat = true;
-        const amountEl = element.querySelector('#purchase-amount');
+        const amountEl = element.querySelector(selectors.superChatAmount);
         if (amountEl) amount = amountEl.textContent.trim();
-      } else if (tagName === 'yt-live-chat-membership-item-renderer') {
-        const headerEl = element.querySelector('#header-subtext');
+      } else if (tagName === messageTags.membership) {
+        const headerEl = element.querySelector(selectors.membershipText);
         if (headerEl) text = headerEl.textContent.trim() || 'New Member!';
       }
 
@@ -270,18 +263,18 @@
       // Mark processed now that we have real message content
       element.__ytProcessed = true;
 
-      const payload = {
-        id: msgId || ('msg_' + Math.random().toString(36).substr(2, 9)),
+      queueChatMessage({
+        id: msgId,
         author,
         avatar,
         text,
         isSuperChat,
         amount,
         timestamp: Date.now()
-      };
-
-      queueChatMessage(payload);
-    } catch (e) {}
+      });
+    } catch (error) {
+      diagnostics.report('chat message parse', error);
+    }
   }
 
   function queueChatMessage(payload) {
@@ -304,7 +297,9 @@
         frameSource: isCustomOverlayFrame ? 'custom' : 'native',
         batch: batch
       }, 'https://www.youtube.com');
-    } catch (e) {}
+    } catch (error) {
+      diagnostics.report('chat batch post', error);
+    }
   }
 
   configReady.then(() => {

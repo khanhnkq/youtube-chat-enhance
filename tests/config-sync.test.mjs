@@ -39,6 +39,7 @@ function storageHarness(initial = {}) {
   function context(extra = {}) {
     const ctx = vm.createContext({ chrome: { storage }, ...extra });
     vm.runInContext(source('content/config.js'), ctx);
+    vm.runInContext(source('content/runtime.js'), ctx);
     return ctx;
   }
   return { data, storage, calls, emit, context };

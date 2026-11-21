@@ -15,8 +15,14 @@ class DanmakuEngine {
     this.hasShadow = true;
     this.config = {};
     this.tracks = [];
-    this.pending = [];
-    this.pendingDrainTimer = null;
+    // Comments wait here while the video is paused or every track is busy.
+    this.pending = YTChatRuntime.createPendingQueue({
+      limit: 30,
+      retryDelay: 200,
+      place: msgData => this.placeComment(msgData),
+      isPaused: () => this.isVideoPaused(),
+      onError: error => YTChatRuntime.diagnostics.report('danmaku placement', error)
+    });
     this.pausedAt = null;
     this.pausedTotal = 0;
     this.activeItems = [];
@@ -42,7 +48,7 @@ class DanmakuEngine {
 
   init(playerElement, config = {}) {
     try {
-      const player = playerElement || document.querySelector('#movie_player, .html5-video-player');
+      const player = playerElement || document.querySelector(YTChatRuntime.selectors.player);
       if (!player) return false;
 
       if (this.playerEl && this.playerEl !== player) this.destroy();
@@ -94,8 +100,8 @@ class DanmakuEngine {
       this.updateLayerStyle();
       this.recalculateTracks();
       return true;
-    } catch (e) {
-      console.warn('[YT Chat Extension] DOM DanmakuEngine init warning:', e);
+    } catch (error) {
+      YTChatRuntime.diagnostics.report('danmaku init', error);
       return false;
     }
   }
@@ -129,19 +135,20 @@ class DanmakuEngine {
     }
   }
 
+  findVideo() {
+    return (this.playerEl || document).querySelector(YTChatRuntime.selectors.video);
+  }
+
   attachVideoListeners() {
-    try {
-      const video = this.playerEl ? this.playerEl.querySelector('video') : document.querySelector('video');
-      if (video && video !== this.videoEl) {
-        if (this.videoEl) {
-          this.videoEl.removeEventListener('play', this.boundVideoPlay);
-          this.videoEl.removeEventListener('pause', this.boundVideoPause);
-        }
-        this.videoEl = video;
-        this.videoEl.addEventListener('play', this.boundVideoPlay);
-        this.videoEl.addEventListener('pause', this.boundVideoPause);
-      }
-    } catch (e) {}
+    const video = this.findVideo();
+    if (!video || video === this.videoEl) return;
+    if (this.videoEl) {
+      this.videoEl.removeEventListener('play', this.boundVideoPlay);
+      this.videoEl.removeEventListener('pause', this.boundVideoPause);
+    }
+    this.videoEl = video;
+    this.videoEl.addEventListener('play', this.boundVideoPlay);
+    this.videoEl.addEventListener('pause', this.boundVideoPause);
   }
 
   clock() {
@@ -149,8 +156,7 @@ class DanmakuEngine {
   }
 
   isVideoPaused() {
-    if (this.videoEl) return this.videoEl.paused;
-    const video = this.playerEl ? this.playerEl.querySelector('video') : document.querySelector('video');
+    const video = this.videoEl || this.findVideo();
     return video ? video.paused : false;
   }
 
@@ -162,7 +168,7 @@ class DanmakuEngine {
     for (const item of this.activeItems) {
       if (item.animation) item.animation.play();
     }
-    this.drainPending();
+    this.pending.drain();
   }
 
   onVideoPause() {
@@ -227,7 +233,9 @@ class DanmakuEngine {
       }
       this.updateLayerStyle();
       this.recalculateTracks();
-    } catch (e) {}
+    } catch (error) {
+      YTChatRuntime.diagnostics.report('danmaku fullscreen change', error);
+    }
   }
 
   updateConfig(newConfig) {
@@ -237,7 +245,9 @@ class DanmakuEngine {
       this.applyConfig(newConfig);
       this.updateLayerStyle();
       this.recalculateTracks();
-    } catch (e) {}
+    } catch (error) {
+      YTChatRuntime.diagnostics.report('danmaku config update', error);
+    }
   }
 
   getItemNode() {
@@ -272,38 +282,7 @@ class DanmakuEngine {
     this.removeActiveItem(item);
   }
 
-  schedulePendingDrain() {
-    if (
-      this.pendingDrainTimer !== null ||
-      this.pending.length === 0 ||
-      this.isVideoPaused()
-    ) {
-      return;
-    }
-
-    this.pendingDrainTimer = setTimeout(() => {
-      this.pendingDrainTimer = null;
-      this.drainPending();
-    }, 200);
-  }
-
-  drainPending() {
-    if (this.isVideoPaused()) return;
-
-    while (this.pending.length > 0) {
-      let placed;
-      try {
-        placed = this.placeComment(this.pending[0]);
-      } catch (e) {
-        placed = true;
-      }
-      if (!placed) break;
-      this.pending.shift();
-    }
-
-    this.schedulePendingDrain();
-  }
-
+  // Returns false when every track is busy, so the caller keeps the comment queued.
   placeComment(msgData) {
     if (!this.tracks || this.tracks.length === 0) this.recalculateTracks();
 
@@ -369,7 +348,9 @@ class DanmakuEngine {
         easing: 'linear',
         fill: 'none'
       });
-    } catch (e) {
+    } catch (error) {
+      // Without an animation the comment cannot be shown; drop it and free the track.
+      YTChatRuntime.diagnostics.report('danmaku animation', error);
       this.tracks[trackIndex] = previousTrack;
       node.remove();
       this.recycleNode(node);
@@ -390,14 +371,8 @@ class DanmakuEngine {
   }
 
   addComment(msgData) {
-    try {
-      if (!this.isEnabled || !this.layer || !this.measureContext || !msgData || !msgData.text) return;
-      if (this.isVideoPaused() || this.pending.length > 0 || !this.placeComment(msgData)) {
-        if (this.pending.length >= 30) this.pending.shift();
-        this.pending.push(msgData);
-        this.schedulePendingDrain();
-      }
-    } catch (e) {}
+    if (!this.isEnabled || !this.layer || !this.measureContext || !msgData || !msgData.text) return;
+    this.pending.add(msgData);
   }
 
   addCommentBatch(batch) {
@@ -408,11 +383,7 @@ class DanmakuEngine {
   }
 
   clear() {
-    this.pending = [];
-    if (this.pendingDrainTimer !== null) {
-      clearTimeout(this.pendingDrainTimer);
-      this.pendingDrainTimer = null;
-    }
+    this.pending.clear();
     this.tracks = this.tracks.map(() => null);
     for (const item of this.activeItems.slice()) {
       this.removeActiveItem(item, false);
