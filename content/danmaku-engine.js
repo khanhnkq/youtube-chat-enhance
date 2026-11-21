@@ -34,8 +34,7 @@ class DanmakuEngine {
 
     const t1 = last.start + (last.w + gap) / last.v;
     if (newV > last.v) {
-      const exit = last.start + (layerWidth + last.w) / last.v;
-      const t2 = exit - layerWidth / newV;
+      const t2 = last.exit - layerWidth / newV;
       return Math.max(t1, t2);
     }
     return t1;
@@ -331,7 +330,12 @@ class DanmakuEngine {
     if (trackIndex === -1) return false;
 
     const previousTrack = this.tracks[trackIndex];
-    this.tracks[trackIndex] = { start: now, v: newV, w: totalWidth };
+    this.tracks[trackIndex] = {
+      start: now,
+      v: newV,
+      w: totalWidth,
+      exit: now + (this.layerWidth + totalWidth) / newV
+    };
 
     const lineHeight = this.fontSize * 1.35;
     const y = trackIndex * lineHeight + 12;

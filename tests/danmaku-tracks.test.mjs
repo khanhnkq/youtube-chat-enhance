@@ -18,15 +18,23 @@ test('trackFreeAt uses the right-edge clearance time for a slower item', () => {
 });
 
 test('trackFreeAt delays a faster item until the previous item exits', () => {
-  const last = { start: 0, v: 0.1, w: 200 };
+  const last = { start: 0, v: 0.1, w: 200, exit: 12000 };
   const t1 = last.start + (last.w + 24) / last.v;
-  const exit = last.start + (1000 + last.w) / last.v;
-  const t2 = exit - 1000 / 0.15;
+  const t2 = last.exit - 1000 / 0.15;
 
   assert.equal(t1, 2240);
-  assert.equal(exit, 12000);
   assert.ok(Math.abs(t2 - 5333.33) < 0.01);
   assert.equal(DanmakuEngine.trackFreeAt(last, 0.15, 1000, 24), t2);
+});
+
+test('trackFreeAt uses the stored exit after the layer widens', () => {
+  const last = { start: 0, v: 0.1, w: 200, exit: 12000 };
+  const t1 = last.start + (last.w + 24) / last.v;
+  const t2 = last.exit - 2000 / 0.11;
+
+  assert.equal(t1, 2240);
+  assert.ok(Math.abs(t2 + 6181.82) < 0.01);
+  assert.equal(DanmakuEngine.trackFreeAt(last, 0.11, 2000, 24), t1);
 });
 
 test('random-width comments never overlap on a track', () => {
@@ -49,7 +57,13 @@ test('random-width comments never overlap on a track', () => {
     const v = (width + item.w) / duration;
     const trackIndex = tracks.findIndex(last => DanmakuEngine.trackFreeAt(last, v, width, gap) <= now);
     if (trackIndex === -1) return false;
-    const placed = { ...item, start: now, v, trackIndex };
+    const placed = {
+      ...item,
+      start: now,
+      v,
+      exit: now + (width + item.w) / v,
+      trackIndex
+    };
     tracks[trackIndex] = placed;
     items.push(placed);
     return true;
