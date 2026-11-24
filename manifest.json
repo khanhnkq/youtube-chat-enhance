@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "YouTube Custom Chat & Danmaku",
   "version": "1.2.0",
-  "description": "Customize YouTube live chat: Transparent overlay on video, flexible draggable & resizable position, and Danmaku mode (scrolling flying comments).",
+  "description": "Transparent, draggable live chat overlay and Danmaku scrolling comments for YouTube™ live streams. Settings stay in your browser.",
   "permissions": [
     "storage"
   ],
