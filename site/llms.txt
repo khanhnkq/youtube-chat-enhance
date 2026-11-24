@@ -1,0 +1,22 @@
+# YouTube Custom Chat & Danmaku
+
+> Free, open-source Manifest V3 browser extension (~37 KB) for Chrome-based browsers and Mozilla Firefox that adds a transparent, draggable live chat overlay and 60FPS DOM/WAAPI Danmaku scrolling comments to YouTube live streams and live chat replays.
+
+## Quick Facts
+- **Version:** 1.2.0
+- **Author:** khanhnkq (https://github.com/khanhnkq)
+- **License:** MIT
+- **Chrome Web Store:** https://chromewebstore.google.com/detail/youtube-custom-chat-danma/eapcgaoflonkgkhaeidekcnkaoniajad
+- **Source Code:** https://github.com/khanhnkq/youtube-chat-enhance
+- **Homepage (EN):** https://khanhnkq.github.io/youtube-chat-enhance/
+- **Homepage (VI):** https://khanhnkq.github.io/youtube-chat-enhance/vi/
+- **Privacy Policy:** https://khanhnkq.github.io/youtube-chat-enhance/privacy/
+
+## Core Features
+- **Transparent Floating Live Chat Overlay:** Displays YouTube live chat directly over the video in Fullscreen and Theater Mode while automatically collapsing the native side chat column.
+- **Draggable, Resizable & Minimizable:** Drag anywhere inside the player, resize via the bottom-right handle, collapse into a compact `Live Chat` corner badge, and automatically restore clamped placement across reloads.
+- **60FPS DOM/WAAPI Danmaku:** Scrolls live chat comments across the screen (Bilibili / Niconico style) using compositor-only transforms, collision-free track reservation, pause/resume video sync, sender avatars, emoji support, Super Chats, and member welcomes. Works even when Floating Chat is turned off.
+- **Real-Time Styling:** 0–100% background opacity, font size controls, inline RGB/HEX color pickers for username/message/Danmaku text, dark outline stroke, shadow, scroll speed (4s–20s), and display area (Top 1/3, Top 1/2, Top 3/4, Fullscreen).
+- **Performance Architecture:** 80ms batch IPC messaging (cuts postMessage overhead >90%), single-channel `chrome.storage.onChanged` sync, zero background blur overhead.
+- **Privacy:** Only 2 permissions (`storage` and `https://www.youtube.com/*`). Zero analytics, zero ads, zero remote servers, `data_collection_permissions: ["none"]`.
+- **Languages:** Built-in English and Vietnamese popup UI with keyboard navigation.

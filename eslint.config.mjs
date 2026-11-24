@@ -7,7 +7,7 @@ const rules = {
 export default [
   { ignores: ['dist/', 'node_modules/', 'perf-results/', 'web-ext-artifacts/'] },
   {
-    files: ['content/**/*.js', 'popup/**/*.js', 'scripts/**/*.js', 'icons/**/*.js'],
+    files: ['content/**/*.js', 'popup/**/*.js', 'scripts/**/*.js', 'icons/**/*.js', 'site/scripts/**/*.js'],
     languageOptions: { ecmaVersion: 'latest', sourceType: 'script' },
     linterOptions: { reportUnusedDisableDirectives: 'error' },
     rules

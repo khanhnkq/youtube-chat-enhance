@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Custom Chat &amp; Danmaku — Chat Nổi &amp; Bình Luận Bay</title>
+  <meta name="description" content="Tiện ích miễn phí cho Chrome &amp; Firefox giúp hiện khung chat YouTube trong suốt đè lên video toàn màn hình và bình luận Danmaku chạy ngang 60FPS. Không theo dõi.">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="author" content="khanhnkq">
+  <meta name="theme-color" content="#f3f2ec">
+
+  <link rel="canonical" href="https://khanhnkq.github.io/youtube-chat-enhance/vi/">
+  <link rel="alternate" hreflang="en" href="https://khanhnkq.github.io/youtube-chat-enhance/">
+  <link rel="alternate" hreflang="vi" href="https://khanhnkq.github.io/youtube-chat-enhance/vi/">
+  <link rel="alternate" hreflang="x-default" href="https://khanhnkq.github.io/youtube-chat-enhance/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="YouTube Custom Chat &amp; Danmaku">
+  <meta property="og:title" content="YouTube Custom Chat &amp; Danmaku — Khung Chat Nổi &amp; Chữ Chạy Ngang YouTube Live">
+  <meta property="og:description" content="Khung chat nổi trong suốt kéo thả tự do và bình luận Danmaku 60FPS cho YouTube toàn màn hình trên Chrome &amp; Firefox. Mã nguồn mở, không theo dõi.">
+  <meta property="og:url" content="https://khanhnkq.github.io/youtube-chat-enhance/vi/">
+  <meta property="og:image" content="https://khanhnkq.github.io/youtube-chat-enhance/assets/og/og-vi.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Tiện ích YouTube Custom Chat và Danmaku hiển thị khung chat nổi trong suốt và bình luận chạy ngang trên video">
+  <meta property="og:locale" content="vi_VN">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="YouTube Custom Chat &amp; Danmaku — Chat Nổi &amp; Bình Luận Bay">
+  <meta name="twitter:description" content="Khung chat trong suốt kéo thả tự do và bình luận Danmaku 60FPS cho YouTube Live trên Chrome và Firefox.">
+  <meta name="twitter:image" content="https://khanhnkq.github.io/youtube-chat-enhance/assets/og/og-vi.png">
+
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/mark.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/icon-16.png">
+  <link rel="apple-touch-icon" sizes="128x128" href="../assets/icons/icon-128.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/main.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://khanhnkq.github.io/youtube-chat-enhance/vi/#software",
+        "name": "YouTube Custom Chat & Danmaku",
+        "alternateName": "Custom Chat & Danmaku",
+        "applicationCategory": "BrowserApplication",
+        "operatingSystem": "Chrome, Firefox, Edge, Brave, Arc",
+        "softwareVersion": "1.2.0",
+        "url": "https://khanhnkq.github.io/youtube-chat-enhance/vi/",
+        "installUrl": "https://chromewebstore.google.com/detail/youtube-custom-chat-danma/eapcgaoflonkgkhaeidekcnkaoniajad",
+        "downloadUrl": "https://chromewebstore.google.com/detail/youtube-custom-chat-danma/eapcgaoflonkgkhaeidekcnkaoniajad",
+        "description": "Tiện ích miễn phí cho Chrome và Firefox giúp hiển thị khung chat YouTube trong suốt đè lên video toàn màn hình và bình luận Danmaku chạy ngang 60FPS. Không theo dõi.",
+        "license": "https://opensource.org/licenses/MIT",
+        "isAccessibleForFree": true,
+        "inLanguage": ["vi", "en"],
+        "dateModified": "2026-11-24",
+        "author": { "@type": "Person", "name": "khanhnkq", "url": "https://github.com/khanhnkq" },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "VND" },
+        "screenshot": [
+          "https://khanhnkq.github.io/youtube-chat-enhance/assets/captures/vi-floating.webp",
+          "https://khanhnkq.github.io/youtube-chat-enhance/assets/captures/vi-danmaku.webp",
+          "https://khanhnkq.github.io/youtube-chat-enhance/assets/captures/vi-custom.webp"
+        ]
+      },
+      {
+        "@type": "VideoObject",
+        "@id": "https://khanhnkq.github.io/youtube-chat-enhance/vi/#demo-video",
+        "name": "Custom Chat & Danmaku: khung chat nổi và chữ chạy ngang cho YouTube Live (giới thiệu nhanh)",
+        "description": "Video giới thiệu 1:52 bản 1.2.0: khung chat nổi trong suốt, kéo thả đổi kích thước, tùy chỉnh màu sắc, Danmaku chạy ngang, Super Chat, đồng bộ tạm dừng và toàn màn hình.",
+        "thumbnailUrl": [
+          "https://khanhnkq.github.io/youtube-chat-enhance/assets/video/poster-vi.webp",
+          "https://khanhnkq.github.io/youtube-chat-enhance/assets/og/og-vi.png"
+        ],
+        "contentUrl": "https://khanhnkq.github.io/youtube-chat-enhance/assets/video/demo-vi.mp4",
+        "uploadDate": "2026-11-24",
+        "duration": "PT1M52S",
+        "inLanguage": "vi",
+        "hasPart": [
+          { "@type": "Clip", "name": "Giới thiệu · Khung chat nổi trên video", "startOffset": 0, "endOffset": 13, "url": "https://khanhnkq.github.io/youtube-chat-enhance/vi/#video-tour" },
+          { "@type": "Clip", "name": "Kéo, đổi kích thước, thu nhỏ", "startOffset": 13, "endOffset": 25, "url": "https://khanhnkq.github.io/youtube-chat-enhance/vi/#video-tour" },
+          { "@type": "Clip", "name": "Tinh chỉnh giao diện", "startOffset": 25, "endOffset": 41, "url": "https://khanhnkq.github.io/youtube-chat-enhance/vi/#video-tour" },
+          { "@type": "Clip", "name": "Danmaku: chữ chạy ngang", "startOffset": 41, "endOffset": 53, "url": "https://khanhnkq.github.io/youtube-chat-enhance/vi/#video-tour" },
+          { "@type": "Clip", "name": "Tùy chỉnh Danmaku", "startOffset": 53, "endOffset": 73, "url": "https://khanhnkq.github.io/youtube-chat-enhance/vi/#video-tour" },
+          { "@type": "Clip", "name": "Tạm dừng, Super Chat, toàn màn hình", "startOffset": 73, "endOffset": 97, "url": "https://khanhnkq.github.io/youtube-chat-enhance/vi/#video-tour" },
+          { "@type": "Clip", "name": "Ngôn ngữ và tắt tiện ích", "startOffset": 97, "endOffset": 112, "url": "https://khanhnkq.github.io/youtube-chat-enhance/vi/#video-tour" }
+        ]
+      },
+      {
+        "@type": "HowTo",
+        "name": "Cách xem chat YouTube toàn màn hình với khung chat nổi và Danmaku",
+        "step": [
+          { "@type": "HowToStep", "position": 1, "name": "Cài tiện ích", "text": "Cài YouTube Custom Chat & Danmaku từ Chrome Web Store hoặc gói dành cho Firefox." },
+          { "@type": "HowToStep", "position": 2, "name": "Mở livestream hoặc phát lại YouTube", "text": "Khung chat trong suốt tự nổi lên trên video và thu gọn cột chat bên cạnh." },
+          { "@type": "HowToStep", "position": 3, "name": "Tùy chỉnh màu sắc và Danmaku", "text": "Mở popup để chỉnh độ mờ, màu chữ hoặc bật bình luận chạy ngang Danmaku." }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "Làm sao xem chat YouTube khi toàn màn hình?", "acceptedAnswer": { "@type": "Answer", "text": "Tiện ích tự động ẩn cột chat mặc định ở chế độ toàn màn hình/rạp để video mở rộng 100% và hiển thị chat nổi trong suốt hoặc chữ chạy Danmaku." } },
+          { "@type": "Question", "name": "Có thể chỉ bật Danmaku mà tắt khung chat nổi không?", "acceptedAnswer": { "@type": "Answer", "text": "Có. Khi tắt Khung Chat Nổi và giữ Danmaku bật, chữ chạy vẫn đọc trực tiếp từ chat gốc của YouTube kèm Super Chat và emoji." } },
+          { "@type": "Question", "name": "Có hỗ trợ video xem lại (live chat replay) không?", "acceptedAnswer": { "@type": "Answer", "text": "Có. Hỗ trợ cả livestream lẫn phát lại replay, đồng bộ dừng và chạy tiếp Danmaku cùng video." } },
+          { "@type": "Question", "name": "Hỗ trợ trình duyệt nào?", "acceptedAnswer": { "@type": "Answer", "text": "Chrome, Edge, Brave, Arc, Cốc Cốc qua Chrome Web Store, cùng gói Manifest V3 riêng cho Firefox (109+)." } },
+          { "@type": "Question", "name": "Livestream đông người có bị giật lag không?", "acceptedAnswer": { "@type": "Answer", "text": "Không. Gom lô IPC 80ms, chuyển động WAAPI trên compositor và không dùng hiệu ứng blur; toàn gói nhẹ ~37 KB." } },
+          { "@type": "Question", "name": "Có miễn phí và không theo dõi thật không?", "acceptedAnswer": { "@type": "Answer", "text": "Miễn phí 100%, mã nguồn mở MIT, không quảng cáo, không máy chủ ngoài; mọi cài đặt chỉ lưu cục bộ." } }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Chuyển tới nội dung chính</a>
+
+  <header class="site-header">
+    <div class="container nav-bar">
+      <a class="brand-link" href="./" aria-label="Trang chủ YouTube Custom Chat &amp; Danmaku">
+        <svg class="brand-mark" viewBox="0 0 512 512" aria-hidden="true">
+          <rect x="64" y="64" width="384" height="384" rx="96" fill="#252928"/>
+          <path d="M222 154h112a44 44 0 0 1 44 44v82a44 44 0 0 1-44 44h-62l-54 39v-39h-8" fill="none" stroke="#f2f1eb" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+          <path class="mark-stroke-1" d="M132 207h127" fill="none" stroke="#e3363b" stroke-width="24" stroke-linecap="round"/>
+          <path class="mark-stroke-2" d="M153 256h127" fill="none" stroke="#e3363b" stroke-width="24" stroke-linecap="round"/>
+          <path class="mark-stroke-3" d="M132 305h44" fill="none" stroke="#e3363b" stroke-width="24" stroke-linecap="round"/>
+        </svg>
+        <span>Custom Chat &amp; Danmaku</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Điều hướng chính">
+        <a href="#demo-studio">Dùng thử</a>
+        <a href="#before-after">Trước / Sau</a>
+        <a href="#features">Tính năng</a>
+        <a href="#video-tour">Video</a>
+        <a href="#faq">Hỏi đáp</a>
+      </nav>
+
+      <div class="nav-actions">
+        <div class="lang-switcher" aria-label="Chuyển ngôn ngữ">
+          <a href="../" hreflang="en" lang="en">EN</a>
+          <span class="is-active" aria-current="page">VI</span>
+        </div>
+        <a class="btn btn--primary btn--sm" href="https://chromewebstore.google.com/detail/youtube-custom-chat-danma/eapcgaoflonkgkhaeidekcnkaoniajad" target="_blank" rel="noopener noreferrer">
+          Thêm vào Chrome
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- Compact Centered Hero + Live Interactive Demo -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-intro">
+          <span class="eyebrow">Tiện ích Chrome &amp; Firefox · v1.2.0 · Miễn phí</span>
+          <h1>Xem toàn màn hình. Không lỡ cuộc trò chuyện.</h1>
+          <p class="hero-lead">
+            Khung chat YouTube trong suốt kéo thả tự do và bình luận Danmaku chạy ngang 60FPS cho livestream toàn màn hình — không theo dõi.
+          </p>
+          <div class="hero-cta-row">
+            <a class="btn btn--primary" href="https://chromewebstore.google.com/detail/youtube-custom-chat-danma/eapcgaoflonkgkhaeidekcnkaoniajad" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M12 8.5h8.3M8.9 13.8L4.8 6.7M15.1 13.8L11 20.9"/></svg>
+              Thêm vào Chrome — Miễn phí
+            </a>
+            <a class="btn btn--dark" href="https://github.com/khanhnkq/youtube-chat-enhance#installation--packaging-guide" target="_blank" rel="noopener noreferrer">
+              Firefox &amp; GitHub
+            </a>
+          </div>
+          <p class="hero-specs">Manifest V3 · Nhẹ ~37 KB · Không theo dõi · Hỗ trợ Livestream &amp; Replay</p>
+        </div>
+
+        <!-- LIVE INTERACTIVE DEMO STUDIO -->
+        <div id="demo-studio" class="outer-box outer-box--dark demo-studio" aria-label="Bản dùng thử tương tác trực tiếp của YouTube Custom Chat và Danmaku">
+          <div class="demo-viewport">
+            <div class="demo-topbar">
+              <div class="demo-topbar-left">
+                <div class="window-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                <span class="demo-url">youtube.com/live/quiet-orbit-demo</span>
+              </div>
+              <span class="demo-live-pill"><span class="demo-live-dot"></span>DÙNG THỬ TRỰC TIẾP</span>
+            </div>
+
+            <div id="demo-player-shell" class="demo-player-shell">
+              <div id="demo-video-stage" class="demo-video-stage">
+                <svg class="orbit-scene-svg" viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                  <rect width="1600" height="800" fill="#181b1c"/>
+                  <polygon points="0,800 0,580 188,456 323,511 465,472 672,583 819,520 1034,578 1210,475 1417,536 1600,486 1600,800" fill="#2c302f"/>
+                  <polygon points="0,800 0,638 184,500 345,620 545,531 737,638 930,563 1142,649 1338,552 1600,649 1600,800" fill="#222626"/>
+                  <polygon points="0,800 0,744 219,646 416,702 649,642 931,767 1145,677 1377,715 1600,645 1600,800" fill="#161919"/>
+                  <g fill="#d7d9d2" opacity="0.45">
+                    <circle cx="138" cy="116" r="1.5"/><circle cx="284" cy="65" r="2"/>
+                    <circle cx="1124" cy="123" r="1.8"/><circle cx="1425" cy="78" r="1.5"/>
+                    <circle cx="1280" cy="272" r="1.8"/><circle cx="440" cy="170" r="1.5"/>
+                    <circle cx="962" cy="44" r="1.8"/><circle cx="72" cy="260" r="1.8"/>
+                  </g>
+                  <circle cx="730" cy="287" r="176" fill="#4f5452"/>
+                  <circle cx="696" cy="252" r="138" fill="#6f7572"/>
+                  <g fill="none" stroke="#d9dbd4" stroke-width="1.2" opacity="0.16">
+                    <ellipse cx="730" cy="287" rx="160" ry="176"/>
+                    <ellipse cx="730" cy="287" rx="112" ry="176"/>
+                    <ellipse cx="730" cy="287" rx="44" ry="176"/>
+                    <ellipse cx="730" cy="287" rx="172" ry="42"/>
+                    <ellipse cx="730" cy="287" rx="152" ry="94"/>
+                  </g>
+                  <ellipse cx="730" cy="300" rx="365" ry="70" fill="none" stroke="#b6b8b1" stroke-opacity="0.32" stroke-width="1.5" transform="rotate(-18 730 300)"/>
+                  <g class="orbit-beacon-group">
+                    <circle cx="730" cy="300" r="22" fill="#e3363b" opacity="0.22"/>
+                    <circle cx="730" cy="300" r="10" fill="#e3363b"/>
+                  </g>
+                </svg>
+
+                <div class="scene-caption">
+                  <div class="scene-caption-title">Quiet orbit</div>
+                  <div class="scene-caption-sub">Demo tương tác · Kéo hoặc đổi cỡ khung chat</div>
+                </div>
+
+                <div id="demo-danmaku-layer" class="demo-danmaku-layer" aria-hidden="true"></div>
+
+                <button id="demo-min-badge" type="button" class="demo-minimized-badge" aria-label="Mở lại khung chat nổi">
+                  <span class="demo-live-dot"></span>
+                  Live Chat
+                </button>
+
+                <div id="demo-floating-chat" class="demo-floating-chat" aria-label="Khung chat nổi có thể kéo thả">
+                  <div id="demo-chat-dragbar" class="demo-chat-dragbar">
+                    <span>Kéo thả · Live Chat</span>
+                    <button id="demo-min-btn" type="button" class="demo-min-btn" title="Thu gọn thành nhãn Live Chat" aria-label="Thu nhỏ khung chat">—</button>
+                  </div>
+                  <div id="demo-chat-messages" class="demo-chat-messages"></div>
+                  <div id="demo-chat-input-mock" class="demo-chat-input-mock is-hidden">
+                    <span>Trò chuyện công khai với @ban.demo...</span>
+                  </div>
+                  <div id="demo-resize-handle" class="demo-resize-handle" title="Đổi kích thước khung chat" aria-hidden="true">
+                    <svg width="10" height="10" viewBox="0 0 10 10"><path d="M9 1L1 9M9 5L5 9" stroke="#f2f1eb" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  </div>
+                </div>
+
+                <div class="demo-player-bar">
+                  <div class="player-bar-left">
+                    <button id="demo-pause-btn" type="button" class="player-btn">Tạm dừng</button>
+                    <button id="demo-superchat-btn" type="button" class="player-btn player-btn--accent">+ Super Chat</button>
+                  </div>
+                  <div class="player-bar-right">
+                    <span style="font-family:var(--font-mono);font-size:11px;color:#a6aba8;">Rê vào khung để kéo hoặc thu gọn</span>
+                  </div>
+                </div>
+              </div>
+
+              <aside class="demo-native-sidebar" aria-label="So sánh cột chat gốc của YouTube">
+                <div class="demo-native-header">Chat gốc (co hẹp video)</div>
+                <div id="demo-native-list" class="demo-native-list"></div>
+              </aside>
+            </div>
+          </div>
+
+          <div class="demo-controls" aria-label="Bảng điều khiển mô phỏng popup tiện ích">
+            <div class="demo-controls-head">
+              <div class="demo-controls-title">
+                <img src="../assets/icons/mark.svg" width="22" height="22" alt="Biểu tượng Custom Chat và Danmaku">
+                <span>Tùy chỉnh trực tiếp</span>
+              </div>
+              <span class="demo-version-tag">v1.2.0</span>
+            </div>
+
+            <div class="ctrl-group">
+              <label class="ctrl-toggle-row">
+                <span>Khung Chat Nổi</span>
+                <span class="flat-switch"><input id="ctrl-floating" type="checkbox" checked><span class="flat-switch-track"></span></span>
+              </label>
+              <label class="ctrl-toggle-row">
+                <span>Danmaku Chạy Ngang</span>
+                <span class="flat-switch"><input id="ctrl-danmaku" type="checkbox" checked><span class="flat-switch-track"></span></span>
+              </label>
+              <label class="ctrl-toggle-row">
+                <span>Ẩn Tiêu Đề &amp; Ô Nhập</span>
+                <span class="flat-switch"><input id="ctrl-hide-frame" type="checkbox" checked><span class="flat-switch-track"></span></span>
+              </label>
+            </div>
+
+            <div class="ctrl-group">
+              <label class="ctrl-slider">
+                <span class="ctrl-slider-head"><span>Độ mờ nền</span><span id="ctrl-opacity-val" class="ctrl-slider-val">25%</span></span>
+                <input id="ctrl-opacity" type="range" min="0" max="100" value="25">
+              </label>
+              <label class="ctrl-slider">
+                <span class="ctrl-slider-head"><span>Cỡ chữ chat</span><span id="ctrl-fontsize-val" class="ctrl-slider-val">13px</span></span>
+                <input id="ctrl-fontsize" type="range" min="11" max="19" value="13">
+              </label>
+              <div class="swatch-row">
+                <span>Màu tên</span>
+                <div class="swatches">
+                  <button type="button" class="swatch-btn is-selected" data-color="#ff88aa" style="background:#ff88aa" aria-label="Màu hồng"></button>
+                  <button type="button" class="swatch-btn" data-color="#fbbf24" style="background:#fbbf24" aria-label="Màu vàng"></button>
+                  <button type="button" class="swatch-btn" data-color="#60a5fa" style="background:#60a5fa" aria-label="Màu xanh dương"></button>
+                  <button type="button" class="swatch-btn" data-color="#34d399" style="background:#34d399" aria-label="Màu xanh lá"></button>
+                  <button type="button" class="swatch-btn" data-color="#f2f1eb" style="background:#f2f1eb" aria-label="Màu trắng"></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="ctrl-group">
+              <label class="ctrl-slider">
+                <span class="ctrl-slider-head"><span>Tốc độ Danmaku</span><span id="ctrl-speed-val" class="ctrl-slider-val">9s</span></span>
+                <input id="ctrl-speed" type="range" min="4" max="18" value="9">
+              </label>
+              <div class="area-pills" role="group" aria-label="Vùng màn hình hiển thị Danmaku">
+                <button type="button" class="area-pill" data-area="0.33">1/3</button>
+                <button type="button" class="area-pill is-active" data-area="0.5">1/2</button>
+                <button type="button" class="area-pill" data-area="0.75">3/4</button>
+                <button type="button" class="area-pill" data-area="1">Full</button>
+              </div>
+              <label class="ctrl-toggle-row">
+                <span>Viền chữ đen</span>
+                <span class="flat-switch"><input id="ctrl-stroke" type="checkbox"><span class="flat-switch-track"></span></span>
+              </label>
+            </div>
+
+            <form id="demo-send-form" class="demo-send-row">
+              <input id="demo-send-input" class="demo-send-input" type="text" maxlength="60" placeholder="Gửi thử bình luận..." aria-label="Gửi thử bình luận vào khung demo">
+              <button type="submit" class="player-btn player-btn--accent">Gửi</button>
+            </form>
+
+            <button id="ctrl-reset-pos" type="button" class="player-btn" style="width:100%;">Đặt lại vị trí</button>
+            <input id="ctrl-hide-input" type="checkbox" checked hidden aria-hidden="true">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Before / After Split Comparator -->
+    <section id="before-after" class="section section--tonal">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-head-main">
+            <span class="eyebrow">Trước / Sau</span>
+            <h2>Mở rộng trọn vẹn 100% khung hình.</h2>
+          </div>
+          <div class="segment-tabs" role="tablist" aria-label="Chọn chế độ so sánh">
+            <button type="button" role="tab" aria-selected="true" class="segment-tab ba-mode-tab is-active" data-after-src="../assets/captures/vi-floating.webp" data-after-alt="Sau: Video YouTube tràn toàn màn hình với khung chat nổi trong suốt" data-after-label="SAU · CHAT NỔI">Chat Nổi</button>
+            <button type="button" role="tab" aria-selected="false" class="segment-tab ba-mode-tab" data-after-src="../assets/captures/vi-danmaku.webp" data-after-alt="Sau: Video YouTube với bình luận Danmaku chạy ngang màn hình" data-after-label="SAU · DANMAKU">Danmaku</button>
+            <button type="button" role="tab" aria-selected="false" class="segment-tab ba-mode-tab" data-after-src="../assets/captures/vi-minimized.webp" data-after-alt="Sau: Video gọn gàng khi thu nhỏ khung chat thành nút Live Chat" data-after-label="SAU · THU GỌN">Thu gọn</button>
+          </div>
+        </div>
+
+        <div id="ba-comparator" class="outer-box outer-box--dark ba-outer reveal" style="--ba-split:50%;">
+          <div class="ba-layer ba-before-layer" aria-hidden="true">
+            <div class="ba-before-video">
+              <img src="../assets/captures/vi-minimized.webp" width="580" height="440" alt="">
+            </div>
+            <div class="ba-before-sidebar">
+              <div class="ba-before-sidebar-title">Chat mặc định YouTube</div>
+              <div class="ba-before-msg"><strong>@gaucon.demo</strong><span>Cột chat chiếm ~28% màn</span></div>
+              <div class="ba-before-msg"><strong>@mai.demo</strong><span>Khó xem chat khi fullscreen</span></div>
+              <div class="ba-before-msg"><strong>@tuan.demo</strong><span>Không có chữ chạy Danmaku</span></div>
+              <div class="ba-before-note">Khung hình bị thu hẹp</div>
+            </div>
+          </div>
+
+          <div class="ba-layer ba-after-layer">
+            <img id="ba-after-img" src="../assets/captures/vi-floating.webp" width="1184" height="500" alt="Sau: Video YouTube tràn toàn màn hình với khung chat nổi trong suốt" fetchpriority="high">
+          </div>
+
+          <span class="ba-tag ba-tag--before">TRƯỚC · MẶC ĐỊNH</span>
+          <span id="ba-after-tag" class="ba-tag ba-tag--after">SAU · CHAT NỔI</span>
+
+          <div class="ba-divider" aria-hidden="true">
+            <div class="ba-knob">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l-6-6 6-6M15 6l6 6-6 6"/></svg>
+            </div>
+          </div>
+
+          <input id="ba-range" class="ba-range" type="range" min="4" max="96" value="50" aria-label="Thanh trượt so sánh trước và sau khi bật tiện ích">
+        </div>
+      </div>
+    </section>
+
+    <!-- 5-Pillar Compact Bento Grid -->
+    <section id="features" class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-head-main">
+            <span class="eyebrow">01 — 05 · Tính năng</span>
+            <h2>Gọn gàng cho mọi buổi livestream.</h2>
+          </div>
+          <p class="section-head-sub">Ảnh chụp thật từ bản v1.2.0 trên cảnh mẫu dựng sẵn.</p>
+        </div>
+
+        <div class="bento-top">
+          <article class="bento-card reveal">
+            <div class="bento-media">
+              <img src="../assets/captures/vi-floating.webp" width="1184" height="500" alt="Khung chat nổi trong suốt tiếng Việt hiển thị trên video YouTube" loading="lazy">
+            </div>
+            <div class="bento-body">
+              <span class="bento-index">01 · Chat nổi</span>
+              <h3>Xem video. Không lỡ cuộc trò chuyện.</h3>
+              <p>Khung chat trong suốt không viền ở Toàn màn hình và Chế độ rạp, tự ẩn cột chat mặc định.</p>
+            </div>
+          </article>
+
+          <article class="bento-card reveal">
+            <div class="bento-media">
+              <img src="../assets/captures/vi-danmaku.webp" width="1184" height="500" alt="Bình luận Danmaku tiếng Việt chạy ngang trên video YouTube" loading="lazy">
+            </div>
+            <div class="bento-body">
+              <span class="bento-index">02 · Danmaku 60FPS</span>
+              <h3>Để bình luận chuyển động.</h3>
+              <p>Chữ chạy ngang kiểu Bilibili kèm avatar, emoji, Super Chat, đồng bộ tạm dừng và chạy độc lập.</p>
+            </div>
+          </article>
+        </div>
+
+        <div class="bento-bottom">
+          <article class="bento-card reveal">
+            <div class="bento-media bento-media--pair">
+              <img src="../assets/captures/vi-position.webp" width="580" height="440" alt="Khung chat nổi kéo sang bên trái video" loading="lazy">
+              <img src="../assets/captures/vi-minimized.webp" width="580" height="440" alt="Khung chat thu gọn thành nhãn Live Chat ở góc trên" loading="lazy">
+            </div>
+            <div class="bento-body">
+              <span class="bento-index">03 · Vị trí</span>
+              <h3>Kéo thả, đổi cỡ, thu gọn.</h3>
+              <p>Tự ghi nhớ vị trí gọn trong trình phát; thu gọn thành nút <code>Live Chat</code> chỉ bằng một chạm.</p>
+            </div>
+          </article>
+
+          <article class="bento-card reveal">
+            <div class="bento-media">
+              <img src="../assets/captures/vi-custom.webp" width="808" height="500" alt="Khung chat YouTube tùy chỉnh cỡ chữ và màu tên người dùng" loading="lazy">
+            </div>
+            <div class="bento-body">
+              <span class="bento-index">04 · Phong cách</span>
+              <h3>Chỉnh màu RGB, HEX &amp; độ mờ.</h3>
+              <p>Chỉnh màu trực tiếp trong popup, ổn định trên cả Firefox lẫn Chrome, không làm mờ video.</p>
+            </div>
+          </article>
+
+          <article class="bento-card reveal">
+            <div class="bento-media">
+              <img src="../assets/captures/vi-area.webp" width="808" height="500" alt="Tùy chỉnh vùng hiển thị và tốc độ Danmaku tiếng Việt" loading="lazy">
+            </div>
+            <div class="bento-body">
+              <span class="bento-index">05 · Nhịp điệu</span>
+              <h3>Tốc độ, cỡ chữ &amp; vùng bay.</h3>
+              <p>Tùy chọn 4s–20s, cỡ 14–38px, viền đen chống chói và vùng 1/3, 1/2, 3/4 hoặc toàn màn hình.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Motion Graphic Performance Architecture -->
+    <section id="architecture" class="section section--tonal">
+      <div class="container">
+        <div class="outer-box pipeline-outer reveal">
+          <div class="section-head" style="margin-bottom:20px;">
+            <div class="section-head-main">
+              <span class="eyebrow eyebrow--neutral">Kiến trúc 60FPS</span>
+              <h2>Mượt ngay cả khi chat chạy dày.</h2>
+            </div>
+            <p class="section-head-sub">~37 KB JS thuần · Không vẽ lại canvas · Không blur nặng GPU.</p>
+          </div>
+
+          <div class="pipeline-grid">
+            <article class="pipeline-stage">
+              <div class="pipeline-svg-wrap" aria-hidden="true">
+                <svg viewBox="0 0 280 110" width="280" height="110">
+                  <rect x="8" y="30" width="62" height="50" rx="8" fill="#252928"/>
+                  <text x="39" y="59" text-anchor="middle" fill="#f2f1eb" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600">IFRAME</text>
+                  <line x1="72" y1="55" x2="196" y2="55" stroke="#363c3e" stroke-width="2" stroke-dasharray="4 4"/>
+                  <circle class="mg-packet" cx="84" cy="44" r="5" fill="#e3363b"/>
+                  <circle class="mg-packet mg-packet-2" cx="84" cy="55" r="5" fill="#f2f1eb"/>
+                  <circle class="mg-packet mg-packet-3" cx="84" cy="66" r="5" fill="#e3363b"/>
+                  <g class="mg-batch-pulse">
+                    <rect x="196" y="25" width="76" height="60" rx="10" fill="#e3363b"/>
+                    <text x="234" y="52" text-anchor="middle" fill="#ffffff" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700">80ms</text>
+                    <text x="234" y="66" text-anchor="middle" fill="#ffffff" font-family="JetBrains Mono, monospace" font-size="9">BATCH</text>
+                  </g>
+                </svg>
+              </div>
+              <span class="pipeline-metric">Giảm &gt;90% IPC</span>
+              <h3>Gom lô 80ms</h3>
+              <p>Gom tin nhắn từ iframe chat theo chu kỳ 80ms thay vì gửi lẻ gây nghẽn.</p>
+            </article>
+
+            <article class="pipeline-stage">
+              <div class="pipeline-svg-wrap" aria-hidden="true">
+                <svg viewBox="0 0 280 110" width="280" height="110">
+                  <rect x="10" y="12" width="260" height="17" rx="4" fill="#212526"/>
+                  <rect x="10" y="35" width="260" height="17" rx="4" fill="#212526"/>
+                  <rect x="10" y="58" width="260" height="17" rx="4" fill="#212526"/>
+                  <rect x="10" y="81" width="260" height="17" rx="4" fill="#212526"/>
+                  <rect class="mg-lane-bar" x="0" y="15" width="96" height="11" rx="4" fill="#f2f1eb"/>
+                  <rect class="mg-lane-bar mg-lane-bar-2" x="0" y="38" width="118" height="11" rx="4" fill="#e3363b"/>
+                  <rect class="mg-lane-bar mg-lane-bar-3" x="0" y="61" width="84" height="11" rx="4" fill="#a6aba8"/>
+                  <rect class="mg-lane-bar mg-lane-bar-4" x="0" y="84" width="108" height="11" rx="4" fill="#f2f1eb"/>
+                </svg>
+              </div>
+              <span class="pipeline-metric">Chống đè dòng</span>
+              <h3>Phân làn thông minh</h3>
+              <p>Giữ chỗ thời điểm rời khung giúp chữ chạy không chồng chéo và chờ khi pause.</p>
+            </article>
+
+            <article class="pipeline-stage">
+              <div class="pipeline-svg-wrap" aria-hidden="true">
+                <svg viewBox="0 0 280 110" width="280" height="110">
+                  <rect class="mg-fps-bar" x="22" y="30" width="18" height="62" rx="4" fill="#3a4042"/>
+                  <rect class="mg-fps-bar" x="48" y="26" width="18" height="66" rx="4" fill="#3a4042"/>
+                  <rect class="mg-fps-bar" x="74" y="24" width="18" height="68" rx="4" fill="#4f5658"/>
+                  <rect class="mg-fps-bar" x="100" y="22" width="18" height="70" rx="4" fill="#e3363b"/>
+                  <rect class="mg-fps-bar" x="126" y="22" width="18" height="70" rx="4" fill="#e3363b"/>
+                  <rect class="mg-fps-bar" x="152" y="22" width="18" height="70" rx="4" fill="#e3363b"/>
+                  <rect x="186" y="22" width="76" height="70" rx="8" fill="#252928"/>
+                  <text x="224" y="54" text-anchor="middle" fill="#f2f1eb" font-family="JetBrains Mono, monospace" font-size="16" font-weight="700">60</text>
+                  <text x="224" y="71" text-anchor="middle" fill="#a6aba8" font-family="JetBrains Mono, monospace" font-size="9">WAAPI FPS</text>
+                </svg>
+              </div>
+              <span class="pipeline-metric">~37 KB</span>
+              <h3>DOM / WAAPI Motion</h3>
+              <p>Transform thuần trên compositor, đồng bộ cài đặt một kênh không tải lại trang.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1:52 Video Tour with 7 Chapters -->
+    <section id="video-tour" class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-head-main">
+            <span class="eyebrow">Video giới thiệu 1:52</span>
+            <h2>Xem bản v1.2.0 ở tốc độ thực.</h2>
+          </div>
+          <p class="section-head-sub">Bấm bất kỳ chương nào để tua nhanh tới tính năng tương ứng. Có phụ đề tiếng Việt.</p>
+        </div>
+
+        <div class="outer-box outer-box--dark video-tour-outer reveal">
+          <div class="video-stage-wrap">
+            <video id="tour-video" class="tour-video" controls preload="metadata" playsinline poster="../assets/video/poster-vi.webp" width="1280" height="720">
+              <source src="../assets/video/demo-vi.mp4" type="video/mp4">
+              <track kind="subtitles" src="../assets/video/demo-vi.vtt" srclang="vi" label="Tiếng Việt" default>
+            </video>
+            <button id="video-poster-btn" type="button" class="video-poster-overlay" aria-label="Phát video giới thiệu 1 phút 52 giây">
+              <img src="../assets/video/poster-vi.webp" width="1280" height="720" alt="Ảnh thu nhỏ video giới thiệu Custom Chat và Danmaku tiếng Việt" loading="lazy">
+              <span class="video-play-badge">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6,4 20,12 6,20"/></svg>
+                Xem Video 1:52
+              </span>
+            </button>
+          </div>
+
+          <div class="chapter-list-col" aria-label="Các chương trong video">
+            <button type="button" class="chapter-btn is-active" data-time="0"><span class="chapter-time">0:00</span><span class="chapter-label">Khung chat nổi trên video</span></button>
+            <button type="button" class="chapter-btn" data-time="13"><span class="chapter-time">0:13</span><span class="chapter-label">Kéo, đổi cỡ &amp; thu nhỏ</span></button>
+            <button type="button" class="chapter-btn" data-time="25"><span class="chapter-time">0:25</span><span class="chapter-label">Độ mờ, cỡ chữ &amp; màu sắc</span></button>
+            <button type="button" class="chapter-btn" data-time="41"><span class="chapter-time">0:41</span><span class="chapter-label">Danmaku chữ chạy ngang</span></button>
+            <button type="button" class="chapter-btn" data-time="53"><span class="chapter-time">0:53</span><span class="chapter-label">Tốc độ, màu &amp; vùng hiển thị</span></button>
+            <button type="button" class="chapter-btn" data-time="73"><span class="chapter-time">1:13</span><span class="chapter-label">Tạm dừng, Super Chat &amp; fullscreen</span></button>
+            <button type="button" class="chapter-btn" data-time="97"><span class="chapter-time">1:37</span><span class="chapter-label">Đổi ngôn ngữ &amp; tắt tiện ích</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Combined Comparison + Privacy -->
+    <section id="privacy" class="section section--tonal">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-head-main">
+            <span class="eyebrow">So sánh &amp; Quyền riêng tư</span>
+            <h2>Nâng cấp khung chat, không theo dõi bạn.</h2>
+          </div>
+        </div>
+
+        <div class="compare-privacy-grid">
+          <div class="outer-box compare-outer reveal">
+            <table class="compare-table">
+              <thead>
+                <tr>
+                  <th>Tiêu chí</th>
+                  <th>YouTube mặc định</th>
+                  <th>Custom Chat &amp; Danmaku</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Chat toàn màn hình</td>
+                  <td>Co hẹp hoặc ẩn cột chat</td>
+                  <td>Video 100% + khung nổi trong suốt</td>
+                </tr>
+                <tr>
+                  <td>Chế độ Danmaku</td>
+                  <td>Không có</td>
+                  <td>DOM/WAAPI 60FPS chống đè</td>
+                </tr>
+                <tr>
+                  <td>Vị trí &amp; kích thước</td>
+                  <td>Cố định cột bên phải</td>
+                  <td>Kéo thả, đổi cỡ, nút Live Chat</td>
+                </tr>
+                <tr>
+                  <td>Màu sắc &amp; độ mờ</td>
+                  <td>Chỉ sáng / tối</td>
+                  <td>Độ mờ 0–100%, RGB / HEX</td>
+                </tr>
+                <tr>
+                  <td>Replay &amp; Super Chat</td>
+                  <td>Đứng yên ở cột bên</td>
+                  <td>Dừng theo video + nổi trên Danmaku</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="outer-box privacy-card reveal">
+            <h3>Chỉ 2 quyền tối thiểu. Không máy chủ.</h3>
+            <p>Mã nguồn mở MIT bằng JavaScript thuần. Không phân tích, không quảng cáo, <code>data_collection_permissions: ["none"]</code>.</p>
+            <div class="perm-item">
+              <code class="perm-code">storage</code>
+              <p>Lưu cài đặt hiển thị và tọa độ khung chat cục bộ tại <code>chrome.storage.local</code>.</p>
+            </div>
+            <div class="perm-item">
+              <code class="perm-code">https://www.youtube.com/*</code>
+              <p>Chỉ đọc tin nhắn live chat đang hiển thị trên trang xem của YouTube.</p>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
+              <a class="btn btn--dark btn--sm" href="./privacy/">Chính sách riêng tư</a>
+              <a class="btn btn--tonal btn--sm" href="https://github.com/khanhnkq/youtube-chat-enhance" target="_blank" rel="noopener noreferrer">Mã nguồn GitHub</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Compact 2-Column FAQ -->
+    <section id="faq" class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-head-main">
+            <span class="eyebrow eyebrow--neutral">Hỏi đáp</span>
+            <h2>Giải đáp nhanh.</h2>
+          </div>
+        </div>
+
+        <div class="outer-box faq-outer reveal">
+          <details class="faq-item" open>
+            <summary><span>Làm sao xem chat YouTube khi toàn màn hình?</span><span class="faq-plus" aria-hidden="true">+</span></summary>
+            <p class="faq-answer">Bật toàn màn hình hoặc chế độ rạp, tiện ích tự ẩn cột chat mặc định và đưa chat lên thành khung nổi trong suốt đè lên video.</p>
+          </details>
+          <details class="faq-item" open>
+            <summary><span>Có thể chỉ dùng Danmaku mà tắt khung nổi?</span><span class="faq-plus" aria-hidden="true">+</span></summary>
+            <p class="faq-answer">Có. Tắt Khung Chat Nổi và giữ Danmaku bật, chữ chạy vẫn đọc trực tiếp từ chat gốc của YouTube.</p>
+          </details>
+          <details class="faq-item">
+            <summary><span>Có dùng được với video phát lại (replay)?</span><span class="faq-plus" aria-hidden="true">+</span></summary>
+            <p class="faq-answer">Có, hỗ trợ cả livestream lẫn live chat replay; khi tạm dừng video thì chữ Danmaku cũng đứng yên và chạy tiếp đồng bộ.</p>
+          </details>
+          <details class="faq-item">
+            <summary><span>Hỗ trợ những trình duyệt nào?</span><span class="faq-plus" aria-hidden="true">+</span></summary>
+            <p class="faq-answer">Chrome, Edge, Brave, Arc, Cốc Cốc, Opera qua Chrome Web Store và bản Manifest V3 riêng cho Firefox (109+) trên GitHub.</p>
+          </details>
+          <details class="faq-item">
+            <summary><span>Livestream đông người có bị giật lag không?</span><span class="faq-plus" aria-hidden="true">+</span></summary>
+            <p class="faq-answer">Không. Gom lô IPC 80ms, chuyển động WAAPI trên compositor và không dùng hiệu ứng blur; toàn bộ gói chỉ ~37 KB.</p>
+          </details>
+          <details class="faq-item">
+            <summary><span>Có thực sự miễn phí và không theo dõi?</span><span class="faq-plus" aria-hidden="true">+</span></summary>
+            <p class="faq-answer">Miễn phí 100%, mã nguồn mở MIT, không tài khoản, không theo dõi và mọi cài đặt chỉ nằm trên trình duyệt của bạn.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="final-cta-outer reveal">
+          <div>
+            <h2>Xem YouTube Live theo cách của bạn.</h2>
+            <p>Cài đặt tiện ích mã nguồn mở ~37 KB chỉ trong vài giây.</p>
+          </div>
+          <div class="final-cta-actions">
+            <a class="btn btn--primary" href="https://chromewebstore.google.com/detail/youtube-custom-chat-danma/eapcgaoflonkgkhaeidekcnkaoniajad" target="_blank" rel="noopener noreferrer">Thêm vào Chrome — Miễn phí</a>
+            <a class="btn btn--surface" href="https://github.com/khanhnkq/youtube-chat-enhance" target="_blank" rel="noopener noreferrer">GitHub</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="brand-link">
+          <img src="../assets/icons/mark.svg" width="24" height="24" alt="Biểu tượng Custom Chat và Danmaku">
+          <span>YouTube Custom Chat &amp; Danmaku · v1.2.0</span>
+        </div>
+        <div class="footer-links">
+          <a href="https://chromewebstore.google.com/detail/youtube-custom-chat-danma/eapcgaoflonkgkhaeidekcnkaoniajad" target="_blank" rel="noopener noreferrer">Chrome Web Store</a>
+          <a href="https://github.com/khanhnkq/youtube-chat-enhance" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="./privacy/">Quyền riêng tư</a>
+          <a href="../" hreflang="en" lang="en">English</a>
+          <a href="https://khanhnkq.quizken.com/buy-me-a-coffee" target="_blank" rel="noopener noreferrer">Mời ly cà phê</a>
+        </div>
+      </div>
+      <p class="footer-disclaimer">
+        Giấy phép MIT · Phát triển bởi <a href="https://github.com/khanhnkq" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;">khanhnkq</a> · Cập nhật 2026-11-24. Hình ảnh &amp; video dùng cảnh nền “Quiet orbit” gốc và chat mẫu dựng sẵn. Tiện ích độc lập, không trực thuộc hay được YouTube / Google LLC bảo trợ. YouTube là nhãn hiệu của Google LLC.
+      </p>
+    </div>
+  </footer>
+
+  <script src="../scripts/landing.js" defer></script>
+</body>
+</html>

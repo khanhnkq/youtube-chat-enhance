@@ -1,0 +1,19 @@
+{
+  "name": "YouTube Custom Chat & Danmaku",
+  "shortName": "Custom Chat & Danmaku",
+  "version": "1.2.0",
+  "baseUrl": "https://khanhnkq.github.io/youtube-chat-enhance",
+  "chromeStoreUrl": "https://chromewebstore.google.com/detail/youtube-custom-chat-danma/eapcgaoflonkgkhaeidekcnkaoniajad",
+  "firefoxAmoUrl": "https://github.com/khanhnkq/youtube-chat-enhance#installation--packaging-guide",
+  "firefoxStoreLive": false,
+  "githubUrl": "https://github.com/khanhnkq/youtube-chat-enhance",
+  "issuesUrl": "https://github.com/khanhnkq/youtube-chat-enhance/issues",
+  "coffeeUrl": "https://khanhnkq.quizken.com/buy-me-a-coffee",
+  "youtubeDemoEnId": "",
+  "youtubeDemoViId": "",
+  "author": {
+    "name": "khanhnkq",
+    "url": "https://github.com/khanhnkq"
+  },
+  "lastUpdated": "2026-11-24"
+}
