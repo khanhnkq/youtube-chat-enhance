@@ -44,6 +44,7 @@ Elevate your YouTube livestream and video watching experience with this feature-
 
 ## 4. Privacy & Data Disclosures
 
+- **Privacy policy URL:** https://github.com/khanhnkq/youtube-chat-enhance/blob/main/PRIVACY.md
 - **Data Collection:** The extension does **NOT** collect, track, store, or transmit any user personal data or browsing activity.
 - **Local State:** All user preferences and visual configurations are stored locally in the browser via `chrome.storage.local`.
 
