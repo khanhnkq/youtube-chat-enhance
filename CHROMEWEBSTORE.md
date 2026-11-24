@@ -9,7 +9,7 @@
 ## 1. Store Metadata
 
 - **Extension Name:** YouTube Custom Chat & Danmaku
-- **Short Description:** Customize YouTube live chat: Transparent floating overlay on video, draggable & resizable window, and Danmaku mode (scrolling comments).
+- **Short Description:** Transparent, draggable live chat overlay and Danmaku scrolling comments for YouTube™ live streams. Settings stay in your browser.
 - **Category:** Entertainment / Productivity
 - **Language:** English (Primary)
 
