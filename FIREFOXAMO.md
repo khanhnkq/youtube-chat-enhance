@@ -1,7 +1,7 @@
-# YouTube Custom Chat & Danmaku - Firefox Add-ons (AMO) Listing Metadata
+# DanmaChat - Firefox Add-ons (AMO) Listing Metadata
 
-**Last Updated:** 2026-11-21  
-**Extension Version:** 1.2.0  
+**Last Updated:** 2026-11-25  
+**Extension Version:** 1.3.0  
 **Manifest Version:** Manifest V3  
 **Gecko Add-on ID:** `youtube-custom-chat@khanhnkq`  
 **License:** MIT License  
@@ -10,7 +10,7 @@
 
 ## 1. AMO Store Metadata
 
-- **Add-on Name:** YouTube Custom Chat & Danmaku
+- **Add-on Name:** DanmaChat: Fullscreen Chat & Danmaku for YouTube (from `appNameFirefox` in `_locales/<locale>/messages.json`; AMO allows 50 characters)
 - **Summary (Max 250 characters):**  
   > Customize YouTube live chat: Transparent floating overlay on video, draggable & resizable window, and Danmaku mode (scrolling flying comments). *(146 characters)*
 - **Categories:**
@@ -25,7 +25,7 @@
 
 ### English (Primary)
 
-Elevate your YouTube livestream and video watching experience with **YouTube Custom Chat & Danmaku**!
+Elevate your YouTube livestream and video watching experience with **DanmaChat**!
 
 ✨ **KEY FEATURES:**
 
@@ -52,7 +52,7 @@ Elevate your YouTube livestream and video watching experience with **YouTube Cus
 
 ### Tiếng Việt
 
-Nâng tầm trải nghiệm xem livestream và video YouTube với tiện ích **YouTube Custom Chat & Danmaku**!
+Nâng tầm trải nghiệm xem livestream và video YouTube với tiện ích **DanmaChat**!
 
 ✨ **TÍNH NĂNG NỔI BẬT:**
 
@@ -126,7 +126,7 @@ Chạy lệnh sau tại thư mục gốc của project:
 npm run build
 ```
 File đóng gói cho Firefox sẽ được tạo tại:
-- `dist/YouTube-Custom-Chat-Firefox-v<version>.zip` (hoặc `dist/YouTube-Custom-Chat-Firefox-v<version>.xpi`), với `<version>` lấy từ `manifest.json`.
+- `dist/DanmaChat-Firefox-v<version>.zip` (hoặc `dist/DanmaChat-Firefox-v<version>.xpi`), với `<version>` lấy từ `manifest.json`.
 
 Gói cài đặt không được lưu trong repo; luôn build lại từ mã nguồn của phiên bản cần nộp.
 
@@ -140,7 +140,7 @@ npm run lint:firefox
 1. Đăng nhập vào [AMO Developer Hub](https://addons.mozilla.org/developers/).
 2. Nhấn nút **Submit a New Add-on** (hoặc **Submit a New Version** nếu cập nhật).
 3. Chọn kênh phân phối: **On this site** (Phát hành công khai trên kho tiện ích Mozilla).
-4. Upload file `dist/YouTube-Custom-Chat-Firefox-v<version>.zip`.
+4. Upload file `dist/DanmaChat-Firefox-v<version>.zip`.
 5. Hệ thống sẽ quét tự động (Automated validation) và xác nhận hợp lệ.
 6. Copy các thông tin từ mục **1. AMO Store Metadata**, **2. Detailed Description**, và **5. Reviewer Notes** ở trên dán vào các trường tương ứng.
 7. Nhấn **Submit Version** để hoàn tất nộp cho kiểm duyệt viên.

@@ -1,4 +1,4 @@
-# Privacy Policy — Custom Chat & Danmaku
+# Privacy Policy — DanmaChat
 
 Last updated: 2026-11-21
 
@@ -32,7 +32,7 @@ https://github.com/khanhnkq/youtube-chat-enhance/issues
 
 ---
 
-# Chính sách quyền riêng tư — Custom Chat & Danmaku
+# Chính sách quyền riêng tư — DanmaChat
 
 Cập nhật lần cuối: 2026-11-21
 

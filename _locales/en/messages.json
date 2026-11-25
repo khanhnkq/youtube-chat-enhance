@@ -1,0 +1,18 @@
+{
+  "appName": {
+    "message": "DanmaChat – Fullscreen Live Chat Overlay & Danmaku for YouTube™",
+    "description": "Extension name shown in the Chrome Web Store and browser (max 75 characters)."
+  },
+  "appNameFirefox": {
+    "message": "DanmaChat: Fullscreen Chat & Danmaku for YouTube",
+    "description": "Shorter extension name for the Firefox build; addons.mozilla.org allows at most 50 characters."
+  },
+  "appShortName": {
+    "message": "DanmaChat",
+    "description": "Short brand name (max 12 characters)."
+  },
+  "appDesc": {
+    "message": "Show YouTube™ live chat in fullscreen as a transparent, draggable overlay, or as Danmaku bullet comments flying across the video.",
+    "description": "Store summary and manifest description (max 132 characters)."
+  }
+}

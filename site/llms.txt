@@ -1,4 +1,6 @@
-# YouTube Custom Chat & Danmaku
+# DanmaChat – Fullscreen Live Chat Overlay & Danmaku for YouTube
+
+Formerly named "YouTube Custom Chat & Danmaku".
 
 > Free, open-source Manifest V3 browser extension (~37 KB) for Chrome-based browsers and Mozilla Firefox that adds a transparent, draggable live chat overlay and 60FPS DOM/WAAPI Danmaku scrolling comments to YouTube live streams and live chat replays.
 

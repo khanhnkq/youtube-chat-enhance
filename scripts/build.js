@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Multi-Browser Build & Packaging Script for YouTube Custom Chat & Danmaku
+ * Multi-Browser Build & Packaging Script for DanmaChat
  * Builds clean, lightweight packages for both Google Chrome and Mozilla Firefox.
  */
 
@@ -20,7 +20,7 @@ const rawManifest = fs.readFileSync(manifestPath, 'utf8');
 const baseManifest = JSON.parse(rawManifest);
 const version = baseManifest.version || '1.0.0';
 
-console.log(`\n📦 Building YouTube Custom Chat & Danmaku v${version}...`);
+console.log(`\n📦 Building DanmaChat v${version}...`);
 
 // 2. Clean and create output directories
 if (fs.existsSync(DIST_DIR)) {
@@ -78,6 +78,9 @@ function populateTarget(targetDir, manifestObj) {
   // Copy popup UI
   copyDir(path.join(ROOT_DIR, 'popup'), path.join(targetDir, 'popup'), generalFilter);
 
+  // Copy localized store name/description (manifest uses __MSG_*__ keys)
+  copyDir(path.join(ROOT_DIR, '_locales'), path.join(targetDir, '_locales'), generalFilter);
+
   // Copy icons (required sizes + popup logo)
   copyDir(path.join(ROOT_DIR, 'icons'), path.join(targetDir, 'icons'), iconFilter);
 
@@ -95,6 +98,8 @@ populateTarget(CHROME_OUT, chromeManifest);
 
 // 7. Build Firefox Package
 const firefoxManifest = JSON.parse(JSON.stringify(baseManifest));
+// addons.mozilla.org limits names to 50 characters; the Chrome name goes up to 75.
+firefoxManifest.name = '__MSG_appNameFirefox__';
 firefoxManifest.browser_specific_settings = {
   gecko: {
     id: 'youtube-custom-chat@khanhnkq',
@@ -116,9 +121,9 @@ function createZip(sourceDir, zipFileName) {
   return { path: zipFilePath, sizeKB };
 }
 
-const chromeZipName = `YouTube-Custom-Chat-Chrome-v${version}.zip`;
-const firefoxZipName = `YouTube-Custom-Chat-Firefox-v${version}.zip`;
-const firefoxXpiName = `YouTube-Custom-Chat-Firefox-v${version}.xpi`;
+const chromeZipName = `DanmaChat-Chrome-v${version}.zip`;
+const firefoxZipName = `DanmaChat-Firefox-v${version}.zip`;
+const firefoxXpiName = `DanmaChat-Firefox-v${version}.xpi`;
 
 const chromeZip = createZip(CHROME_OUT, chromeZipName);
 const firefoxZip = createZip(FIREFOX_OUT, firefoxZipName);

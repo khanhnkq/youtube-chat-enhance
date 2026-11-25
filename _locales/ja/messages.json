@@ -1,0 +1,18 @@
+{
+  "appName": {
+    "message": "DanmaChat – YouTube™ ライブチャットを全画面表示・弾幕コメント",
+    "description": "Extension name shown in the Chrome Web Store and browser (max 75 characters)."
+  },
+  "appNameFirefox": {
+    "message": "DanmaChat – YouTube™ 全画面チャット・弾幕",
+    "description": "Shorter extension name for the Firefox build; addons.mozilla.org allows at most 50 characters."
+  },
+  "appShortName": {
+    "message": "DanmaChat",
+    "description": "Short brand name (max 12 characters)."
+  },
+  "appDesc": {
+    "message": "YouTube™ のライブチャットを全画面でも表示。透明でドラッグできるチャットオーバーレイと、ニコニコ風の弾幕コメント。設定はブラウザ内に保存されます。",
+    "description": "Store summary and manifest description (max 132 characters)."
+  }
+}

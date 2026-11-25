@@ -1,0 +1,18 @@
+{
+  "appName": {
+    "message": "DanmaChat – YouTube™ 전체화면 라이브 채팅 오버레이 & 탄막",
+    "description": "Extension name shown in the Chrome Web Store and browser (max 75 characters)."
+  },
+  "appNameFirefox": {
+    "message": "DanmaChat – YouTube™ 전체화면 채팅 & 탄막",
+    "description": "Shorter extension name for the Firefox build; addons.mozilla.org allows at most 50 characters."
+  },
+  "appShortName": {
+    "message": "DanmaChat",
+    "description": "Short brand name (max 12 characters)."
+  },
+  "appDesc": {
+    "message": "YouTube™ 라이브 채팅을 전체화면에서도 표시합니다. 투명하고 드래그 가능한 채팅 오버레이, 또는 영상 위로 흐르는 탄막 댓글. 설정은 브라우저에만 저장됩니다.",
+    "description": "Store summary and manifest description (max 132 characters)."
+  }
+}

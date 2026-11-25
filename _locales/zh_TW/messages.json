@@ -1,0 +1,18 @@
+{
+  "appName": {
+    "message": "DanmaChat – YouTube™ 全螢幕直播聊天室浮窗與彈幕",
+    "description": "Extension name shown in the Chrome Web Store and browser (max 75 characters)."
+  },
+  "appNameFirefox": {
+    "message": "DanmaChat – YouTube™ 全螢幕聊天室與彈幕",
+    "description": "Shorter extension name for the Firefox build; addons.mozilla.org allows at most 50 characters."
+  },
+  "appShortName": {
+    "message": "DanmaChat",
+    "description": "Short brand name (max 12 characters)."
+  },
+  "appDesc": {
+    "message": "全螢幕觀看 YouTube™ 直播也能看聊天室：透明、可拖曳的聊天浮窗，或由右至左捲動的彈幕留言。設定只儲存在你的瀏覽器中。",
+    "description": "Store summary and manifest description (max 132 characters)."
+  }
+}
