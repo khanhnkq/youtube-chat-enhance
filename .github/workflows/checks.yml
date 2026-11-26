@@ -41,7 +41,7 @@ jobs:
       - name: Verify both packages
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
-          for package in dist/YouTube-Custom-Chat-Chrome-v*.zip dist/YouTube-Custom-Chat-Firefox-v*.zip; do
+          for package in dist/DanmaChat-Chrome-v*.zip dist/DanmaChat-Firefox-v*.zip; do
             unzip -tq "$package"
             unzip -Z1 "$package" | grep -qx 'manifest.json'
           done

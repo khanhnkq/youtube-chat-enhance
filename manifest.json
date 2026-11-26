@@ -1,8 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Custom Chat & Danmaku",
-  "version": "1.2.0",
-  "description": "Transparent, draggable live chat overlay and Danmaku scrolling comments for YouTube™ live streams. Settings stay in your browser.",
+  "name": "__MSG_appName__",
+  "short_name": "__MSG_appShortName__",
+  "version": "1.3.0",
+  "description": "__MSG_appDesc__",
+  "default_locale": "en",
   "permissions": [
     "storage"
   ],
@@ -11,6 +13,7 @@
   ],
   "action": {
     "default_popup": "popup/popup.html",
+    "default_title": "__MSG_appShortName__",
     "default_icon": {
       "16": "icons/icon-16.png",
       "48": "icons/icon-48.png",

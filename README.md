@@ -1,10 +1,12 @@
-# YouTube Chat Enhance 🚀
+# DanmaChat – Fullscreen Live Chat Overlay & Danmaku for YouTube™
+
+[Chrome Web Store](https://chromewebstore.google.com/detail/eapcgaoflonkgkhaeidekcnkaoniajad) · [Website](https://khanhnkq.github.io/youtube-chat-enhance/) · Formerly *YouTube Custom Chat & Danmaku*
 
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-brightgreen.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Performance](https://img.shields.io/badge/Performance-60FPS%20DOM%2FWAAPI-ff0055.svg)](#-supercharged-performance-60fps)
 
-> **YouTube Chat Enhance** is a high-performance **Manifest V3 browser extension for Chrome-based browsers and Firefox** designed to revolutionize your YouTube live stream and video watching experience. Features include **60FPS Hardware-Accelerated Danmaku Bullet Comments**, **Transparent Floating Chat Overlays**, **Real-time Live Color & Opacity Styling**, and **Auto-Hide Native Chat in Fullscreen Mode**.
+> **DanmaChat** is a high-performance **Manifest V3 browser extension for Chrome-based browsers and Firefox** designed to revolutionize your YouTube live stream and video watching experience. Features include **60FPS Hardware-Accelerated Danmaku Bullet Comments**, **Transparent Floating Chat Overlays**, **Real-time Live Color & Opacity Styling**, and **Auto-Hide Native Chat in Fullscreen Mode**.
 
 ---
 
@@ -64,9 +66,9 @@ npm run build
 ```
 The version comes from `manifest.json`. Output is written to `dist/`:
 - `dist/chrome/` and `dist/firefox/`: unpacked builds for local testing.
-- `dist/YouTube-Custom-Chat-Chrome-v<version>.zip` (for Chrome Web Store)
-- `dist/YouTube-Custom-Chat-Firefox-v<version>.zip` (for Mozilla Add-ons / AMO)
-- `dist/YouTube-Custom-Chat-Firefox-v<version>.xpi` (the same Firefox package with the `.xpi` extension)
+- `dist/DanmaChat-Chrome-v<version>.zip` (for Chrome Web Store)
+- `dist/DanmaChat-Firefox-v<version>.zip` (for Mozilla Add-ons / AMO)
+- `dist/DanmaChat-Firefox-v<version>.xpi` (the same Firefox package with the `.xpi` extension)
 
 The packages contain only `manifest.json`, `content/`, `popup/`, the icons the extension uses and `LICENSE`; documentation, screenshots, tests and build scripts are left out.
 
@@ -98,6 +100,7 @@ Compare the results with the extension disabled.
 ```
 youtube-chat-enhance/
 ├── manifest.json               # Manifest V3 configuration (Firefox settings included)
+├── _locales/                   # Localized store name and summary (en, vi, ja, zh_CN, zh_TW, ko)
 ├── content/
 │   ├── config.js               # Shared defaults, profile migration & storage subscription
 │   ├── chat-injector.js        # Watch/live page script: wires the chat overlay and Danmaku to the player

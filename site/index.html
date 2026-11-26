@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Custom Chat &amp; Danmaku — Floating Live Chat Overlay</title>
+  <title>DanmaChat — Fullscreen Live Chat Overlay &amp; Danmaku for YouTube</title>
   <meta name="description" content="Free Chrome &amp; Firefox extension for transparent, draggable YouTube live chat overlays and 60FPS Danmaku scrolling comments in fullscreen. Zero tracking.">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <meta name="author" content="khanhnkq">
@@ -15,19 +15,19 @@
   <link rel="alternate" hreflang="x-default" href="https://khanhnkq.github.io/youtube-chat-enhance/">
 
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="YouTube Custom Chat &amp; Danmaku">
-  <meta property="og:title" content="YouTube Custom Chat &amp; Danmaku — Floating Live Chat &amp; Scrolling Comments">
+  <meta property="og:site_name" content="DanmaChat">
+  <meta property="og:title" content="DanmaChat — Fullscreen Live Chat Overlay &amp; Danmaku for YouTube">
   <meta property="og:description" content="Transparent, draggable YouTube live chat overlay and 60FPS Danmaku scrolling comments for fullscreen and theater mode. Free, open-source, zero tracking.">
   <meta property="og:url" content="https://khanhnkq.github.io/youtube-chat-enhance/">
   <meta property="og:image" content="https://khanhnkq.github.io/youtube-chat-enhance/assets/og/og-en.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="YouTube Custom Chat and Danmaku showing transparent floating chat and scrolling comments over a video">
+  <meta property="og:image:alt" content="DanmaChat showing transparent floating chat and scrolling comments over a video">
   <meta property="og:locale" content="en_US">
   <meta property="og:locale:alternate" content="vi_VN">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="YouTube Custom Chat &amp; Danmaku — Floating Live Chat Overlay">
+  <meta name="twitter:title" content="DanmaChat — Fullscreen Live Chat Overlay &amp; Danmaku for YouTube">
   <meta name="twitter:description" content="Transparent draggable live chat overlay and 60FPS Danmaku scrolling comments for YouTube Live on Chrome and Firefox.">
   <meta name="twitter:image" content="https://khanhnkq.github.io/youtube-chat-enhance/assets/og/og-en.png">
 
@@ -48,8 +48,8 @@
       {
         "@type": "SoftwareApplication",
         "@id": "https://khanhnkq.github.io/youtube-chat-enhance/#software",
-        "name": "YouTube Custom Chat & Danmaku",
-        "alternateName": "Custom Chat & Danmaku",
+        "name": "DanmaChat",
+        "alternateName": ["YouTube Custom Chat & Danmaku", "Custom Chat & Danmaku"],
         "applicationCategory": "BrowserApplication",
         "operatingSystem": "Chrome, Firefox, Edge, Brave, Arc",
         "softwareVersion": "1.2.0",
@@ -72,8 +72,8 @@
       {
         "@type": "VideoObject",
         "@id": "https://khanhnkq.github.io/youtube-chat-enhance/#demo-video",
-        "name": "Custom Chat & Danmaku: floating chat overlay and scrolling comments for YouTube Live (quick tour)",
-        "description": "A 1:52 tour of YouTube Custom Chat & Danmaku v1.2.0 showing transparent floating chat, drag and resize, live styling, Danmaku scrolling comments, Super Chats, pause sync, and fullscreen viewing.",
+        "name": "DanmaChat: floating chat overlay and scrolling comments for YouTube Live (quick tour)",
+        "description": "A 1:52 tour of DanmaChat v1.2.0 showing transparent floating chat, drag and resize, live styling, Danmaku scrolling comments, Super Chats, pause sync, and fullscreen viewing.",
         "thumbnailUrl": [
           "https://khanhnkq.github.io/youtube-chat-enhance/assets/video/poster-en.webp",
           "https://khanhnkq.github.io/youtube-chat-enhance/assets/og/og-en.png"
@@ -96,7 +96,7 @@
         "@type": "HowTo",
         "name": "How to show YouTube live chat in fullscreen with transparent overlay and Danmaku",
         "step": [
-          { "@type": "HowToStep", "position": 1, "name": "Install extension", "text": "Install YouTube Custom Chat & Danmaku from the Chrome Web Store or load the Firefox package." },
+          { "@type": "HowToStep", "position": 1, "name": "Install extension", "text": "Install DanmaChat from the Chrome Web Store or load the Firefox package." },
           { "@type": "HowToStep", "position": 2, "name": "Open a YouTube livestream or replay", "text": "Floating chat overlays the video automatically and collapses the side column." },
           { "@type": "HowToStep", "position": 3, "name": "Tune opacity, colors, and Danmaku", "text": "Open the popup to adjust styling or turn on scrolling Danmaku comments." }
         ]
@@ -104,7 +104,7 @@
       {
         "@type": "FAQPage",
         "mainEntity": [
-          { "@type": "Question", "name": "How do I read YouTube live chat in fullscreen without shrinking the video?", "acceptedAnswer": { "@type": "Answer", "text": "YouTube Custom Chat & Danmaku automatically hides the native side chat in fullscreen and theater mode, expanding the video to 100% width with a transparent floating chat box or scrolling Danmaku." } },
+          { "@type": "Question", "name": "How do I read YouTube live chat in fullscreen without shrinking the video?", "acceptedAnswer": { "@type": "Answer", "text": "DanmaChat automatically hides the native side chat in fullscreen and theater mode, expanding the video to 100% width with a transparent floating chat box or scrolling Danmaku." } },
           { "@type": "Question", "name": "Can I use Danmaku without the floating chat box?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Turn Floating Chat off and keep Danmaku enabled to read directly from YouTube's native chat, including Super Chats and emojis." } },
           { "@type": "Question", "name": "Does it work on live chat replays?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. It supports both live streams and live chat replays, pausing and resuming Danmaku in sync with playback." } },
           { "@type": "Question", "name": "Does it impact CPU or frame rate?", "acceptedAnswer": { "@type": "Answer", "text": "No. It batches IPC messages every 80ms, animates Danmaku with compositor-only DOM/WAAPI transforms, and weighs ~37 KB." } },
@@ -121,7 +121,7 @@
 
   <header class="site-header">
     <div class="container nav-bar">
-      <a class="brand-link" href="./" aria-label="YouTube Custom Chat &amp; Danmaku Home">
+      <a class="brand-link" href="./" aria-label="DanmaChat Home">
         <svg class="brand-mark" viewBox="0 0 512 512" aria-hidden="true">
           <rect x="64" y="64" width="384" height="384" rx="96" fill="#252928"/>
           <path d="M222 154h112a44 44 0 0 1 44 44v82a44 44 0 0 1-44 44h-62l-54 39v-39h-8" fill="none" stroke="#f2f1eb" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
@@ -129,7 +129,7 @@
           <path class="mark-stroke-2" d="M153 256h127" fill="none" stroke="#e3363b" stroke-width="24" stroke-linecap="round"/>
           <path class="mark-stroke-3" d="M132 305h44" fill="none" stroke="#e3363b" stroke-width="24" stroke-linecap="round"/>
         </svg>
-        <span>Custom Chat &amp; Danmaku</span>
+        <span>DanmaChat</span>
       </a>
 
       <nav class="nav-links" aria-label="Primary navigation">
@@ -175,7 +175,7 @@
         </div>
 
         <!-- LIVE INTERACTIVE DEMO STUDIO -->
-        <div id="demo-studio" class="outer-box outer-box--dark demo-studio" aria-label="Interactive live demo of YouTube Custom Chat and Danmaku">
+        <div id="demo-studio" class="outer-box outer-box--dark demo-studio" aria-label="Interactive live demo of DanmaChat">
           <div class="demo-viewport">
             <div class="demo-topbar">
               <div class="demo-topbar-left">
@@ -261,7 +261,7 @@
           <div class="demo-controls" aria-label="Interactive extension popup controls">
             <div class="demo-controls-head">
               <div class="demo-controls-title">
-                <img src="./assets/icons/mark.svg" width="22" height="22" alt="Custom Chat and Danmaku mark">
+                <img src="./assets/icons/mark.svg" width="22" height="22" alt="DanmaChat mark">
                 <span>Live Controls</span>
               </div>
               <span class="demo-version-tag">v1.2.0</span>
@@ -374,7 +374,7 @@
             </div>
           </div>
 
-          <input id="ba-range" class="ba-range" type="range" min="4" max="96" value="50" aria-label="Compare YouTube native chat before and Custom Chat and Danmaku after">
+          <input id="ba-range" class="ba-range" type="range" min="4" max="96" value="50" aria-label="Compare YouTube native chat before and DanmaChat after">
         </div>
       </div>
     </section>
@@ -545,7 +545,7 @@
               <track kind="subtitles" src="./assets/video/demo-en.vtt" srclang="en" label="English" default>
             </video>
             <button id="video-poster-btn" type="button" class="video-poster-overlay" aria-label="Play 1 minute 52 second video tour">
-              <img src="./assets/video/poster-en.webp" width="1280" height="720" alt="Custom Chat and Danmaku video tour thumbnail" loading="lazy">
+              <img src="./assets/video/poster-en.webp" width="1280" height="720" alt="DanmaChat video tour thumbnail" loading="lazy">
               <span class="video-play-badge">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6,4 20,12 6,20"/></svg>
                 Play 1:52 Tour
@@ -583,7 +583,7 @@
                 <tr>
                   <th>Feature</th>
                   <th>YouTube Native</th>
-                  <th>Custom Chat &amp; Danmaku</th>
+                  <th>DanmaChat</th>
                 </tr>
               </thead>
               <tbody>
@@ -696,8 +696,8 @@
     <div class="container">
       <div class="footer-grid">
         <div class="brand-link">
-          <img src="./assets/icons/mark.svg" width="24" height="24" alt="Custom Chat and Danmaku mark">
-          <span>YouTube Custom Chat &amp; Danmaku · v1.2.0</span>
+          <img src="./assets/icons/mark.svg" width="24" height="24" alt="DanmaChat mark">
+          <span>DanmaChat · v1.2.0</span>
         </div>
         <div class="footer-links">
           <a href="https://chromewebstore.google.com/detail/youtube-custom-chat-danma/eapcgaoflonkgkhaeidekcnkaoniajad" target="_blank" rel="noopener noreferrer">Chrome Web Store</a>

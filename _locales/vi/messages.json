@@ -1,0 +1,18 @@
+{
+  "appName": {
+    "message": "DanmaChat – Chat toàn màn hình & Bình luận bay cho YouTube™",
+    "description": "Extension name shown in the Chrome Web Store and browser (max 75 characters)."
+  },
+  "appNameFirefox": {
+    "message": "DanmaChat – Chat toàn màn hình & Bình luận bay",
+    "description": "Shorter extension name for the Firefox build; addons.mozilla.org allows at most 50 characters."
+  },
+  "appShortName": {
+    "message": "DanmaChat",
+    "description": "Short brand name (max 12 characters)."
+  },
+  "appDesc": {
+    "message": "Xem chat YouTube™ khi toàn màn hình: khung chat trong suốt kéo thả được, hoặc bình luận bay (Danmaku) chạy ngang video. Miễn phí.",
+    "description": "Store summary and manifest description (max 132 characters)."
+  }
+}
